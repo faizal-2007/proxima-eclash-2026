@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs';
-import { verifyAdminAuth } from '../_lib/auth.js';
+import { verifyAdminAuth } from '../../_lib/auth.js';
 import {
   getSheetsClient,
   getVolunteers,
   saveVolunteer,
   deleteVolunteer,
-} from '../_lib/googleSheets.js';
+} from '../../_lib/googleSheets.js';
 
 /**
  * Vercel Serverless Function: /api/admin/volunteers

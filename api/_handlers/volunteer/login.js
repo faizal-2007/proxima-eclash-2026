@@ -2,13 +2,13 @@ import bcrypt from 'bcryptjs';
 import {
   getSheetsClient,
   getVolunteerByUsername,
-} from '../_lib/googleSheets.js';
+} from '../../_lib/googleSheets.js';
 import {
   checkLoginRateLimit,
   recordFailedLogin,
   clearLoginRateLimit,
   signVolunteerToken,
-} from '../_lib/auth.js';
+} from '../../_lib/auth.js';
 
 /**
  * In-memory fallback dev volunteers when Google Sheets is not configured or in offline dev testing.

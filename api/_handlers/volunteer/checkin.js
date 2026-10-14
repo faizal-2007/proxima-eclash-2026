@@ -1,9 +1,9 @@
-import { verifyVolunteerJwt } from '../_lib/auth.js';
+import { verifyVolunteerJwt } from '../../_lib/auth.js';
 import {
   getSheetsClient,
   performParticipantCheckIn,
   findRegistrationById,
-} from '../_lib/googleSheets.js';
+} from '../../_lib/googleSheets.js';
 
 /**
  * Vercel Serverless Function: POST /api/volunteer/checkin

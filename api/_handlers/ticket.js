@@ -1,9 +1,9 @@
 import {
   getRegistrationForTicket,
   getSheetsClient,
-} from './_lib/googleSheets.js';
-import { checkRateLimit } from './_lib/rateLimit.js';
-import { signQrToken } from './_lib/crypto.js';
+} from '../_lib/googleSheets.js';
+import { checkRateLimit } from '../_lib/rateLimit.js';
+import { signQrToken } from '../_lib/crypto.js';
 
 const DEFAULT_SHEET_TITLE = 'E-Clash';
 

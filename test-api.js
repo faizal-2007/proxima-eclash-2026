@@ -1,4 +1,5 @@
-import handler from './api/register/eclash.js';
+import handler from './api/_handlers/register/eclash.js';
+import apiHandler from './api/[...path].js';
 
 function createMockReqRes(body = {}, method = 'POST') {
   const req = {
@@ -29,6 +30,14 @@ function createMockReqRes(body = {}, method = 'POST') {
 }
 
 async function runTests() {
+  console.log('[TEST 0] Catch-All API Route Dispatch:');
+  const routedHealthCheck = createMockReqRes({}, 'GET');
+  routedHealthCheck.req.url = '/api/health';
+  await apiHandler(routedHealthCheck.req, routedHealthCheck.res);
+  if (routedHealthCheck.res.statusCode !== 200 || routedHealthCheck.res.data?.status !== 'healthy') {
+    throw new Error('Test 0 failed: /api/health was not dispatched by the catch-all route');
+  }
+
   console.log('[TEST 1] Registration Without Payment Proof Is Rejected:');
   const origSheetId = process.env.GOOGLE_SHEET_ID;
   process.env.GOOGLE_SHEET_ID = ''; // Prevent writing test data to live sheet
@@ -86,7 +95,7 @@ async function runTests() {
   if (t4.res.statusCode !== 202) throw new Error('Test 4 failed');
 
   console.log('\n[TEST 5] Healthcheck Endpoint:');
-  const { default: healthHandler } = await import('./api/health.js');
+  const { default: healthHandler } = await import('./api/_handlers/health.js');
   const t5 = createMockReqRes({}, 'GET');
   await healthHandler(t5.req, t5.res);
   console.log('-> Status:', t5.res.statusCode);
@@ -141,7 +150,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 10] Volunteer Login — Correct Credentials (Campus ID 11111 / 11111):');
-  const { default: volunteerLoginHandler } = await import('./api/volunteer/login.js');
+  const { default: volunteerLoginHandler } = await import('./api/_handlers/volunteer/login.js');
   const t10 = createMockReqRes({
     username: '11111',
     password: '11111',
@@ -231,7 +240,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 15] GET /api/volunteer/me Session Endpoint (Phase 2):');
-  const { default: volunteerMeHandler } = await import('./api/volunteer/me.js');
+  const { default: volunteerMeHandler } = await import('./api/_handlers/volunteer/me.js');
   const t15 = createMockReqRes({}, 'GET');
   t15.req.headers = { authorization: `Bearer ${validVolunteerToken}` };
   await volunteerMeHandler(t15.req, t15.res);
@@ -273,7 +282,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 16] POST /api/volunteer/scan — Valid QR Token at Matching Station (Phase 3):');
-  const { default: volunteerScanHandler } = await import('./api/volunteer/scan.js');
+  const { default: volunteerScanHandler } = await import('./api/_handlers/volunteer/scan.js');
   const test16Qr = signQrToken('ECL-2026-0001');
   const t16 = createMockReqRes({
     qrToken: test16Qr,
@@ -319,7 +328,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 19] POST /api/volunteer/checkin — Station Override & Check In (Phase 3):');
-  const { default: volunteerCheckinHandler } = await import('./api/volunteer/checkin.js');
+  const { default: volunteerCheckinHandler } = await import('./api/_handlers/volunteer/checkin.js');
   const t19 = createMockReqRes({
     registrationId: 'ECL-2026-0001',
     station: 'Valorant',
@@ -353,7 +362,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 21] GET /api/volunteer/stats — Live Game & Station Check-in Counters (Phase 4):');
-  const { default: volunteerStatsHandler } = await import('./api/volunteer/stats.js');
+  const { default: volunteerStatsHandler } = await import('./api/_handlers/volunteer/stats.js');
   const t21 = createMockReqRes({}, 'GET');
   t21.req.headers = { authorization: `Bearer ${validVolunteerToken}` };
   await volunteerStatsHandler(t21.req, t21.res);
@@ -366,7 +375,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 22] GET /api/volunteer/search — Search by Participant Name (Phase 4):');
-  const { default: volunteerSearchHandler } = await import('./api/volunteer/search.js');
+  const { default: volunteerSearchHandler } = await import('./api/_handlers/volunteer/search.js');
   const t22 = createMockReqRes({}, 'GET');
   t22.req.headers = { authorization: `Bearer ${validVolunteerToken}` };
   t22.req.query = { q: 'Aarav' };
@@ -391,7 +400,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 24] GET /api/volunteer/history — Audit Logs Feed (Phase 4):');
-  const { default: volunteerHistoryHandler } = await import('./api/volunteer/history.js');
+  const { default: volunteerHistoryHandler } = await import('./api/_handlers/volunteer/history.js');
   const t24 = createMockReqRes({}, 'GET');
   t24.req.headers = { authorization: `Bearer ${validVolunteerToken}` };
   t24.req.query = { limit: '10', filter: 'all' };
@@ -416,7 +425,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 26] GET /api/admin/volunteers — Admin Volunteer Roster (Phase 5):');
-  const { default: adminVolunteersHandler } = await import('./api/admin/volunteers.js');
+  const { default: adminVolunteersHandler } = await import('./api/_handlers/admin/volunteers.js');
   const t26 = createMockReqRes({}, 'GET');
   t26.req.headers = { authorization: 'Bearer admin-authenticated' };
   await adminVolunteersHandler(t26.req, t26.res);
@@ -524,7 +533,7 @@ async function runTests() {
   }
 
   console.log('\n[TEST 32] DELETE /api/admin/registrations — Admin Deletes Player Registration:');
-  const { default: adminRegistrationsHandler } = await import('./api/admin/registrations.js');
+  const { default: adminRegistrationsHandler } = await import('./api/_handlers/admin/registrations.js');
 
   // Subtest A: Missing admin auth receives 401
   const t32Unauth = createMockReqRes({}, 'DELETE');
@@ -640,4 +649,3 @@ runTests().catch((err) => {
   console.error('Test execution failed:', err);
   process.exit(1);
 });
-

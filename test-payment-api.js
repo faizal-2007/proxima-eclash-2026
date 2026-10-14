@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { decodePaymentImage, validatePaymentFields } from './api/_lib/paymentValidation.js';
-import registerHandler from './api/register/index.js';
-import legacyHandler from './api/register/eclash.js';
-import ticketHandler from './api/ticket.js';
+import registerHandler from './api/_handlers/register/index.js';
+import legacyHandler from './api/_handlers/register/eclash.js';
+import ticketHandler from './api/_handlers/ticket.js';
 import { quoteSheetRange } from './api/_lib/googleSheets.js';
 import { EMAIL_CONFIG } from './src/config/eventConfig.js';
 

@@ -1,4 +1,4 @@
-import { getSheetsClient } from './_lib/googleSheets.js';
+import { getSheetsClient } from '../_lib/googleSheets.js';
 
 export default async function handler(req, res) {
   const hasClientEmail = Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);

@@ -1,5 +1,5 @@
-import { verifyVolunteerJwt } from '../_lib/auth.js';
-import { getSheetsClient, getCheckInLogs } from '../_lib/googleSheets.js';
+import { verifyVolunteerJwt } from '../../_lib/auth.js';
+import { getSheetsClient, getTournamentStats } from '../../_lib/googleSheets.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,44 +27,48 @@ export default async function handler(req, res) {
   const volunteer = authVerification.payload;
 
   try {
-    const limit = parseInt(req.query?.limit || '50', 10);
-    const filter = (req.query?.filter || 'all').toLowerCase();
-    const volunteerIdFilter = filter === 'my' ? (volunteer.volunteerId || volunteer.username) : null;
-
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
     const sheetsClient = getSheetsClient();
+    const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || 'E-Clash';
 
     if (sheetsClient && spreadsheetId) {
-      const logs = await getCheckInLogs(sheetsClient, spreadsheetId, limit, volunteerIdFilter);
+      const stats = await getTournamentStats(
+        sheetsClient,
+        spreadsheetId,
+        sheetTitle,
+        volunteer.volunteerId || volunteer.username
+      );
+
       return res.status(200).json({
         success: true,
-        count: logs.length,
-        logs,
+        stats,
+        station: volunteer.station || 'All',
+        timestamp: new Date().toISOString(),
       });
     }
 
-    // Mock logs fallback
+    // Mock fallback if sheets not configured
     return res.status(200).json({
       success: true,
-      count: 1,
-      logs: [
-        {
-          id: 'log-1',
-          timestamp: new Date().toISOString(),
-          registrationId: 'ECL-2026-0001',
-          game: 'BGMI',
-          result: 'CHECKED_IN',
-          volunteerId: volunteer.volunteerId || volunteer.username,
-          volunteerName: volunteer.name || volunteer.username,
-          station: 'All',
-          note: 'Verified in simulated mode',
+      stats: {
+        total: 2,
+        checkedIn: 1,
+        pending: 1,
+        byGame: {
+          'Free Fire': { total: 1, checkedIn: 0, pending: 1 },
+          'BGMI': { total: 1, checkedIn: 1, pending: 0 },
+          'Mini Militia': { total: 0, checkedIn: 0, pending: 0 },
+          'Valorant': { total: 0, checkedIn: 0, pending: 0 },
         },
-      ],
+        volunteerScanCount: 1,
+      },
+      station: volunteer.station || 'All',
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[Volunteer History API] Error fetching logs:', error);
+    console.error('[Volunteer Stats API] Error fetching stats:', error);
     return res.status(500).json({
-      error: 'An unexpected internal error occurred while fetching scan history.',
+      error: 'An unexpected internal error occurred while fetching stats.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }

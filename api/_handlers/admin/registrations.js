@@ -1,5 +1,5 @@
-import { getSheetsClient, deleteRegistration, quoteSheetRange } from '../_lib/googleSheets.js';
-import { verifyAdminAuth } from '../_lib/auth.js';
+import { getSheetsClient, deleteRegistration, quoteSheetRange } from '../../_lib/googleSheets.js';
+import { verifyAdminAuth } from '../../_lib/auth.js';
 
 const DEFAULT_SHEET_TITLE = 'E-Clash';
 

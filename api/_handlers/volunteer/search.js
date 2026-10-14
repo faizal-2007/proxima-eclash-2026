@@ -1,5 +1,5 @@
-import { verifyVolunteerJwt } from '../_lib/auth.js';
-import { getSheetsClient, getAllRegistrations } from '../_lib/googleSheets.js';
+import { verifyVolunteerJwt } from '../../_lib/auth.js';
+import { getSheetsClient, getAllRegistrations } from '../../_lib/googleSheets.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

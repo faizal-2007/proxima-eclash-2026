@@ -41,67 +41,8 @@ function serverlessApiPlugin() {
     req.query = Object.fromEntries(url.searchParams.entries());
 
     try {
-      if (pathname === '/api/register' || pathname === '/api/register/eclash') {
-        const { default: handler } = await import('./api/register/eclash.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/login') {
-        const { default: handler } = await import('./api/volunteer/login.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/me') {
-        const { default: handler } = await import('./api/volunteer/me.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/scan') {
-        const { default: handler } = await import('./api/volunteer/scan.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/checkin') {
-        const { default: handler } = await import('./api/volunteer/checkin.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/stats') {
-        const { default: handler } = await import('./api/volunteer/stats.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/search') {
-        const { default: handler } = await import('./api/volunteer/search.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/volunteer/history') {
-        const { default: handler } = await import('./api/volunteer/history.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/admin/login') {
-        const { default: handler } = await import('./api/admin/login.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/admin/registrations') {
-        const { default: handler } = await import('./api/admin/registrations.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/admin/volunteers') {
-        const { default: handler } = await import('./api/admin/volunteers.js');
-        return handler(req, res);
-      }
-      if (pathname === '/api/health') {
-        const { default: handler } = await import('./api/health.js');
-        return handler(req, res);
-      }
-
-      // Dynamic fallback for any /api/volunteer/* or /api/* route
-      const cleanSubpath = pathname.replace(/^\/api\//, '').replace(/\/$/, '');
-      try {
-        const dynamicModule = await import(`./api/${cleanSubpath}.js`);
-        if (dynamicModule?.default) {
-          return dynamicModule.default(req, res);
-        }
-      } catch (importErr) {
-        // Module doesn't exist, proceed to 404
-      }
-
-      res.status(404).json({ error: `API route ${pathname} not found.` });
+      const { default: handler } = await import('./api/[...path].js');
+      return handler(req, res);
     } catch (err) {
       console.error('[API Middleware Error]:', err);
       res.status(500).json({ error: 'Internal API Server Error', details: err.message });

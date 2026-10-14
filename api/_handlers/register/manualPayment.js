@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { del, put } from '@vercel/blob';
-import { ALLOW_MULTIPLE_GAMES, EMAIL_CONFIG, PAYMENT_CONFIG } from '../../src/config/eventConfig.js';
+import { ALLOW_MULTIPLE_GAMES, EMAIL_CONFIG, PAYMENT_CONFIG } from '../../../src/config/eventConfig.js';
 import {
   appendPaymentAuditEvent,
   appendPaymentRegistration,
@@ -8,10 +8,10 @@ import {
   ensureSheetInitialized,
   getSheetsClient,
   removePaymentRegistration,
-} from '../_lib/googleSheets.js';
-import { checkRateLimit, serializeRegistrationSubmission } from '../_lib/rateLimit.js';
-import { decodePaymentImage, validatePaymentFields } from '../_lib/paymentValidation.js';
-import { signQrToken } from '../_lib/crypto.js';
+} from '../../_lib/googleSheets.js';
+import { checkRateLimit, serializeRegistrationSubmission } from '../../_lib/rateLimit.js';
+import { decodePaymentImage, validatePaymentFields } from '../../_lib/paymentValidation.js';
+import { signQrToken } from '../../_lib/crypto.js';
 
 const VALID_GAMES = ['Free Fire', 'BGMI', 'Mini Militia', 'eFootball', 'Ludo', 'Carrom'];
 const GROUP_ONE_GAMES = ['Free Fire', 'BGMI', 'Mini Militia'];

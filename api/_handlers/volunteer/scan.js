@@ -1,11 +1,11 @@
-import { verifyVolunteerJwt } from '../_lib/auth.js';
-import { verifyQrToken } from '../_lib/crypto.js';
+import { verifyVolunteerJwt } from '../../_lib/auth.js';
+import { verifyQrToken } from '../../_lib/crypto.js';
 import {
   getSheetsClient,
   findRegistrationById,
   performParticipantCheckIn,
   appendCheckInLog,
-} from '../_lib/googleSheets.js';
+} from '../../_lib/googleSheets.js';
 
 // In-memory fallback dev participants if Google Sheets is not configured
 const MOCK_DEV_PARTICIPANTS = [

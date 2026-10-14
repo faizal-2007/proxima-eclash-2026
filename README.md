@@ -60,7 +60,7 @@ The listed awards total ₹6,750. The remaining ₹250 of the announced ₹7,000
    - 1-click high-resolution PNG pass download and direct print dialog.
 
 5. **Serverless Backend & Live Google Sheets Integration**:
-   - Vercel Serverless Functions in `/api/*`.
+   - A single Vercel catch-all function dispatches the API routes; implementations are kept in Vercel-private `api/_handlers/` so Hobby deployments stay within the function limit.
    - Official Google Sheets API v4 integration using Google Service Account JWT.
    - Automatic sheet & tab initialization with frozen headers.
    - Duplicate entry rejection (`409 Conflict`) if Campus ID or Email is already registered.
@@ -218,7 +218,7 @@ npm run lint
    - `BLOB_READ_WRITE_TOKEN`: Read/write token for the Vercel Blob store used for payment screenshots.
    - `QR_SECRET`: A unique, random secret of at least 32 characters. Do not reuse a sample value.
    - `ADMIN_SECRET_KEY`: `yennex2026`
-4. Click **Deploy**. Vercel will automatically build the client bundle and deploy the serverless functions in `/api/`.
+4. Click **Deploy**. Vercel will build the client bundle and use `api/[...path].js` to dispatch requests to the existing `/api/*` routes. Keep implementation modules under `api/_handlers/`; files there are private modules, not separate deployed functions.
 
 ---
 

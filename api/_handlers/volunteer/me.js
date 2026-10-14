@@ -1,8 +1,8 @@
 import {
   getSheetsClient,
   getVolunteerByUsername,
-} from '../_lib/googleSheets.js';
-import { verifyVolunteerJwt } from '../_lib/auth.js';
+} from '../../_lib/googleSheets.js';
+import { verifyVolunteerJwt } from '../../_lib/auth.js';
 
 /**
  * Vercel Serverless Function: GET /api/volunteer/me
