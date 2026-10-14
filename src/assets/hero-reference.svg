@@ -1,0 +1,372 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient Blend -->
+    <linearGradient id="bgBlend" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#070b2a" />
+      <stop offset="28%" stop-color="#0e1346" />
+      <stop offset="45%" stop-color="#3c1864" />
+      <stop offset="50%" stop-color="#732578" />
+      <stop offset="56%" stop-color="#b84687" />
+      <stop offset="72%" stop-color="#f4806b" />
+      <stop offset="88%" stop-color="#ffc9a3" />
+      <stop offset="100%" stop-color="#fff5ee" />
+    </linearGradient>
+
+    <!-- Silk Wave Ribbons Gradient -->
+    <linearGradient id="ribbonGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#7c3aed" stop-opacity="0.85" />
+      <stop offset="65%" stop-color="#d65db1" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#ffd28a" stop-opacity="0.9" />
+    </linearGradient>
+
+    <linearGradient id="ribbonGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2b4bff" stop-opacity="0.8" />
+      <stop offset="40%" stop-color="#9b4dca" stop-opacity="0.8" />
+      <stop offset="70%" stop-color="#e8607a" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#f4806b" stop-opacity="0.8" />
+    </linearGradient>
+
+    <!-- Gaming Neon Glow Filter -->
+    <filter id="neonGlowBlue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur1" />
+      <feGaussianBlur stdDeviation="20" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Cultural Soft Glow Filter -->
+    <filter id="culturalGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Fog Gradient -->
+    <linearGradient id="fogGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.22" />
+      <stop offset="40%" stop-color="#2b4bff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#070b2a" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Watercolor Splatter Gradient -->
+    <radialGradient id="splatterGrad1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8607a" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#f4806b" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#ffc9a3" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- LAYER 1: BASE BACKGROUND -->
+  <rect width="1920" height="1080" fill="url(#bgBlend)" />
+
+  <!-- GAMING BACKGROUND ACCENTS (LEFT) -->
+  <g opacity="0.3">
+    <!-- Perspective Cyber Grid -->
+    <path d="M 0,900 L 960,1080 M 0,780 L 960,1080 M 0,660 L 960,1080 M 0,540 L 960,1080" stroke="#00e5ff" stroke-width="1.2" opacity="0.35" />
+    <path d="M 150,1080 L 400,600 M 350,1080 L 500,600 M 550,1080 L 600,600 M 750,1080 L 700,600" stroke="#2b4bff" stroke-width="1.2" opacity="0.3" />
+  </g>
+
+  <!-- CULTURAL BACKGROUND ACCENTS (RIGHT) -->
+  <!-- Watercolor splashes -->
+  <circle cx="1600" cy="300" r="280" fill="url(#splatterGrad1)" />
+  <circle cx="1380" cy="650" r="240" fill="url(#splatterGrad1)" />
+  <circle cx="1780" cy="780" r="190" fill="url(#splatterGrad1)" />
+
+  <!-- Watercolor splatters & dots -->
+  <g fill="#e8607a" opacity="0.35">
+    <circle cx="1450" cy="220" r="8" />
+    <circle cx="1480" cy="245" r="5" />
+    <circle cx="1420" cy="260" r="4" />
+    <circle cx="1680" cy="180" r="10" />
+    <circle cx="1720" cy="210" r="6" />
+    <circle cx="1320" cy="480" r="9" />
+    <circle cx="1350" cy="510" r="5" />
+    <circle cx="1750" cy="620" r="7" />
+    <circle cx="1820" cy="590" r="11" />
+  </g>
+  <g fill="#ffd28a" opacity="0.45">
+    <circle cx="1520" cy="160" r="6" />
+    <circle cx="1620" cy="220" r="8" />
+    <circle cx="1390" cy="420" r="7" />
+    <circle cx="1780" cy="490" r="9" />
+  </g>
+
+  <!-- LAYER 2: GAMING SCENE (Gamers + Monitors + Battlestation) -->
+  <g id="gaming-scene">
+    <!-- Ambient Monitor Glow -->
+    <ellipse cx="380" cy="640" rx="350" ry="180" fill="#00e5ff" opacity="0.18" filter="url(#neonGlowBlue)" />
+    <ellipse cx="580" cy="680" rx="280" ry="160" fill="#7c3aed" opacity="0.22" filter="url(#neonGlowBlue)" />
+
+    <!-- Battlestation Desk -->
+    <path d="M 0,820 L 880,820 L 820,1080 L 0,1080 Z" fill="#030514" opacity="0.95" />
+    <line x1="0" y1="820" x2="880" y2="820" stroke="#00e5ff" stroke-width="3" opacity="0.8" filter="url(#neonGlowBlue)" />
+
+    <!-- Multiple Gaming Monitors -->
+    <!-- Monitor 1 (Left) -->
+    <rect x="80" y="520" width="260" height="170" rx="8" fill="#0a0f2e" stroke="#2b4bff" stroke-width="3" />
+    <rect x="90" y="530" width="240" height="150" fill="#031633" />
+    <!-- Screen gameplay graphics -->
+    <path d="M 90,640 L 160,590 L 220,630 L 280,570 L 330,640 L 330,680 L 90,680 Z" fill="#00e5ff" opacity="0.4" />
+    <circle cx="210" cy="570" r="18" fill="#ff4d4d" opacity="0.8" />
+    <rect x="195" y="690" width="30" height="60" fill="#080c24" />
+    <polygon points="160,750 260,750 240,760 180,760" fill="#2b4bff" opacity="0.7" />
+
+    <!-- Monitor 2 (Center-Left Main Ultrawide) -->
+    <rect x="340" y="460" width="360" height="230" rx="10" fill="#080e2d" stroke="#00e5ff" stroke-width="4" filter="url(#neonGlowBlue)" />
+    <rect x="352" y="472" width="336" height="206" fill="#040b22" />
+    <!-- Tactical battle scene on main monitor -->
+    <polygon points="352,620 440,560 520,600 610,520 688,610 688,678 352,678" fill="#2b4bff" opacity="0.65" />
+    <polygon points="410,678 480,590 560,650 688,580 688,678" fill="#00e5ff" opacity="0.45" />
+    <!-- HUD crosshair & stats -->
+    <circle cx="520" cy="565" r="24" stroke="#00e5ff" stroke-width="2" fill="none" opacity="0.8" />
+    <line x1="520" y1="535" x2="520" y2="595" stroke="#00e5ff" stroke-width="2" opacity="0.8" />
+    <line x1="490" y1="565" x2="550" y2="565" stroke="#00e5ff" stroke-width="2" opacity="0.8" />
+    <!-- Monitor Stand -->
+    <rect x="505" y="690" width="30" height="70" fill="#080c24" />
+    <polygon points="460,760 580,760 550,772 490,772" fill="#00e5ff" opacity="0.8" />
+
+    <!-- Monitor 3 (Vertical Discord/Stream Chat Display) -->
+    <rect x="710" y="500" width="130" height="230" rx="8" fill="#090e2f" stroke="#7c3aed" stroke-width="3" />
+    <rect x="718" y="510" width="114" height="210" fill="#05071a" />
+    <!-- Chat lines -->
+    <g fill="#7c3aed" opacity="0.6">
+      <rect x="726" y="530" width="98" height="6" rx="3" />
+      <rect x="726" y="546" width="70" height="6" rx="3" />
+      <rect x="726" y="562" width="85" height="6" rx="3" />
+      <rect x="726" y="578" width="60" height="6" rx="3" />
+      <rect x="726" y="594" width="90" height="6" rx="3" />
+      <rect x="726" y="610" width="75" height="6" rx="3" />
+      <rect x="726" y="626" width="88" height="6" rx="3" />
+      <rect x="726" y="642" width="65" height="6" rx="3" />
+    </g>
+
+    <!-- RGB Mechanical Keyboards & Mice -->
+    <rect x="220" y="780" width="180" height="32" rx="4" fill="#030718" stroke="#00e5ff" stroke-width="1.5" />
+    <rect x="420" y="780" width="220" height="32" rx="4" fill="#030718" stroke="#7c3aed" stroke-width="1.5" />
+    <ellipse cx="680" cy="796" rx="14" ry="20" fill="#030718" stroke="#00e5ff" stroke-width="1.5" />
+
+    <!-- Gamers in Dark Hoodies (Seen from Behind) -->
+    <!-- Gamer 1 (Main Pro Center-Left) -->
+    <g id="gamer-center">
+      <!-- Gamer Torso / Dark Hoodie -->
+      <path d="M 360,1080 L 380,870 Q 420,830 510,830 Q 600,830 640,870 L 660,1080 Z" fill="#050818" stroke="#00e5ff" stroke-width="2" opacity="0.95" />
+      <!-- Hoodie folds / Rim lighting -->
+      <path d="M 380,870 Q 420,830 510,830" stroke="#00e5ff" stroke-width="4" fill="none" opacity="0.9" filter="url(#neonGlowBlue)" />
+      <path d="M 510,830 Q 600,830 640,870" stroke="#7c3aed" stroke-width="3" fill="none" opacity="0.8" />
+      <!-- Head in Hood -->
+      <ellipse cx="510" cy="800" rx="65" ry="75" fill="#040614" />
+      <path d="M 450,790 Q 510,725 570,790 Q 580,850 510,865 Q 440,850 450,790 Z" fill="#03040e" />
+      <!-- Glowing Cyan Headset -->
+      <path d="M 445,785 Q 510,730 575,785" stroke="#00e5ff" stroke-width="7" fill="none" filter="url(#neonGlowBlue)" />
+      <!-- Headset Earcups with glowing rings -->
+      <circle cx="445" cy="800" r="18" fill="#050a24" stroke="#00e5ff" stroke-width="4" filter="url(#neonGlowBlue)" />
+      <circle cx="445" cy="800" r="7" fill="#00e5ff" />
+      <circle cx="575" cy="800" r="18" fill="#050a24" stroke="#00e5ff" stroke-width="4" filter="url(#neonGlowBlue)" />
+      <circle cx="575" cy="800" r="7" fill="#00e5ff" />
+    </g>
+
+    <!-- Gamer 2 (Squadmate on Far Left) -->
+    <g id="gamer-left">
+      <path d="M 120,1080 L 140,910 Q 180,870 260,870 Q 320,870 350,910 L 370,1080 Z" fill="#030614" opacity="0.9" />
+      <path d="M 140,910 Q 180,870 260,870" stroke="#2b4bff" stroke-width="3" fill="none" opacity="0.75" />
+      <!-- Head -->
+      <ellipse cx="260" cy="840" rx="55" ry="65" fill="#02040d" />
+      <!-- Glowing Headset -->
+      <path d="M 210,830 Q 260,780 310,830" stroke="#7c3aed" stroke-width="6" fill="none" />
+      <circle cx="210" cy="840" r="14" fill="#080c2c" stroke="#7c3aed" stroke-width="3" />
+      <circle cx="310" cy="840" r="14" fill="#080c2c" stroke="#7c3aed" stroke-width="3" />
+    </g>
+  </g>
+
+  <!-- LAYER 3: HOLOGRAPHIC GAME CONTROLLER OUTLINE (TOP LEFT) -->
+  <g id="controller-outline" transform="translate(140, 120) scale(1.15)" filter="url(#neonGlowBlue)" opacity="0.85">
+    <!-- Main Controller Body -->
+    <path d="M 50,60 C 35,40 20,40 10,70 C 0,100 15,160 35,175 C 50,185 65,165 75,145 C 90,135 130,135 145,145 C 155,165 170,185 185,175 C 205,160 220,100 210,70 C 200,40 185,40 170,60 C 145,52 75,52 50,60 Z"
+          fill="none" stroke="#00e5ff" stroke-width="3.5" stroke-linejoin="round" />
+    <!-- D-Pad Left -->
+    <path d="M 55,85 L 65,85 L 65,75 L 75,75 L 75,85 L 85,85 L 85,95 L 75,95 L 75,105 L 65,105 L 65,95 L 55,95 Z"
+          fill="none" stroke="#00e5ff" stroke-width="2.5" />
+    <!-- Action Buttons Right (X, Y, A, B) -->
+    <circle cx="155" cy="80" r="6" stroke="#00e5ff" stroke-width="2" fill="none" />
+    <circle cx="168" cy="92" r="6" stroke="#00e5ff" stroke-width="2" fill="none" />
+    <circle cx="155" cy="104" r="6" stroke="#00e5ff" stroke-width="2" fill="none" />
+    <circle cx="142" cy="92" r="6" stroke="#00e5ff" stroke-width="2" fill="none" />
+    <!-- Thumbsticks -->
+    <circle cx="90" cy="115" r="14" stroke="#00e5ff" stroke-width="2.5" fill="none" />
+    <circle cx="90" cy="115" r="5" fill="#00e5ff" />
+    <circle cx="130" cy="115" r="14" stroke="#00e5ff" stroke-width="2.5" fill="none" />
+    <circle cx="130" cy="115" r="5" fill="#00e5ff" />
+    <!-- Center Logo / Light Bar -->
+    <ellipse cx="110" cy="80" rx="14" ry="7" stroke="#7c3aed" stroke-width="2" fill="none" />
+  </g>
+
+  <!-- LAYER 4: LOW SMOKY FOG (RISING FROM BOTTOM LEFT) -->
+  <path d="M 0,1080 L 0,860 Q 200,820 400,890 Q 600,960 850,910 Q 950,890 960,1080 Z" fill="url(#fogGrad)" />
+  <path d="M 0,1080 L 0,940 Q 250,910 500,960 Q 750,1010 920,980 L 920,1080 Z" fill="url(#fogGrad)" opacity="0.8" />
+
+  <!-- LAYER 5: CULTURAL SCENE (WOMAN SILHOUETTE + FACE PAINTING + JHUMKA + LEAVES) -->
+  <g id="cultural-scene" transform="translate(1050, 60)">
+    <!-- Woman Silhouette (Profile View Looking Left Toward Center) -->
+    <g id="woman-profile">
+      <!-- Elegant neck, chin, lips, nose, forehead, hair -->
+      <path d="M 440,850 C 420,720 380,620 340,550 C 310,500 270,460 250,420 C 230,380 230,350 240,320 C 245,305 240,295 230,285 C 220,275 228,260 235,250 C 242,240 245,225 240,215 C 235,200 255,180 270,195 C 285,180 320,160 360,150 C 440,130 530,170 570,250 C 610,330 600,430 580,520 C 560,610 580,720 620,850 Z"
+            fill="#321626" opacity="0.85" />
+
+      <!-- Hair bun / Traditional Gown contour -->
+      <circle cx="530" cy="220" r="110" fill="#240e1b" opacity="0.9" />
+
+      <!-- Jhumka Earring (Traditional Indian Hanging Earring) -->
+      <g id="jhumka" transform="translate(360, 310)" filter="url(#culturalGlow)">
+        <!-- Stud -->
+        <circle cx="0" cy="0" r="10" fill="#ffd28a" stroke="#e8607a" stroke-width="2" />
+        <circle cx="0" cy="0" r="4" fill="#e8607a" />
+        <!-- Connector -->
+        <line x1="0" y1="10" x2="0" y2="24" stroke="#ffd28a" stroke-width="3" />
+        <!-- Bell / Dome (Jhumka cup) -->
+        <path d="M -22,46 C -20,26 20,26 22,46 Z" fill="#ffd28a" stroke="#e8607a" stroke-width="2" />
+        <line x1="-22" y1="46" x2="22" y2="46" stroke="#e8607a" stroke-width="2.5" />
+        <!-- Hanging Pearl Droplets -->
+        <circle cx="-16" cy="56" r="3.5" fill="#ffd28a" />
+        <circle cx="-8" cy="58" r="3.5" fill="#ffd28a" />
+        <circle cx="0" cy="60" r="4" fill="#ffd28a" />
+        <circle cx="8" cy="58" r="3.5" fill="#ffd28a" />
+        <circle cx="16" cy="56" r="3.5" fill="#ffd28a" />
+      </g>
+
+      <!-- Floral Face Painting on Cheek -->
+      <g id="floral-face-paint" transform="translate(295, 330)" filter="url(#culturalGlow)">
+        <!-- Petals -->
+        <ellipse cx="0" cy="-14" rx="7" ry="12" fill="#e8607a" opacity="0.95" />
+        <ellipse cx="14" cy="0" rx="12" ry="7" fill="#f4806b" opacity="0.95" />
+        <ellipse cx="0" cy="14" rx="7" ry="12" fill="#e8607a" opacity="0.95" />
+        <ellipse cx="-14" cy="0" rx="12" ry="7" fill="#f4806b" opacity="0.95" />
+        <ellipse cx="10" cy="-10" rx="6" ry="10" transform="rotate(45, 10, -10)" fill="#ffd28a" opacity="0.95" />
+        <ellipse cx="-10" cy="-10" rx="6" ry="10" transform="rotate(-45, -10, -10)" fill="#ffd28a" opacity="0.95" />
+        <!-- Flower Center -->
+        <circle cx="0" cy="0" r="6" fill="#ffd28a" stroke="#ffffff" stroke-width="1.5" />
+        <!-- Swirling artistic vines on cheek -->
+        <path d="M 12,12 Q 25,25 22,40 Q 20,50 30,55" stroke="#f4806b" stroke-width="3" fill="none" stroke-linecap="round" />
+        <circle cx="30" cy="55" r="3" fill="#ffd28a" />
+      </g>
+
+      <!-- Artist Paintbrush Touching the Cheek -->
+      <g id="artist-brush" transform="translate(180, 260) rotate(35)">
+        <!-- Wooden/Golden Brush Handle -->
+        <rect x="0" y="0" width="14" height="200" rx="4" fill="#4a2618" stroke="#ffd28a" stroke-width="1.5" />
+        <!-- Metal Ferrule -->
+        <rect x="-1" y="200" width="16" height="40" fill="#c0c0c0" stroke="#ffd28a" stroke-width="1.5" />
+        <!-- Brush Bristles -->
+        <path d="M 0,240 C 0,270 7,285 7,285 C 7,285 14,270 14,240 Z" fill="#e8607a" />
+        <!-- Glowing paint dab on tip -->
+        <circle cx="7" cy="285" r="5" fill="#ffd28a" filter="url(#culturalGlow)" />
+      </g>
+    </g>
+
+    <!-- Decorative Botanical Leaf Branches -->
+    <g id="botanical-leaves" stroke="#f4806b" fill="#ffd28a" opacity="0.75">
+      <!-- Main Stem -->
+      <path d="M 520,100 Q 420,180 400,320 Q 380,450 450,580" stroke-width="3" fill="none" stroke-linecap="round" />
+      <!-- Leaves -->
+      <path d="M 470,140 Q 440,110 420,120 Q 450,150 470,140 Z" />
+      <path d="M 430,200 Q 390,190 380,210 Q 410,230 430,200 Z" />
+      <path d="M 405,270 Q 360,280 365,305 Q 395,310 405,270 Z" />
+      <path d="M 395,350 Q 350,380 360,405 Q 395,395 395,350 Z" />
+      <path d="M 410,430 Q 380,470 395,490 Q 425,465 410,430 Z" />
+    </g>
+  </g>
+
+  <!-- LAYER 6: DETAILED MEHENDI (HENNA) HAND (LOWER RIGHT) -->
+  <g id="mehendi-hand" transform="translate(1320, 520)">
+    <!-- Graceful Hand Silhouette receiving Henna -->
+    <!-- Arm and Wrist -->
+    <path d="M 280,560 L 250,350 C 240,300 230,260 210,220 C 190,180 180,150 170,110 C 160,70 155,40 150,10 C 145,-5 130,-5 125,15 C 115,55 105,95 95,140 C 85,110 75,80 65,55 C 58,40 45,45 45,65 C 45,95 55,130 65,170 C 50,145 35,120 25,100 C 18,90 8,95 8,110 C 10,135 25,170 45,210 C 30,195 15,185 5,175 C -3,170 -8,180 -2,195 C 15,230 40,270 70,310 C 95,350 110,410 130,560 Z"
+          fill="#441a2e" opacity="0.9" />
+
+    <!-- Detailed Mehendi (Henna) Pattern Lines on Palm and Fingers -->
+    <g stroke="#ffd28a" stroke-width="2.5" fill="none" opacity="0.92" filter="url(#culturalGlow)">
+      <!-- Mandala on Center of Palm -->
+      <circle cx="125" cy="280" r="32" />
+      <circle cx="125" cy="280" r="22" stroke-dasharray="4,4" />
+      <circle cx="125" cy="280" r="10" fill="#e8607a" />
+      <!-- Floral Petals around Mandala -->
+      <path d="M 125,248 C 135,235 145,248 125,248 Z" />
+      <path d="M 157,280 C 170,290 157,300 157,280 Z" />
+      <path d="M 125,312 C 115,325 105,312 125,312 Z" />
+      <path d="M 93,280 C 80,270 93,260 93,280 Z" />
+      <!-- Paisley / Peacock Motif on Wrist -->
+      <path d="M 140,360 C 170,340 190,380 160,410 C 140,430 110,400 140,360 Z" />
+      <path d="M 130,440 L 230,440 M 125,455 L 235,455 M 120,470 L 240,470" stroke-width="2" />
+      <!-- Vines running up middle finger -->
+      <path d="M 125,248 Q 135,180 135,120 Q 135,60 140,25" stroke-dasharray="3,3" />
+      <!-- Finger tips henna caps -->
+      <path d="M 130,25 C 130,5 145,5 145,25 Z" fill="#ffd28a" />
+      <path d="M 48,70 C 48,50 60,50 60,70 Z" fill="#ffd28a" />
+    </g>
+
+    <!-- Henna Cone applying the design -->
+    <g transform="translate(60, 210) rotate(-40)">
+      <polygon points="0,0 25,-120 45,-120" fill="#2c5c36" stroke="#ffd28a" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="3" fill="#ffd28a" filter="url(#culturalGlow)" />
+    </g>
+  </g>
+
+  <!-- LAYER 7: FLOWING SILK WAVE RIBBONS (JOINING BOTH WORLDS) -->
+  <g id="wave-ribbons">
+    <!-- Ribbon 1: Upper Dramatic Swirl -->
+    <path d="M -50,380 C 400,220 650,580 960,420 C 1250,280 1550,560 1980,320"
+          stroke="url(#ribbonGrad1)" stroke-width="9" fill="none" opacity="0.9" filter="url(#neonGlowBlue)" />
+    <!-- Ribbon 1 Inner Fine Core -->
+    <path d="M -50,380 C 400,220 650,580 960,420 C 1250,280 1550,560 1980,320"
+          stroke="#ffffff" stroke-width="2" fill="none" opacity="0.95" />
+
+    <!-- Ribbon 2: Center Gentle Flow -->
+    <path d="M -50,520 C 350,680 720,380 980,540 C 1240,690 1620,410 1980,560"
+          stroke="url(#ribbonGrad2)" stroke-width="14" fill="none" opacity="0.75" />
+    <path d="M -50,520 C 350,680 720,380 980,540 C 1240,690 1620,410 1980,560"
+          stroke="url(#ribbonGrad1)" stroke-width="4" fill="none" opacity="0.9" />
+
+    <!-- Ribbon 3: Lower Wave Ribbon -->
+    <path d="M -50,720 C 480,560 760,780 1020,680 C 1320,560 1650,760 1980,680"
+          stroke="url(#ribbonGrad1)" stroke-width="6" fill="none" opacity="0.8" />
+  </g>
+
+  <!-- LAYER 8: DUAL PARTICLES (CYBER PIXELS LEFT, GOLD/CORAL PETALS RIGHT) -->
+  <!-- Left Side: Cyan / Violet Cyber Pixels & Sparks -->
+  <g id="cyber-sparks" fill="#00e5ff" opacity="0.75">
+    <rect x="180" y="240" width="6" height="6" transform="rotate(45, 180, 240)" />
+    <rect x="290" y="380" width="8" height="8" transform="rotate(45, 290, 380)" />
+    <rect x="420" y="260" width="5" height="5" transform="rotate(45, 420, 260)" />
+    <rect x="520" y="380" width="7" height="7" transform="rotate(45, 520, 380)" />
+    <rect x="680" y="290" width="9" height="9" transform="rotate(45, 680, 290)" />
+    <rect x="790" y="420" width="6" height="6" transform="rotate(45, 790, 420)" />
+  </g>
+  <g fill="#7c3aed" opacity="0.8">
+    <circle cx="240" cy="310" r="4" />
+    <circle cx="360" cy="220" r="5" />
+    <circle cx="490" cy="330" r="4" />
+    <circle cx="630" cy="240" r="6" />
+    <circle cx="740" cy="360" r="5" />
+  </g>
+
+  <!-- Right Side: Stardust & Coral Petals -->
+  <g id="cultural-petals" fill="#ffd28a" opacity="0.85">
+    <polygon points="1180,240 1184,250 1194,254 1184,258 1180,268 1176,258 1166,254 1176,250" />
+    <polygon points="1320,380 1323,388 1331,391 1323,394 1320,402 1317,394 1309,391 1317,388" />
+    <polygon points="1460,260 1463,268 1471,271 1463,274 1460,282 1457,274 1449,271 1457,268" />
+    <polygon points="1640,420 1644,430 1654,434 1644,438 1640,448 1636,438 1626,434 1636,430" />
+  </g>
+  <g fill="#e8607a" opacity="0.75">
+    <!-- Drifting Petals -->
+    <ellipse cx="1120" cy="460" rx="9" ry="5" transform="rotate(35, 1120, 460)" />
+    <ellipse cx="1240" cy="520" rx="11" ry="6" transform="rotate(-25, 1240, 520)" />
+    <ellipse cx="1380" cy="440" rx="10" ry="5" transform="rotate(45, 1380, 440)" />
+    <ellipse cx="1590" cy="340" rx="8" ry="4" transform="rotate(-35, 1590, 340)" />
+    <ellipse cx="1740" cy="480" rx="12" ry="6" transform="rotate(20, 1740, 480)" />
+  </g>
+</svg>
