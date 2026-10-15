@@ -65,6 +65,9 @@ export default function handler(req, res) {
     }
   }
 
+  // Clean route of leading/trailing slashes and query strings
+  route = (route || '').replace(/^\/+/, '').replace(/\/+$/, '').split('?')[0];
+
   const routeHandler = handlers[route];
 
   if (!routeHandler) {
