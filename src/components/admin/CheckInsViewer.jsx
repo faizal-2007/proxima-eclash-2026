@@ -17,9 +17,11 @@ export function CheckInsViewer({ token }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedResult, setSelectedResult] = useState('ALL');
   const [lastRefreshed, setLastRefreshed] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
+    setErrorMsg('');
     try {
       const res = await fetch('/api/admin/checkins?limit=500', {
         headers: {
@@ -28,14 +30,17 @@ export function CheckInsViewer({ token }) {
         },
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setLogs(data.logs || []);
         setLastRefreshed(new Date());
       } else {
-        console.warn('[CheckInsViewer] API returned error:', data.error);
+        const errText = data.error || `HTTP ${res.status}`;
+        console.warn('[CheckInsViewer] API error:', res.status, errText);
+        setErrorMsg(`Failed to load check-in logs: ${errText}`);
       }
     } catch (err) {
-      console.error('[CheckInsViewer] Error loading logs:', err);
+      console.error('[CheckInsViewer] Network error:', err);
+      setErrorMsg(`Network error: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +114,17 @@ export function CheckInsViewer({ token }) {
 
   return (
     <div className="space-y-6">
+      {/* Error Banner */}
+      {errorMsg && (
+        <div className="p-4 rounded-2xl bg-rose-950/70 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-2">
+          <XCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+          <div>
+            <span className="font-bold block mb-0.5">Check-in Ledger Error</span>
+            <span className="font-mono">{errorMsg}</span>
+            <span className="block mt-1 text-rose-400/70">Check browser console for details. You may need to run the schema SQL in Supabase to create the <code className="bg-rose-900/50 px-1 rounded">checkin_logs</code> table.</span>
+          </div>
+        </div>
+      )}
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#070b29] border border-white/10 p-5 rounded-3xl">
         <div>

@@ -1,9 +1,10 @@
+import { verifyAdminAuth } from '../../_lib/auth.js';
 import { getSupabaseClient, getCheckInLogs } from '../../_lib/supabase.js';
 
 /**
  * GET /api/admin/checkins
  * Returns check-in audit logs for the Admin Dashboard.
- * Uses the admin Bearer token for auth (not volunteer JWT).
+ * Uses verifyAdminAuth — same auth as other admin endpoints.
  */
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,20 +19,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Use GET.' });
   }
 
-  // Admin auth: check Authorization header or x-admin-key
-  const adminPassword = process.env.ADMIN_PASSWORD || process.env.VITE_ADMIN_PASSWORD || 'yennex2026';
-  const authHeader = req.headers.authorization || '';
-  const adminKey = req.headers['x-admin-key'] || '';
-
-  const providedToken = authHeader.replace(/^Bearer\s+/i, '').trim() || adminKey;
-
-  // Accept static admin token, preview token, or the raw admin password
-  const validTokens = [adminPassword, 'preview-session-token', 'admin-authenticated'];
-  const isAuthorized =
-    validTokens.includes(providedToken) || providedToken === adminPassword;
-
-  if (!isAuthorized) {
-    return res.status(401).json({ error: 'Unauthorized. Admin access required.' });
+  // Use the same admin auth as registrations.js and volunteers.js
+  const authCheck = verifyAdminAuth(req);
+  if (!authCheck.valid) {
+    return res.status(401).json({ error: authCheck.error || 'Unauthorized. Admin access required.' });
   }
 
   try {
