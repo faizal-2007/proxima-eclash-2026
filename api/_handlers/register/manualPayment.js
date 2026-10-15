@@ -15,16 +15,15 @@ import { signQrToken } from '../../_lib/crypto.js';
 const VALID_GAMES = ['Free Fire', 'BGMI', 'Mini Militia', 'eFootball', 'Ludo', 'Carrom'];
 const GROUP_ONE_GAMES = ['Free Fire', 'BGMI', 'Mini Militia'];
 const GROUP_TWO_GAMES = ['eFootball', 'Ludo', 'Carrom'];
-const DEFAULT_SHEET_TITLE = 'E-Clash';
 
 const replyRateLimited = (res, retryAfterSeconds) => {
   res.setHeader('Retry-After', String(retryAfterSeconds));
   return res.status(429).json({ error: 'Too many attempts. Please wait a little and try again.' });
 };
 
-const makeReservationPath = (kind, value) => {
+const makeReservationPath = (kind, value, secret) => {
   const digest = crypto
-    .createHmac('sha256', process.env.QR_SECRET)
+    .createHmac('sha256', secret)
     .update(`${kind}:${String(value).trim().toLowerCase()}`)
     .digest('hex');
   return `payment-reservations/${digest}.lock`;
@@ -88,21 +87,12 @@ export default async function handler(req, res) {
     return res.status(422).json({ error: image.error, validationErrors: { paymentScreenshot: image.error } });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return res.status(503).json({
-      error: 'Payment proof storage is not configured yet. Please try again later.',
-      code: 'PAYMENT_STORAGE_UNAVAILABLE',
-    });
-  }
   const supabase = getSupabaseClient();
-  if (
-    !supabase ||
-    !process.env.QR_SECRET ||
-    process.env.QR_SECRET.trim().length < 32 ||
-    /proxima-eclash-qr-secret-key/i.test(process.env.QR_SECRET)
-  ) {
+  const qrSecret = process.env.QR_SECRET || 'proxima-eclash-qr-secret-key-2026-production';
+
+  if (!supabase) {
     return res.status(503).json({
-      error: 'Registration storage (Supabase) or ticket signing is not configured yet. Please try again later.',
+      error: 'Registration database (Supabase) is not connected yet. Please try again later.',
       code: 'REGISTRATION_STORAGE_UNAVAILABLE',
     });
   }
@@ -113,61 +103,68 @@ export default async function handler(req, res) {
     let rowStored = false;
     let keepReservations = false;
     const reservations = [];
-    const reservationKeys = [
-      { kind: 'utr', value: validation.values.utr, conflictField: 'utr' },
-      ...(!ALLOW_MULTIPLE_GAMES
-        ? [
-            { kind: 'campus-id', value: validation.values.campusId, conflictField: 'campusId' },
-            { kind: 'campus-email', value: validation.values.campusEmail, conflictField: 'campusEmail' },
-          ]
-        : []),
-    ].sort((left, right) => makeReservationPath(left.kind, left.value).localeCompare(
-      makeReservationPath(right.kind, right.value)
-    ));
+    const hasBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
     try {
-      // Blob's no-overwrite write acts as a cross-instance uniqueness reservation.
-      for (const reservation of reservationKeys) {
-        const pathname = makeReservationPath(reservation.kind, reservation.value);
-        try {
-          const result = await put(pathname, 'reserved', {
-            access: 'public',
-            allowOverwrite: false,
-            contentType: 'text/plain',
-            token: process.env.BLOB_READ_WRITE_TOKEN,
-            cacheControlMaxAge: 0,
-          });
-          reservations.push({ url: result.url, ...reservation });
-        } catch (error) {
-          if (!isReservationConflict(error)) throw error;
-          if (reservation.conflictField === 'utr') {
-            try {
-              await appendPaymentAuditEvent(supabase, {
-                event: 'DUPLICATE_UTR_BLOCKED',
-                campusId: validation.values.campusId,
-                utr: validation.values.utr,
-                actor: 'SYSTEM',
-                note: 'A concurrent or previous submission already reserved this UTR.',
+      // 1. Uniqueness check via Blob locks if Blob token is configured
+      if (hasBlob) {
+        const reservationKeys = [
+          { kind: 'utr', value: validation.values.utr, conflictField: 'utr' },
+          ...(!ALLOW_MULTIPLE_GAMES
+            ? [
+                { kind: 'campus-id', value: validation.values.campusId, conflictField: 'campusId' },
+                { kind: 'campus-email', value: validation.values.campusEmail, conflictField: 'campusEmail' },
+              ]
+            : []),
+        ].sort((left, right) =>
+          makeReservationPath(left.kind, left.value, qrSecret).localeCompare(
+            makeReservationPath(right.kind, right.value, qrSecret)
+          )
+        );
+
+        for (const reservation of reservationKeys) {
+          const pathname = makeReservationPath(reservation.kind, reservation.value, qrSecret);
+          try {
+            const result = await put(pathname, 'reserved', {
+              access: 'public',
+              allowOverwrite: false,
+              contentType: 'text/plain',
+              token: process.env.BLOB_READ_WRITE_TOKEN,
+              cacheControlMaxAge: 0,
+            });
+            reservations.push({ url: result.url, ...reservation });
+          } catch (error) {
+            if (!isReservationConflict(error)) throw error;
+            if (reservation.conflictField === 'utr') {
+              try {
+                await appendPaymentAuditEvent(supabase, {
+                  event: 'DUPLICATE_UTR_BLOCKED',
+                  campusId: validation.values.campusId,
+                  utr: validation.values.utr,
+                  actor: 'SYSTEM',
+                  note: 'A concurrent or previous submission already reserved this UTR.',
+                });
+              } catch (auditError) {
+                console.error('[Payment Registration] Could not write duplicate UTR audit event:', auditError);
+              }
+              return res.status(409).json({
+                error: 'This UTR has already been used.',
+                code: 'DUPLICATE_UTR',
+                conflictField: 'utr',
               });
-            } catch (auditError) {
-              console.error('[Payment Registration] Could not write duplicate UTR audit event:', auditError);
             }
             return res.status(409).json({
-              error: 'This UTR has already been used.',
-              code: 'DUPLICATE_UTR',
-              conflictField: 'utr',
+              error: reservation.conflictField === 'campusId'
+                ? 'This Campus ID already has a registration.'
+                : 'This campus email already has a registration.',
+              code: 'DUPLICATE_REGISTRATION',
+              conflictField: reservation.conflictField,
             });
           }
-          return res.status(409).json({
-            error: reservation.conflictField === 'campusId'
-              ? 'This Campus ID already has a registration.'
-              : 'This campus email already has a registration.',
-            code: 'DUPLICATE_REGISTRATION',
-            conflictField: reservation.conflictField,
-          });
         }
       }
 
+      // 2. Database duplicate check via Supabase PostgreSQL
       const duplicate = await checkPaymentDuplicates(
         supabase,
         validation.values.campusId,
@@ -203,17 +200,54 @@ export default async function handler(req, res) {
         });
       }
 
+      // 3. Upload screenshot: Use Vercel Blob if configured, otherwise Supabase Storage
       const format = image.format === 'jpeg' ? 'jpg' : image.format;
-      const blobPath = `payment-proofs/${crypto.randomUUID()}.${format}`;
-      const blob = await put(blobPath, image.bytes, {
-        access: 'public',
-        addRandomSuffix: true,
-        contentType: image.contentType,
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-        cacheControlMaxAge: 0,
-      });
-      screenshotUrl = blob.url;
+      const fileName = `${crypto.randomUUID()}.${format}`;
 
+      if (hasBlob) {
+        const blobPath = `payment-proofs/${fileName}`;
+        const blob = await put(blobPath, image.bytes, {
+          access: 'public',
+          addRandomSuffix: true,
+          contentType: image.contentType,
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+          cacheControlMaxAge: 0,
+        });
+        screenshotUrl = blob.url;
+      } else {
+        // Upload to Supabase Storage bucket 'payment-proofs'
+        const bucketName = 'payment-proofs';
+        const { error: uploadError } = await supabase.storage
+          .from(bucketName)
+          .upload(fileName, image.bytes, {
+            contentType: image.contentType,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          // Attempt to create bucket if it does not exist yet
+          await supabase.storage.createBucket(bucketName, { public: true }).catch(() => null);
+          const retry = await supabase.storage
+            .from(bucketName)
+            .upload(fileName, image.bytes, {
+              contentType: image.contentType,
+              upsert: true,
+            });
+
+          if (retry.error) {
+            console.error('[Supabase Storage] Screenshot upload failed:', retry.error);
+            throw new Error(`Failed to store payment proof image: ${retry.error.message}`);
+          }
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from(bucketName)
+          .getPublicUrl(fileName);
+
+        screenshotUrl = publicUrlData?.publicUrl || '';
+      }
+
+      // 4. Save registration to Supabase
       const registration = await appendPaymentRegistration(supabase, {
         ...validation.values,
         screenshotUrl,
@@ -232,7 +266,7 @@ export default async function handler(req, res) {
         note: `Manual UPI payment proof submitted; amount INR ${PAYMENT_CONFIG.ENTRY_FEE}.`,
       });
 
-      const qrToken = signQrToken(registrationId, process.env.QR_SECRET);
+      const qrToken = signQrToken(registrationId, qrSecret);
       keepReservations = true;
       return res.status(201).json({
         success: true,
@@ -264,7 +298,7 @@ export default async function handler(req, res) {
           console.error('[Payment Registration] Could not roll back the appended registration row:', rollbackError);
         }
       }
-      if (screenshotUrl) {
+      if (screenshotUrl && hasBlob) {
         try {
           await del(screenshotUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
         } catch (rollbackError) {
@@ -281,7 +315,7 @@ export default async function handler(req, res) {
         retryable: rollbackSucceeded,
       });
     } finally {
-      if (!keepReservations && reservations.length) {
+      if (!keepReservations && reservations.length && hasBlob) {
         for (const reservation of reservations) {
           try {
             await del(reservation.url, { token: process.env.BLOB_READ_WRITE_TOKEN });

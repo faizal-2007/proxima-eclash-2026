@@ -123,3 +123,21 @@ CREATE POLICY "Allow service role full access to payment_audit_logs"
   TO service_role
   USING (true)
   WITH CHECK (true);
+
+-- ==============================================================================
+-- Storage Bucket: payment-proofs (for registration screenshots)
+-- ==============================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('payment-proofs', 'payment-proofs', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Allow public read payment proofs"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'payment-proofs');
+
+CREATE POLICY "Allow service role manage payment proofs"
+  ON storage.objects FOR ALL
+  TO service_role
+  USING (bucket_id = 'payment-proofs')
+  WITH CHECK (bucket_id = 'payment-proofs');
+
