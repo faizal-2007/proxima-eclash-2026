@@ -96,17 +96,50 @@ export function App() {
       window.location.hash = '#admin';
       setCurrentView('admin');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (
+      hash === '#volunteer' ||
+      hash === '#volunteer/login' ||
+      hash === '#volunteer-login' ||
+      hash === '#scanner'
+    ) {
+      const token = getStoredVolunteerToken();
+      if (token && !isTokenExpired(token)) {
+        window.location.hash = '#volunteer';
+        setCurrentView('volunteer-dashboard');
+      } else {
+        window.location.hash = '#volunteer/login';
+        setCurrentView('volunteer-login');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (hash === '#volunteer/history') {
+      const token = getStoredVolunteerToken();
+      if (!token || isTokenExpired(token)) {
+        window.location.hash = '#volunteer/login';
+        setCurrentView('volunteer-login');
+      } else {
+        window.location.hash = '#volunteer/history';
+        setCurrentView('volunteer-history');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      if (currentView !== 'home') {
-        setCurrentView('home');
-        window.location.hash = '';
-        setTimeout(() => {
+      try {
+        if (currentView !== 'home') {
+          setCurrentView('home');
+          window.location.hash = '';
+          setTimeout(() => {
+            try {
+              const el = document.querySelector(hash);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            } catch {
+              // Ignore invalid selector
+            }
+          }, 100);
+        } else {
           const el = document.querySelector(hash);
           if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      } else {
-        const el = document.querySelector(hash);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+      } catch {
+        // Ignore invalid CSS selector
       }
     }
   };
