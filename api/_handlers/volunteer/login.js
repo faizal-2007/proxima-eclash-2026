@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import {
-  getSheetsClient,
+  getSupabaseClient,
   getVolunteerByUsername,
-} from '../../_lib/googleSheets.js';
+} from '../../_lib/supabase.js';
 import {
   checkLoginRateLimit,
   recordFailedLogin,
@@ -10,10 +10,9 @@ import {
   signVolunteerToken,
 } from '../../_lib/auth.js';
 
-
 /**
  * Vercel Serverless Function: POST /api/volunteer/login
- * Authenticates volunteers against the Volunteers Google Sheet tab.
+ * Authenticates volunteers against the Supabase volunteers table.
  */
 export default async function handler(req, res) {
   // CORS configuration
@@ -57,13 +56,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Fetch volunteer record
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetsClient = getSheetsClient();
+    // 2. Fetch volunteer record from Supabase
+    const supabase = getSupabaseClient();
     let volunteer = null;
 
-    if (sheetsClient && spreadsheetId) {
-      volunteer = await getVolunteerByUsername(sheetsClient, spreadsheetId, cleanUsername);
+    if (supabase) {
+      volunteer = await getVolunteerByUsername(supabase, cleanUsername);
     }
 
     // 3. Verify user existence and password hash

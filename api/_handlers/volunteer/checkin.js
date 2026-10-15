@@ -1,13 +1,12 @@
 import { verifyVolunteerJwt } from '../../_lib/auth.js';
 import {
-  getSheetsClient,
+  getSupabaseClient,
   performParticipantCheckIn,
-  findRegistrationById,
-} from '../../_lib/googleSheets.js';
+} from '../../_lib/supabase.js';
 
 /**
  * Vercel Serverless Function: POST /api/volunteer/checkin
- * Marks a participant as checked in with race condition protection and audit logging.
+ * Marks a participant as checked in with race condition protection and audit logging using Supabase.
  */
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,15 +45,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'registrationId is required.' });
     }
 
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetsClient = getSheetsClient();
-    const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || 'E-Clash';
+    const supabase = getSupabaseClient();
 
-    if (sheetsClient && spreadsheetId) {
+    if (supabase) {
       const result = await performParticipantCheckIn(
-        sheetsClient,
-        spreadsheetId,
-        sheetTitle,
+        supabase,
         {
           registrationId,
           station,
@@ -78,7 +73,7 @@ export default async function handler(req, res) {
 
     return res.status(503).json({
       success: false,
-      error: 'Google Sheets database connection unavailable. Check-in cannot be recorded.',
+      error: 'Supabase database connection unavailable. Check-in cannot be recorded.',
     });
   } catch (error) {
     console.error('[Volunteer Checkin API] Error checking in:', error);

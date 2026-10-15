@@ -1,5 +1,5 @@
 import { verifyVolunteerJwt } from '../../_lib/auth.js';
-import { getSheetsClient, getCheckInLogs } from '../../_lib/googleSheets.js';
+import { getSupabaseClient, getCheckInLogs } from '../../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,11 +31,10 @@ export default async function handler(req, res) {
     const filter = (req.query?.filter || 'all').toLowerCase();
     const volunteerIdFilter = filter === 'my' ? (volunteer.volunteerId || volunteer.username) : null;
 
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetsClient = getSheetsClient();
+    const supabase = getSupabaseClient();
 
-    if (sheetsClient && spreadsheetId) {
-      const logs = await getCheckInLogs(sheetsClient, spreadsheetId, limit, volunteerIdFilter);
+    if (supabase) {
+      const logs = await getCheckInLogs(supabase, limit, volunteerIdFilter);
       return res.status(200).json({
         success: true,
         count: logs.length,
@@ -43,7 +42,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // No logs fallback: return empty list
     return res.status(200).json({
       success: true,
       count: 0,

@@ -1,21 +1,18 @@
-import { getSheetsClient } from '../_lib/googleSheets.js';
+import { getSupabaseClient } from '../_lib/supabase.js';
 
 export default async function handler(req, res) {
-  const hasClientEmail = Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
-  const hasPrivateKey = Boolean(process.env.GOOGLE_PRIVATE_KEY);
-  const sheetId = process.env.GOOGLE_SHEET_ID;
+  const hasUrl = Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL);
+  const hasKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY);
 
-  let sheetConnectionStatus = 'unconfigured';
-  let sheetTitle = null;
+  let supabaseStatus = 'unconfigured';
 
-  if (hasClientEmail && hasPrivateKey && sheetId) {
+  if (hasUrl && hasKey) {
     try {
-      const sheets = getSheetsClient();
-      const meta = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
-      sheetConnectionStatus = 'connected';
-      sheetTitle = meta.data.properties?.title;
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.from('registrations').select('registration_id', { count: 'exact', head: true });
+      supabaseStatus = error ? `error: ${error.message}` : 'connected';
     } catch (err) {
-      sheetConnectionStatus = `error: ${err.message}`;
+      supabaseStatus = `error: ${err.message}`;
     }
   }
 
@@ -23,12 +20,11 @@ export default async function handler(req, res) {
     status: 'healthy',
     event: 'PROXIMA E-CLASH 2026',
     institution: 'Yenepoya School of Engineering and Technology',
-    googleSheets: {
-      hasServiceAccountEmail: hasClientEmail,
-      hasPrivateKey: hasPrivateKey,
-      sheetIdConfigured: Boolean(sheetId),
-      connectionStatus: sheetConnectionStatus,
-      sheetTitle,
+    database: {
+      provider: 'Supabase (PostgreSQL)',
+      hasUrl,
+      hasKey,
+      connectionStatus: supabaseStatus,
     },
     timestamp: new Date().toISOString(),
   });

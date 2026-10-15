@@ -1,12 +1,12 @@
 import {
-  getSheetsClient,
+  getSupabaseClient,
   getVolunteerByUsername,
-} from '../../_lib/googleSheets.js';
+} from '../../_lib/supabase.js';
 import { verifyVolunteerJwt } from '../../_lib/auth.js';
 
 /**
  * Vercel Serverless Function: GET /api/volunteer/me
- * Returns current volunteer session info and validates server-side active status.
+ * Returns current volunteer session info and validates server-side active status via Supabase.
  */
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,12 +31,11 @@ export default async function handler(req, res) {
   const { username } = verification.payload;
 
   // Server-side active check
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetsClient = getSheetsClient();
+  const supabase = getSupabaseClient();
   let volunteer = null;
 
-  if (sheetsClient && spreadsheetId) {
-    volunteer = await getVolunteerByUsername(sheetsClient, spreadsheetId, username);
+  if (supabase) {
+    volunteer = await getVolunteerByUsername(supabase, username);
   }
 
   if (volunteer && !volunteer.active) {

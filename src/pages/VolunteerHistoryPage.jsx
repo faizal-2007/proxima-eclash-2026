@@ -100,7 +100,7 @@ export function VolunteerHistoryPage({ onBackToDashboard }) {
               </div>
               <h1 className="text-lg font-black font-orbitron text-white">SCAN & AUDIT LOG</h1>
             </div>
-            <p className="text-xs text-slate-400 mt-1">Real-time check-in ledger recorded to Google Sheets</p>
+            <p className="text-xs text-slate-400 mt-1">Real-time check-in ledger recorded to Supabase</p>
           </div>
 
           {/* Filter Pills */}
@@ -144,7 +144,7 @@ export function VolunteerHistoryPage({ onBackToDashboard }) {
         {isLoading ? (
           <div className="py-16 text-center space-y-2">
             <RefreshCw className="w-7 h-7 text-fuchsia-400 animate-spin mx-auto" />
-            <p className="text-xs text-slate-400">Loading audit history from Google Sheets...</p>
+            <p className="text-xs text-slate-400">Loading audit history from Supabase...</p>
           </div>
         ) : filteredLogs.length > 0 ? (
           <div className="space-y-2.5">

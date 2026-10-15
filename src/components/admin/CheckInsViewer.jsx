@@ -109,7 +109,7 @@ export function CheckInsViewer({ token }) {
             </div>
             <div>
               <h2 className="text-lg font-black font-orbitron text-white">ARENA CHECK-IN AUDIT LEDGER</h2>
-              <p className="text-xs text-slate-400">Append-only audit trail recorded to CheckInLog Google Sheets tab</p>
+              <p className="text-xs text-slate-400">Append-only audit trail recorded to Supabase</p>
             </div>
           </div>
         </div>
@@ -191,7 +191,7 @@ export function CheckInsViewer({ token }) {
         {isLoading ? (
           <div className="py-20 text-center space-y-2">
             <RefreshCw className="w-8 h-8 text-fuchsia-400 animate-spin mx-auto" />
-            <p className="text-xs text-slate-400">Loading audit history from Google Sheets...</p>
+            <p className="text-xs text-slate-400">Loading audit history from Supabase...</p>
           </div>
         ) : filteredLogs.length > 0 ? (
           <div className="overflow-x-auto">

@@ -1,15 +1,15 @@
 import bcrypt from 'bcryptjs';
 import { verifyAdminAuth } from '../../_lib/auth.js';
 import {
-  getSheetsClient,
+  getSupabaseClient,
   getVolunteers,
   saveVolunteer,
   deleteVolunteer,
-} from '../../_lib/googleSheets.js';
+} from '../../_lib/supabase.js';
 
 /**
  * Vercel Serverless Function: /api/admin/volunteers
- * Admin-only CRUD operations for tournament volunteers:
+ * Admin-only CRUD operations for tournament volunteers using Supabase:
  * - GET: List all volunteers
  * - POST: Create new volunteer with admin-assigned password
  * - PUT: Edit volunteer details or reset password
@@ -30,16 +30,15 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: authCheck.error || 'Unauthorized: Admin access required.' });
   }
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetsClient = getSheetsClient();
+  const supabase = getSupabaseClient();
 
   try {
     // ==========================================
     // GET: List all volunteers
     // ==========================================
     if (req.method === 'GET') {
-      if (sheetsClient && spreadsheetId) {
-        const volunteers = await getVolunteers(sheetsClient, spreadsheetId, true);
+      if (supabase) {
+        const volunteers = await getVolunteers(supabase);
         const sanitized = (volunteers || []).map((v) => ({
           volunteerId: v.volunteerId,
           name: v.name,
@@ -58,7 +57,6 @@ export default async function handler(req, res) {
         });
       }
 
-      // No mock fallback: return empty list
       return res.status(200).json({
         success: true,
         count: 0,
@@ -90,8 +88,8 @@ export default async function handler(req, res) {
 
       const cleanCampusId = campusId.trim().toLowerCase();
 
-      if (sheetsClient && spreadsheetId) {
-        const existing = await getVolunteers(sheetsClient, spreadsheetId, true);
+      if (supabase) {
+        const existing = await getVolunteers(supabase);
         const duplicate = existing.find((v) => v.username === cleanCampusId);
         if (duplicate) {
           return res.status(409).json({
@@ -102,7 +100,7 @@ export default async function handler(req, res) {
         const passwordHash = await bcrypt.hash(String(password).trim(), 10);
         const volunteerId = `VOL-${String(existing.length + 1).padStart(3, '0')}`;
 
-        await saveVolunteer(sheetsClient, spreadsheetId, {
+        await saveVolunteer(supabase, {
           volunteerId,
           name: name.trim(),
           username: cleanCampusId,
@@ -129,7 +127,7 @@ export default async function handler(req, res) {
       }
 
       return res.status(503).json({
-        error: 'Google Sheets database connection unavailable. Volunteer cannot be created.',
+        error: 'Supabase database connection unavailable. Volunteer cannot be created.',
       });
     }
 
@@ -152,8 +150,8 @@ export default async function handler(req, res) {
 
       const cleanCampusId = (campusId || '').trim().toLowerCase();
 
-      if (sheetsClient && spreadsheetId) {
-        const existing = await getVolunteers(sheetsClient, spreadsheetId, true);
+      if (supabase) {
+        const existing = await getVolunteers(supabase);
         const volunteer = existing.find(
           (v) =>
             (volunteerId && v.volunteerId.toLowerCase() === volunteerId.toLowerCase()) ||
@@ -169,7 +167,7 @@ export default async function handler(req, res) {
           passwordHash = await bcrypt.hash(String(password).trim(), 10);
         }
 
-        await saveVolunteer(sheetsClient, spreadsheetId, {
+        await saveVolunteer(supabase, {
           volunteerId: volunteer.volunteerId,
           name: name.trim() || volunteer.name,
           username: volunteer.username,
@@ -196,7 +194,7 @@ export default async function handler(req, res) {
       }
 
       return res.status(503).json({
-        error: 'Google Sheets database connection unavailable. Volunteer cannot be updated.',
+        error: 'Supabase database connection unavailable. Volunteer cannot be updated.',
       });
     }
 
@@ -210,8 +208,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'volunteerId is required to delete volunteer.' });
       }
 
-      if (sheetsClient && spreadsheetId) {
-        const result = await deleteVolunteer(sheetsClient, spreadsheetId, volunteerId);
+      if (supabase) {
+        const result = await deleteVolunteer(supabase, volunteerId);
         if (!result.success) {
           return res.status(404).json({ error: result.error || 'Volunteer not found.' });
         }
@@ -223,7 +221,7 @@ export default async function handler(req, res) {
       }
 
       return res.status(503).json({
-        error: 'Google Sheets database connection unavailable. Volunteer cannot be deleted.',
+        error: 'Supabase database connection unavailable. Volunteer cannot be deleted.',
       });
     }
 

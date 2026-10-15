@@ -281,7 +281,7 @@ export function VolunteersManager({ token }) {
         {isLoading ? (
           <div className="py-20 text-center space-y-2">
             <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
-            <p className="text-xs text-slate-400">Loading volunteer accounts from Google Sheets...</p>
+            <p className="text-xs text-slate-400">Loading volunteer accounts from Supabase...</p>
           </div>
         ) : filteredVolunteers.length > 0 ? (
           <div className="overflow-x-auto">
@@ -618,7 +618,7 @@ export function VolunteersManager({ token }) {
               <span className="font-mono text-cyan-400">{deleteTarget.username}</span>)?
             </p>
             <p className="text-[11px] text-slate-500">
-              This action removes their credential row from Google Sheets.
+              This action removes their account from Supabase.
             </p>
 
             <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">

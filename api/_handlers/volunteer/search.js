@@ -1,5 +1,5 @@
 import { verifyVolunteerJwt } from '../../_lib/auth.js';
-import { getSheetsClient, getAllRegistrations } from '../../_lib/googleSheets.js';
+import { getSupabaseClient, getAllRegistrations } from '../../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,13 +31,11 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, results: [] });
     }
 
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetsClient = getSheetsClient();
-    const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || 'E-Clash';
-
+    const supabase = getSupabaseClient();
     let list = [];
-    if (sheetsClient && spreadsheetId) {
-      list = await getAllRegistrations(sheetsClient, spreadsheetId, sheetTitle);
+
+    if (supabase) {
+      list = await getAllRegistrations(supabase);
     }
 
     // Filter results matching query against name, campus ID, phone, email, or registration ID

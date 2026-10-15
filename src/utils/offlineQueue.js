@@ -1,7 +1,7 @@
 /**
  * Offline Sync Queue Utility for PROXIMA Volunteer Portal
  * Stores check-ins recorded when internet connectivity drops
- * and automatically drains/syncs to Google Sheets when back online.
+ * and automatically drains/syncs to Supabase when back online.
  */
 
 const STORAGE_KEY = 'proxima_volunteer_offline_queue_v1';

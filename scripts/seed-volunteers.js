@@ -1,10 +1,9 @@
 import bcrypt from 'bcryptjs';
 import {
-  getSheetsClient,
-  ensureSheetInitialized,
+  getSupabaseClient,
   saveVolunteer,
   getVolunteers,
-} from '../api/_lib/googleSheets.js';
+} from '../api/_lib/supabase.js';
 
 // Auto-load .env
 if (typeof process !== 'undefined' && typeof process.loadEnvFile === 'function') {
@@ -39,11 +38,10 @@ async function seed() {
   console.log('🌱 PROXIMA E-CLASH 2026 — Volunteer Seeding Script');
   console.log('=====================================================\n');
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetsClient = getSheetsClient();
+  const supabase = getSupabaseClient();
 
-  if (!sheetsClient || !spreadsheetId) {
-    console.error('❌ Google Sheets API credentials or GOOGLE_SHEET_ID not detected in .env.');
+  if (!supabase) {
+    console.error('❌ Supabase credentials (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY) not detected in .env.');
     process.exit(1);
   }
 
@@ -54,8 +52,8 @@ async function seed() {
     console.log('   Option B (Recommended): Use the live web Admin Portal at /admin -> "Volunteers" tab to add and manage volunteers with a UI.\n');
 
     try {
-      const all = await getVolunteers(sheetsClient, spreadsheetId, true);
-      console.log(`Current active volunteers in Google Sheet: ${all.length}`);
+      const all = await getVolunteers(supabase);
+      console.log(`Current active volunteers in Supabase: ${all.length}`);
     } catch {
       // ignore
     }
@@ -63,13 +61,11 @@ async function seed() {
   }
 
   try {
-    console.log(`1. Connecting to Google Sheet ID: ${spreadsheetId.slice(0, 10)}...`);
-    await ensureSheetInitialized(sheetsClient, spreadsheetId);
-
-    console.log(`\n2. Seeding ${SEED_VOLUNTEERS.length} Volunteer accounts into "Volunteers" tab:`);
+    console.log(`1. Connecting to Supabase...`);
+    console.log(`\n2. Seeding ${SEED_VOLUNTEERS.length} Volunteer accounts into "volunteers" table:`);
     for (const v of SEED_VOLUNTEERS) {
       const passwordHash = bcrypt.hashSync(String(v.passwordPlain || v.username), 10);
-      await saveVolunteer(sheetsClient, spreadsheetId, {
+      await saveVolunteer(supabase, {
         volunteerId: v.volunteerId,
         name: v.name,
         username: String(v.username).trim().toLowerCase(),
@@ -77,13 +73,12 @@ async function seed() {
         role: v.role || 'volunteer',
         station: v.station || 'All',
         active: v.active !== false,
-        createdAt: new Date().toISOString(),
       });
       console.log(`  ✅ [${(v.role || 'volunteer').toUpperCase()}] ${v.name} (${v.username}) — Station: ${v.station || 'All'} — Active: ${v.active !== false}`);
     }
 
-    const all = await getVolunteers(sheetsClient, spreadsheetId, true);
-    console.log(`\n🎉 SEEDING COMPLETE! Total volunteers registered in sheet: ${all.length}`);
+    const all = await getVolunteers(supabase);
+    console.log(`\n🎉 SEEDING COMPLETE! Total volunteers registered in Supabase: ${all.length}`);
   } catch (err) {
     console.error('\n❌ Seeding failed with error:', err.message);
     process.exit(1);

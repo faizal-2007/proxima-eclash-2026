@@ -1,11 +1,9 @@
 import {
   getRegistrationForTicket,
-  getSheetsClient,
-} from '../_lib/googleSheets.js';
+  getSupabaseClient,
+} from '../_lib/supabase.js';
 import { checkRateLimit } from '../_lib/rateLimit.js';
 import { signQrToken } from '../_lib/crypto.js';
-
-const DEFAULT_SHEET_TITLE = 'E-Clash';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -38,19 +36,14 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many ticket lookup attempts. Please wait and try again.' });
   }
 
-  if (!process.env.GOOGLE_SHEET_ID || !process.env.QR_SECRET || process.env.QR_SECRET.length < 32) {
-    return res.status(503).json({ error: 'Ticket lookup is not configured yet. Please try again later.' });
-  }
-  const sheetsClient = getSheetsClient();
-  if (!sheetsClient) {
-    return res.status(503).json({ error: 'Ticket lookup is not configured yet. Please try again later.' });
+  const supabase = getSupabaseClient();
+  if (!supabase || !process.env.QR_SECRET || process.env.QR_SECRET.length < 32) {
+    return res.status(503).json({ error: 'Ticket lookup storage (Supabase) is not configured yet. Please try again later.' });
   }
 
   try {
     const registration = await getRegistrationForTicket(
-      sheetsClient,
-      process.env.GOOGLE_SHEET_ID,
-      process.env.GOOGLE_SHEET_TAB_NAME || DEFAULT_SHEET_TITLE,
+      supabase,
       campusId,
       email
     );

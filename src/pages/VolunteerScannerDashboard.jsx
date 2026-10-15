@@ -267,7 +267,7 @@ export function VolunteerScannerDashboard({ onLogout, onNavigateHistory }) {
           checkedInAt: new Date().toISOString(),
           checkedInBy: `${profile?.name || 'Volunteer'} (OFFLINE QUEUE)`,
         },
-        message: 'Saved offline! Will automatically sync to Google Sheets once reconnected.',
+        message: 'Saved offline! Will automatically sync to Supabase once reconnected.',
       }));
       setIsCheckingIn(false);
       return;

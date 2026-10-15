@@ -1,16 +1,15 @@
 import { verifyVolunteerJwt } from '../../_lib/auth.js';
 import { verifyQrToken } from '../../_lib/crypto.js';
 import {
-  getSheetsClient,
+  getSupabaseClient,
   findRegistrationById,
   performParticipantCheckIn,
   appendCheckInLog,
-} from '../../_lib/googleSheets.js';
-
+} from '../../_lib/supabase.js';
 
 /**
  * Vercel Serverless Function: POST /api/volunteer/scan
- * Verifies QR cryptographic token, inspects station matching, and checks participant registration.
+ * Verifies QR cryptographic token, inspects station matching, and checks participant registration using Supabase.
  */
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,15 +43,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'qrToken is required.' });
     }
 
+    const supabase = getSupabaseClient();
+
     // 2. Cryptographic Token Verification
     const tokenVerification = verifyQrToken(qrToken);
 
     if (!tokenVerification.valid && !tokenVerification.isLegacy) {
-      // Record invalid scan in CheckInLog audit table if possible
-      const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-      const sheetsClient = getSheetsClient();
-      if (sheetsClient && spreadsheetId) {
-        await appendCheckInLog(sheetsClient, spreadsheetId, {
+      if (supabase) {
+        await appendCheckInLog(supabase, {
           timestamp: new Date().toISOString(),
           registrationId: tokenVerification.registrationId || 'UNKNOWN',
           game: 'UNKNOWN',
@@ -73,15 +71,11 @@ export default async function handler(req, res) {
 
     const registrationId = tokenVerification.registrationId;
 
-    // 3. Lookup participant in Google Sheet
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetsClient = getSheetsClient();
-    const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || 'E-Clash';
-
+    // 3. Lookup participant in Supabase
     let participant = null;
 
-    if (sheetsClient && spreadsheetId) {
-      participant = await findRegistrationById(sheetsClient, spreadsheetId, sheetTitle, registrationId);
+    if (supabase) {
+      participant = await findRegistrationById(supabase, registrationId);
     }
 
     if (!participant) {
@@ -126,12 +120,9 @@ export default async function handler(req, res) {
 
     // 6. Valid scan at correct station
     if (autoCheckIn) {
-      // Auto check-in mode: Check in immediately
-      if (sheetsClient && spreadsheetId) {
+      if (supabase) {
         const checkInResult = await performParticipantCheckIn(
-          sheetsClient,
-          spreadsheetId,
-          sheetTitle,
+          supabase,
           {
             registrationId: participant.registrationId,
             station: cleanStation,
@@ -154,7 +145,7 @@ export default async function handler(req, res) {
       } else {
         return res.status(503).json({
           success: false,
-          error: 'Google Sheets database connection unavailable. Check-in cannot be recorded.',
+          error: 'Supabase database connection unavailable. Check-in cannot be recorded.',
         });
       }
     }

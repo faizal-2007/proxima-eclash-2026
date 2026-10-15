@@ -1,14 +1,10 @@
-import { getSheetsClient, deleteRegistration, quoteSheetRange } from '../../_lib/googleSheets.js';
+import { getSupabaseClient, getAllRegistrations, deleteRegistration } from '../../_lib/supabase.js';
 import { verifyAdminAuth } from '../../_lib/auth.js';
-
-const DEFAULT_SHEET_TITLE = 'E-Clash';
-
-// No dummy registrations. Only live rows from Google Sheets are returned.
 
 /**
  * Vercel Serverless Function: /api/admin/registrations
- * - GET: Returns all registered players with summary counts.
- * - DELETE: Permanently deletes a player registration row.
+ * - GET: Returns all registered players with summary counts from Supabase.
+ * - DELETE: Permanently deletes a player registration row from Supabase.
  */
 export default async function handler(req, res) {
   // CORS
@@ -26,9 +22,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: authCheck.error || 'Unauthorized: Admin authentication token required.' });
   }
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetsClient = getSheetsClient();
-  const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || DEFAULT_SHEET_TITLE;
+  const supabase = getSupabaseClient();
 
   // ==========================================
   // DELETE: Delete a player registration
@@ -40,12 +34,8 @@ export default async function handler(req, res) {
     }
 
     try {
-      if (sheetsClient && spreadsheetId) {
-        const result = await deleteRegistration(sheetsClient, spreadsheetId, sheetTitle, registrationId);
-        if (!result.success) {
-          return res.status(404).json({ error: result.error || 'Registration not found.' });
-        }
-
+      if (supabase) {
+        const result = await deleteRegistration(supabase, registrationId);
         return res.status(200).json({
           success: true,
           message: `Registration '${registrationId}' successfully deleted.`,
@@ -53,10 +43,8 @@ export default async function handler(req, res) {
         });
       }
 
-      // Simulated deletion when Google Sheets not configured
-      return res.status(200).json({
-        success: true,
-        message: `Registration '${registrationId}' deleted (simulated).`,
+      return res.status(503).json({
+        error: 'Supabase database client unavailable.',
       });
     } catch (error) {
       console.error('[Admin API] Error deleting registration:', error);
@@ -73,38 +61,9 @@ export default async function handler(req, res) {
 
   try {
     let registrations = [];
-    let isMock = false;
 
-    if (sheetsClient && spreadsheetId) {
-      // Read all rows from sheet (skipping row 1 headers)
-      const sheetRes = await sheetsClient.spreadsheets.values.get({
-        spreadsheetId,
-        range: quoteSheetRange(sheetTitle, 'A2:M'),
-      });
-
-      const rows = sheetRes.data.values || [];
-      registrations = rows.map((row) => ({
-        registrationId: row[0] || '',
-        registeredAt: row[1] || '',
-        registeredAtIST: row[2] || '',
-        fullName: row[3] || '',
-        phone: row[4] || '',
-        campusId: row[5] || '',
-        campusEmail: row[6] || '',
-        year: row[7] || '',
-        game: row[8] || '',
-        status: row[9] || 'CONFIRMED',
-        checkedIn: String(row[10] || '').toUpperCase() === 'TRUE',
-        checkedInAt: row[11] || '',
-        checkedInBy: row[12] || '',
-        paymentUtr: row[13] || '',
-        paymentScreenshot: row[14] || '',
-        paymentStatus: row[15] || 'PENDING',
-        paidAt: row[16] || '',
-      }));
-    } else {
-      registrations = [];
-      isMock = false;
+    if (supabase) {
+      registrations = await getAllRegistrations(supabase);
     }
 
     // Compute aggregate statistics
@@ -128,8 +87,7 @@ export default async function handler(req, res) {
       success: true,
       stats,
       registrations,
-      isMock,
-      spreadsheetId: spreadsheetId || null,
+      isMock: false,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

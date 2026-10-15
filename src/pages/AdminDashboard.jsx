@@ -906,7 +906,7 @@ export const AdminDashboard = ({ onBack }) => {
                   )}
 
                   <p className="text-[11px] text-slate-400 mb-6">
-                    This row will be deleted from the Google Sheet. The player&apos;s ticket QR code will become invalid immediately.
+                    This registration will be permanently deleted from Supabase. The player&apos;s ticket QR code will become invalid immediately.
                   </p>
 
                   <div className="flex items-center justify-end gap-3">
@@ -960,23 +960,16 @@ export const AdminDashboard = ({ onBack }) => {
           </div>
         )}
 
-        {/* Connected Google Sheets Info Banner */}
-        {spreadsheetId && (
-          <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs flex items-center justify-between">
-            <span className="font-mono">
-              Live Google Sheets Synchronization Active: <code>{spreadsheetId}</code>
-            </span>
-            <a
-              href={`https://docs.google.com/spreadsheets/d/1zXmDtU8GpNxrxByklbvSgZArBcmHwJdCbro0JQDLIcs/edit?gid=330608042#gid=330608042`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-cyan-300 hover:text-cyan-100 font-bold underline ml-2"
-            >
-              <span>Open in Google Sheets</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+        {/* Connected Supabase Database Info Banner */}
+        <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs flex items-center justify-between">
+          <div className="flex items-center gap-2 font-mono">
+            <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span>Supabase PostgreSQL Live Database Active</span>
           </div>
-        )}
+          <span className="text-slate-400 font-mono text-[11px]">
+            High-Performance Real-Time Storage
+          </span>
+        </div>
       </main>
     </div>
   );

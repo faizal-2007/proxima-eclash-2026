@@ -5,10 +5,9 @@ import {
   appendPaymentAuditEvent,
   appendPaymentRegistration,
   checkPaymentDuplicates,
-  ensureSheetInitialized,
-  getSheetsClient,
-  removePaymentRegistration,
-} from '../../_lib/googleSheets.js';
+  getSupabaseClient,
+  deleteRegistration,
+} from '../../_lib/supabase.js';
 import { checkRateLimit, serializeRegistrationSubmission } from '../../_lib/rateLimit.js';
 import { decodePaymentImage, validatePaymentFields } from '../../_lib/paymentValidation.js';
 import { signQrToken } from '../../_lib/crypto.js';
@@ -95,28 +94,18 @@ export default async function handler(req, res) {
       code: 'PAYMENT_STORAGE_UNAVAILABLE',
     });
   }
+  const supabase = getSupabaseClient();
   if (
-    !process.env.GOOGLE_SHEET_ID ||
+    !supabase ||
     !process.env.QR_SECRET ||
     process.env.QR_SECRET.trim().length < 32 ||
     /proxima-eclash-qr-secret-key/i.test(process.env.QR_SECRET)
   ) {
     return res.status(503).json({
-      error: 'Registration storage or ticket signing is not configured yet. Please try again later.',
+      error: 'Registration storage (Supabase) or ticket signing is not configured yet. Please try again later.',
       code: 'REGISTRATION_STORAGE_UNAVAILABLE',
     });
   }
-
-  const sheetsClient = getSheetsClient();
-  if (!sheetsClient) {
-    return res.status(503).json({
-      error: 'Registration storage is not configured yet. Please try again later.',
-      code: 'REGISTRATION_STORAGE_UNAVAILABLE',
-    });
-  }
-
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || DEFAULT_SHEET_TITLE;
 
   return serializeRegistrationSubmission(async () => {
     let screenshotUrl = '';
@@ -153,7 +142,7 @@ export default async function handler(req, res) {
           if (!isReservationConflict(error)) throw error;
           if (reservation.conflictField === 'utr') {
             try {
-              await appendPaymentAuditEvent(sheetsClient, spreadsheetId, {
+              await appendPaymentAuditEvent(supabase, {
                 event: 'DUPLICATE_UTR_BLOCKED',
                 campusId: validation.values.campusId,
                 utr: validation.values.utr,
@@ -179,11 +168,8 @@ export default async function handler(req, res) {
         }
       }
 
-      await ensureSheetInitialized(sheetsClient, spreadsheetId, sheetTitle);
       const duplicate = await checkPaymentDuplicates(
-        sheetsClient,
-        spreadsheetId,
-        sheetTitle,
+        supabase,
         validation.values.campusId,
         validation.values.campusEmail,
         validation.values.utr
@@ -192,7 +178,7 @@ export default async function handler(req, res) {
       if (duplicate.isDuplicate) {
         if (duplicate.conflictField === 'utr') {
           try {
-            await appendPaymentAuditEvent(sheetsClient, spreadsheetId, {
+            await appendPaymentAuditEvent(supabase, {
               event: 'DUPLICATE_UTR_BLOCKED',
               campusId: validation.values.campusId,
               utr: validation.values.utr,
@@ -228,7 +214,7 @@ export default async function handler(req, res) {
       });
       screenshotUrl = blob.url;
 
-      const registration = await appendPaymentRegistration(sheetsClient, spreadsheetId, sheetTitle, {
+      const registration = await appendPaymentRegistration(supabase, {
         ...validation.values,
         screenshotUrl,
         selection: validation.values.selection.join(', '),
@@ -236,7 +222,7 @@ export default async function handler(req, res) {
       registrationId = registration.registrationId;
       rowStored = true;
 
-      await appendPaymentAuditEvent(sheetsClient, spreadsheetId, {
+      await appendPaymentAuditEvent(supabase, {
         timestamp: registration.registeredAt,
         event: 'SUBMITTED',
         registrationId,
@@ -272,7 +258,7 @@ export default async function handler(req, res) {
 
       if (rowStored && registrationId) {
         try {
-          await removePaymentRegistration(sheetsClient, spreadsheetId, sheetTitle, registrationId);
+          await deleteRegistration(supabase, registrationId);
         } catch (rollbackError) {
           rollbackSucceeded = false;
           console.error('[Payment Registration] Could not roll back the appended registration row:', rollbackError);

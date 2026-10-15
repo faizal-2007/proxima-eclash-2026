@@ -1,5 +1,5 @@
 import { verifyVolunteerJwt } from '../../_lib/auth.js';
-import { getSheetsClient, getTournamentStats } from '../../_lib/googleSheets.js';
+import { getSupabaseClient, getTournamentStats } from '../../_lib/supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,15 +27,11 @@ export default async function handler(req, res) {
   const volunteer = authVerification.payload;
 
   try {
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const sheetsClient = getSheetsClient();
-    const sheetTitle = process.env.GOOGLE_SHEET_TAB_NAME || 'E-Clash';
+    const supabase = getSupabaseClient();
 
-    if (sheetsClient && spreadsheetId) {
+    if (supabase) {
       const stats = await getTournamentStats(
-        sheetsClient,
-        spreadsheetId,
-        sheetTitle,
+        supabase,
         volunteer.volunteerId || volunteer.username
       );
 
@@ -47,7 +43,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Fallback if sheets not configured or empty: return 0 counts
     return res.status(200).json({
       success: true,
       stats: {
@@ -58,7 +53,9 @@ export default async function handler(req, res) {
           'Free Fire': { total: 0, checkedIn: 0, pending: 0 },
           'BGMI': { total: 0, checkedIn: 0, pending: 0 },
           'Mini Militia': { total: 0, checkedIn: 0, pending: 0 },
-          'Valorant': { total: 0, checkedIn: 0, pending: 0 },
+          'eFootball': { total: 0, checkedIn: 0, pending: 0 },
+          'Ludo': { total: 0, checkedIn: 0, pending: 0 },
+          'Carrom': { total: 0, checkedIn: 0, pending: 0 },
         },
         volunteerScanCount: 0,
       },

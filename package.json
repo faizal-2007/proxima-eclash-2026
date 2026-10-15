@@ -8,18 +8,17 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:api": "node test-api.js",
-    "test:payment": "node test-payment-api.js",
-    "verify:sheets": "node scripts/verify-sheets.js",
-    "seed:volunteers": "node scripts/seed-volunteers.js"
+    "verify:supabase": "node scripts/verify-supabase.js",
+    "seed:volunteers": "node scripts/seed-volunteers.js",
+    "clear:logs": "node scripts/clear-checkin-logs.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "@vercel/blob": "^2.8.2",
     "autoprefixer": "^10.6.1",
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^14.1.0",
-    "googleapis": "^185.0.0",
     "html5-qrcode": "^2.3.8",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.55.0",
