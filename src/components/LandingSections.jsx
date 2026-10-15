@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   Mail,
+  Phone,
   Zap,
   Target,
 } from 'lucide-react';
@@ -321,10 +322,36 @@ export const LandingSections = ({ onSelectTrack }) => {
                 Have questions regarding team registrations, custom game rules, or match scheduling? Contact the student tournament admins directly.
               </p>
               
-              <div className="space-y-2 text-xs sm:text-sm text-slate-200 font-rajdhani">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-cyan-400 shrink-0" />
-                  <span className="break-all">{EVENT_METADATA.contact.email}</span>
+              <div className="space-y-3 text-xs sm:text-sm font-rajdhani">
+                {/* Tournament Admin */}
+                <div className="p-3 rounded-xl bg-white/5 border border-cyan-500/20 space-y-1">
+                  <div className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold font-mono">Tournament Admin</div>
+                  <div className="font-semibold text-white">{EVENT_METADATA.contact.esportsLead}</div>
+                  <div className="flex flex-wrap gap-3 text-slate-300">
+                    <a href={`tel:${EVENT_METADATA.contact.esportsLeadPhone}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
+                      <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      {EVENT_METADATA.contact.esportsLeadPhone}
+                    </a>
+                    <a href={`mailto:${EVENT_METADATA.contact.esportsLeadEmail}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors break-all">
+                      <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      {EVENT_METADATA.contact.esportsLeadEmail}
+                    </a>
+                  </div>
+                </div>
+                {/* Technical Admin */}
+                <div className="p-3 rounded-xl bg-white/5 border border-indigo-500/20 space-y-1">
+                  <div className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold font-mono">Technical Admin</div>
+                  <div className="font-semibold text-white">{EVENT_METADATA.contact.technicalAdmin}</div>
+                  <div className="flex flex-wrap gap-3 text-slate-300">
+                    <a href={`tel:${EVENT_METADATA.contact.technicalAdminPhone}`} className="flex items-center gap-1 hover:text-indigo-400 transition-colors">
+                      <Phone className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      {EVENT_METADATA.contact.technicalAdminPhone}
+                    </a>
+                    <a href={`mailto:${EVENT_METADATA.contact.technicalAdminEmail}`} className="flex items-center gap-1 hover:text-indigo-400 transition-colors break-all">
+                      <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      {EVENT_METADATA.contact.technicalAdminEmail}
+                    </a>
+                  </div>
                 </div>
                 <div className="flex items-start gap-2 pt-1 text-xs text-slate-400">
                   <MapPin className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
