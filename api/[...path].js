@@ -35,12 +35,40 @@ const handlers = {
 };
 
 export default function handler(req, res) {
-  const pathname = new URL(req.url || '/', 'http://localhost').pathname;
-  const route = pathname.replace(/^\/api\/?/, '').replace(/\/$/, '');
+  let route = '';
+
+  // 1. Try Vercel dynamic catch-all route parameter (req.query.path)
+  if (req.query?.path) {
+    if (Array.isArray(req.query.path)) {
+      route = req.query.path.join('/');
+    } else if (typeof req.query.path === 'string') {
+      route = req.query.path;
+    }
+  }
+
+  // 2. If route is empty or literal '[...path]', inspect req.url
+  if (!route || route === '[...path]') {
+    const rawUrl = req.url || '/';
+    const pathname = new URL(rawUrl, 'http://localhost').pathname;
+    const clean = pathname.replace(/^\/api\/?/, '').replace(/\/$/, '');
+    if (clean && clean !== '[...path]') {
+      route = clean;
+    }
+  }
+
+  // 3. Fall back to Vercel headers if available
+  if (!route || route === '[...path]') {
+    const matched = req.headers?.['x-matched-path'] || req.headers?.['x-forwarded-uri'] || '';
+    const clean = matched.replace(/^\/api\/?/, '').replace(/\/$/, '');
+    if (clean && clean !== '[...path]') {
+      route = clean;
+    }
+  }
+
   const routeHandler = handlers[route];
 
   if (!routeHandler) {
-    return res.status(404).json({ error: `API route ${pathname} not found.` });
+    return res.status(404).json({ error: `API route /api/${route || '[empty]'} not found.` });
   }
 
   return routeHandler(req, res);

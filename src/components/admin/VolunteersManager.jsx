@@ -64,14 +64,14 @@ export function VolunteersManager({ token }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
         setVolunteers(data.volunteers || []);
       } else {
-        setErrorMsg(data.error || 'Failed to load volunteers.');
+        setErrorMsg(data?.error || `Server error (${res.status}): Failed to load volunteers.`);
       }
-    } catch (_err) {
-      setErrorMsg('Network error fetching volunteers list.');
+    } catch (err) {
+      setErrorMsg(err.message || 'Network error fetching volunteers list.');
     } finally {
       setIsLoading(false);
     }
@@ -104,8 +104,8 @@ export function VolunteersManager({ token }) {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
         setSuccessMsg(`Volunteer '${addName}' created successfully.`);
         setIsAddModalOpen(false);
         setAddName('');
@@ -113,10 +113,10 @@ export function VolunteersManager({ token }) {
         setAddPassword('');
         fetchVolunteers();
       } else {
-        setErrorMsg(data.error || 'Failed to create volunteer.');
+        setErrorMsg(data?.error || `Failed to create volunteer (HTTP ${res.status}).`);
       }
-    } catch {
-      setErrorMsg('Network error while creating volunteer.');
+    } catch (err) {
+      setErrorMsg(err.message || 'Network error while creating volunteer.');
     } finally {
       setIsSubmittingAdd(false);
     }
@@ -156,16 +156,16 @@ export function VolunteersManager({ token }) {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
         setSuccessMsg(`Volunteer '${editName}' updated successfully.`);
         setEditTarget(null);
         fetchVolunteers();
       } else {
-        setErrorMsg(data.error || 'Failed to update volunteer.');
+        setErrorMsg(data?.error || `Failed to update volunteer (HTTP ${res.status}).`);
       }
-    } catch {
-      setErrorMsg('Network error while updating volunteer.');
+    } catch (err) {
+      setErrorMsg(err.message || 'Network error while updating volunteer.');
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -185,16 +185,16 @@ export function VolunteersManager({ token }) {
         },
       });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
         setSuccessMsg(`Volunteer '${deleteTarget.name}' deleted.`);
         setDeleteTarget(null);
         fetchVolunteers();
       } else {
-        setErrorMsg(data.error || 'Failed to delete volunteer.');
+        setErrorMsg(data?.error || `Failed to delete volunteer (HTTP ${res.status}).`);
       }
-    } catch {
-      setErrorMsg('Network error while deleting volunteer.');
+    } catch (err) {
+      setErrorMsg(err.message || 'Network error while deleting volunteer.');
     }
   };
 
