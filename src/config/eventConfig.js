@@ -16,10 +16,6 @@ export const EVENT_METADATA = {
   totalPrizePool: "₹7,000",
   contact: {
     email: "eclash2026@yenepoya.edu.in",
-    phone: "+91 98765 43211",
-    esportsLead: "Alan Ray",
-    esportsLeadPhone: "+91 98765 43211",
-    esportsLeadEmail: "eclash2026@yenepoya.edu.in",
     technicalAdmin: "Mohammed Faizal",
     technicalAdminPhone: "+91 99001 66140",
     technicalAdminEmail: "faizalmdg.2007@gmail.com",

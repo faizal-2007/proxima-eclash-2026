@@ -130,9 +130,6 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
                 </a>
               </div>
               <div className="text-[11px] text-slate-400 pt-0.5 pl-5">
-                Tournament Admin: {EVENT_METADATA.contact.esportsLead} · {EVENT_METADATA.contact.esportsLeadPhone}
-              </div>
-              <div className="text-[11px] text-slate-400 pl-5">
                 Technical Admin: {EVENT_METADATA.contact.technicalAdmin} · {EVENT_METADATA.contact.technicalAdminPhone}
               </div>
               <div className="pt-2 flex flex-wrap gap-2">

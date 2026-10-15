@@ -323,32 +323,17 @@ export const LandingSections = ({ onSelectTrack }) => {
               </p>
               
               <div className="space-y-3 text-xs sm:text-sm font-rajdhani">
-                {/* Tournament Admin */}
+                {/* Technical Admin only */}
                 <div className="p-3 rounded-xl bg-white/5 border border-cyan-500/20 space-y-1">
-                  <div className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold font-mono">Tournament Admin</div>
-                  <div className="font-semibold text-white">{EVENT_METADATA.contact.esportsLead}</div>
-                  <div className="flex flex-wrap gap-3 text-slate-300">
-                    <a href={`tel:${EVENT_METADATA.contact.esportsLeadPhone}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
-                      <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      {EVENT_METADATA.contact.esportsLeadPhone}
-                    </a>
-                    <a href={`mailto:${EVENT_METADATA.contact.esportsLeadEmail}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors break-all">
-                      <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      {EVENT_METADATA.contact.esportsLeadEmail}
-                    </a>
-                  </div>
-                </div>
-                {/* Technical Admin */}
-                <div className="p-3 rounded-xl bg-white/5 border border-indigo-500/20 space-y-1">
-                  <div className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold font-mono">Technical Admin</div>
+                  <div className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold font-mono">Technical Admin</div>
                   <div className="font-semibold text-white">{EVENT_METADATA.contact.technicalAdmin}</div>
                   <div className="flex flex-wrap gap-3 text-slate-300">
-                    <a href={`tel:${EVENT_METADATA.contact.technicalAdminPhone}`} className="flex items-center gap-1 hover:text-indigo-400 transition-colors">
-                      <Phone className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <a href={`tel:${EVENT_METADATA.contact.technicalAdminPhone}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
+                      <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                       {EVENT_METADATA.contact.technicalAdminPhone}
                     </a>
-                    <a href={`mailto:${EVENT_METADATA.contact.technicalAdminEmail}`} className="flex items-center gap-1 hover:text-indigo-400 transition-colors break-all">
-                      <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <a href={`mailto:${EVENT_METADATA.contact.technicalAdminEmail}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors break-all">
+                      <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                       {EVENT_METADATA.contact.technicalAdminEmail}
                     </a>
                   </div>
