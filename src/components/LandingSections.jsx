@@ -332,10 +332,6 @@ export const LandingSections = ({ onSelectTrack }) => {
                       <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                       {EVENT_METADATA.contact.technicalAdminPhone}
                     </a>
-                    <a href={`mailto:${EVENT_METADATA.contact.technicalAdminEmail}`} className="flex items-center gap-1 hover:text-cyan-400 transition-colors break-all">
-                      <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      {EVENT_METADATA.contact.technicalAdminEmail}
-                    </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 pt-1 text-xs text-slate-400">

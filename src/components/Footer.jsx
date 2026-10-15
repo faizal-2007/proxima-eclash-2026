@@ -123,13 +123,7 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
               Connect & Support
             </div>
             <div className="space-y-2 text-xs text-slate-300 font-rajdhani">
-              <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                <a href={`mailto:${EVENT_METADATA.contact.email}`} className="hover:text-white">
-                  {EVENT_METADATA.contact.email}
-                </a>
-              </div>
-              <div className="text-[11px] text-slate-400 pt-0.5 pl-5">
+              <div className="text-[11px] text-slate-400">
                 Technical Admin: {EVENT_METADATA.contact.technicalAdmin} · {EVENT_METADATA.contact.technicalAdminPhone}
               </div>
               <div className="pt-2 flex flex-wrap gap-2">
