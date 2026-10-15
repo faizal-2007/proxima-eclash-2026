@@ -76,20 +76,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // Mock dev fallback
-    const nowIso = new Date().toISOString();
-    return res.status(200).json({
-      success: true,
-      status: 'checkedIn',
-      participant: {
-        registrationId,
-        checkedIn: true,
-        checkedInAt: nowIso,
-        checkedInBy: `${volunteer.name} (${volunteer.username})`,
-      },
-      message: override
-        ? `Station override confirmed for ${registrationId}.`
-        : `Check-in confirmed for ${registrationId}.`,
+    return res.status(503).json({
+      success: false,
+      error: 'Google Sheets database connection unavailable. Check-in cannot be recorded.',
     });
   } catch (error) {
     console.error('[Volunteer Checkin API] Error checking in:', error);

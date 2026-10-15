@@ -43,23 +43,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Mock logs fallback
+    // No logs fallback: return empty list
     return res.status(200).json({
       success: true,
-      count: 1,
-      logs: [
-        {
-          id: 'log-1',
-          timestamp: new Date().toISOString(),
-          registrationId: 'ECL-2026-0001',
-          game: 'BGMI',
-          result: 'CHECKED_IN',
-          volunteerId: volunteer.volunteerId || volunteer.username,
-          volunteerName: volunteer.name || volunteer.username,
-          station: 'All',
-          note: 'Verified in simulated mode',
-        },
-      ],
+      count: 0,
+      logs: [],
     });
   } catch (error) {
     console.error('[Volunteer History API] Error fetching logs:', error);

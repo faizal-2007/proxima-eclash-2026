@@ -507,20 +507,18 @@ export const AdminDashboard = ({ onBack }) => {
         <div className="flex items-center gap-2.5 border-b border-white/10 pb-4 overflow-x-auto">
           <button
             onClick={() => setActiveTab('REGISTRATIONS')}
-            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === 'REGISTRATIONS'
+            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'REGISTRATIONS'
                 ? 'bg-cyan-500 text-black shadow-neon-blue'
                 : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-            }`}
+              }`}
           >
             <Users className="w-4 h-4" />
             <span>Player Registrations</span>
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-                activeTab === 'REGISTRATIONS'
+              className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${activeTab === 'REGISTRATIONS'
                   ? 'bg-black/20 text-black font-bold'
                   : 'bg-white/10 text-cyan-400'
-              }`}
+                }`}
             >
               {stats?.total ?? registrations.length}
             </span>
@@ -528,11 +526,10 @@ export const AdminDashboard = ({ onBack }) => {
 
           <button
             onClick={() => setActiveTab('VOLUNTEERS')}
-            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === 'VOLUNTEERS'
+            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'VOLUNTEERS'
                 ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md'
                 : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-            }`}
+              }`}
           >
             <ShieldCheck className="w-4 h-4 text-cyan-400" />
             <span>Volunteers & Passwords</span>
@@ -540,11 +537,10 @@ export const AdminDashboard = ({ onBack }) => {
 
           <button
             onClick={() => setActiveTab('CHECKINS')}
-            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === 'CHECKINS'
+            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'CHECKINS'
                 ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-md'
                 : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-            }`}
+              }`}
           >
             <History className="w-4 h-4 text-fuchsia-400" />
             <span>Check-in Audit Ledger</span>
@@ -556,153 +552,153 @@ export const AdminDashboard = ({ onBack }) => {
           <div className="space-y-8 animate-in fade-in duration-200">
             {/* KPI Cards Row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-3.5">
-          {/* Card 1: Total Registrations */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-cyan-500/30 shadow-[0_0_20px_rgba(0,229,255,0.1)] flex flex-col justify-between col-span-2 sm:col-span-1">
-            <div className="flex items-center justify-between text-cyan-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                Total Players
-              </span>
-              <Users className="w-4 h-4" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.total ?? registrations.length}
-            </div>
-            <div className="text-[10px] text-cyan-300 font-mono mt-1">Confirmed Arena Entries</div>
-          </div>
+              {/* Card 1: Total Registrations */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-cyan-500/30 shadow-[0_0_20px_rgba(0,229,255,0.1)] flex flex-col justify-between col-span-2 sm:col-span-1">
+                <div className="flex items-center justify-between text-cyan-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    Total Players
+                  </span>
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.total ?? registrations.length}
+                </div>
+                <div className="text-[10px] text-cyan-300 font-mono mt-1">Confirmed Arena Entries</div>
+              </div>
 
-          {/* Card 2: Free Fire */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-amber-500/30 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-amber-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                Free Fire
-              </span>
-              <Flame className="w-4 h-4" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.byGame?.['Free Fire'] ?? registrations.filter((r) => r.game === 'Free Fire').length}
-            </div>
-            <div className="text-[10px] text-amber-300 font-mono mt-1">Battle Royale</div>
-          </div>
+              {/* Card 2: Free Fire */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-amber-500/30 shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between text-amber-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    Free Fire
+                  </span>
+                  <Flame className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.byGame?.['Free Fire'] ?? registrations.filter((r) => r.game === 'Free Fire').length}
+                </div>
+                <div className="text-[10px] text-amber-300 font-mono mt-1">Battle Royale</div>
+              </div>
 
-          {/* Card 3: BGMI */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-blue-500/30 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-blue-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                BGMI
-              </span>
-              <Crosshair className="w-4 h-4" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.byGame?.BGMI ?? registrations.filter((r) => r.game === 'BGMI').length}
-            </div>
-            <div className="text-[10px] text-blue-300 font-mono mt-1">Battle Royale</div>
-          </div>
+              {/* Card 3: BGMI */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-blue-500/30 shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between text-blue-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    BGMI
+                  </span>
+                  <Crosshair className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.byGame?.BGMI ?? registrations.filter((r) => r.game === 'BGMI').length}
+                </div>
+                <div className="text-[10px] text-blue-300 font-mono mt-1">Battle Royale</div>
+              </div>
 
-          {/* Card 4: Mini Militia */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-purple-500/30 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-purple-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                Mini Militia
-              </span>
-              <Gamepad2 className="w-4 h-4" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.byGame?.['Mini Militia'] ?? registrations.filter((r) => r.game === 'Mini Militia').length}
-            </div>
-            <div className="text-[10px] text-purple-300 font-mono mt-1">Deathmatch FFA</div>
-          </div>
+              {/* Card 4: Mini Militia */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-purple-500/30 shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between text-purple-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    Mini Militia
+                  </span>
+                  <Gamepad2 className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.byGame?.['Mini Militia'] ?? registrations.filter((r) => r.game === 'Mini Militia').length}
+                </div>
+                <div className="text-[10px] text-purple-300 font-mono mt-1">Deathmatch FFA</div>
+              </div>
 
-          {/* Card 5: eFootball */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-emerald-500/30 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-emerald-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                eFootball
-              </span>
-              <Trophy className="w-4 h-4" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.byGame?.eFootball ?? registrations.filter((r) => r.game === 'eFootball').length}
-            </div>
-            <div className="text-[10px] text-emerald-300 font-mono mt-1">1v1 Mobile Sim</div>
-          </div>
+              {/* Card 5: eFootball */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-emerald-500/30 shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between text-emerald-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    eFootball
+                  </span>
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.byGame?.eFootball ?? registrations.filter((r) => r.game === 'eFootball').length}
+                </div>
+                <div className="text-[10px] text-emerald-300 font-mono mt-1">1v1 Mobile Sim</div>
+              </div>
 
-          {/* Card 6: Ludo */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-rose-500/30 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-rose-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                Ludo
-              </span>
-              <Dices className="w-4 h-4" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.byGame?.Ludo ?? registrations.filter((r) => r.game === 'Ludo').length}
-            </div>
-            <div className="text-[10px] text-rose-300 font-mono mt-1">4-Player Classic</div>
-          </div>
+              {/* Card 6: Ludo */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-rose-500/30 shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between text-rose-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    Ludo
+                  </span>
+                  <Dices className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.byGame?.Ludo ?? registrations.filter((r) => r.game === 'Ludo').length}
+                </div>
+                <div className="text-[10px] text-rose-300 font-mono mt-1">4-Player Classic</div>
+              </div>
 
-          {/* Card 7: Carrom */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-cyan-500/30 shadow-sm flex flex-col justify-between col-span-2 sm:col-span-1">
-            <div className="flex items-center justify-between text-cyan-400 mb-2">
-              <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                Carrom
-              </span>
-              <Target className="w-4 h-4" />
+              {/* Card 7: Carrom */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-cyan-500/30 shadow-sm flex flex-col justify-between col-span-2 sm:col-span-1">
+                <div className="flex items-center justify-between text-cyan-400 mb-2">
+                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
+                    Carrom
+                  </span>
+                  <Target className="w-4 h-4" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
+                  {stats?.byGame?.Carrom ?? registrations.filter((r) => r.game === 'Carrom').length}
+                </div>
+                <div className="text-[10px] text-cyan-300 font-mono mt-1">1v1 Disc Pool</div>
+              </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-              {stats?.byGame?.Carrom ?? registrations.filter((r) => r.game === 'Carrom').length}
+
+            {/* Filter and Search Bar */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#070b29] border border-white/10 flex flex-col md:flex-row gap-3 items-center justify-between">
+              {/* Search Box */}
+              <div className="relative w-full md:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by Name, ID, Phone..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/15 bg-black/40 text-sm text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder:text-slate-500"
+                />
+              </div>
+
+              {/* Filter Dropdowns */}
+              <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                {/* Game Filter */}
+                <select
+                  value={selectedGameFilter}
+                  onChange={(e) => setSelectedGameFilter(e.target.value)}
+                  className="px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-200 text-xs font-semibold focus:border-cyan-400"
+                >
+                  <option value="ALL">All Disciplines (6 Games)</option>
+                  <option value="Free Fire">Free Fire (BR)</option>
+                  <option value="BGMI">BGMI (BR)</option>
+                  <option value="Mini Militia">Mini Militia (FFA)</option>
+                  <option value="eFootball">eFootball (1v1)</option>
+                  <option value="Ludo">Ludo (4P Board)</option>
+                  <option value="Carrom">Carrom (1v1 Disc)</option>
+                </select>
+
+                {/* Year Filter */}
+                <select
+                  value={selectedYearFilter}
+                  onChange={(e) => setSelectedYearFilter(e.target.value)}
+                  className="px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-200 text-xs font-semibold focus:border-cyan-400"
+                >
+                  <option value="ALL">All Academic Years</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                </select>
+
+                {/* Showing count */}
+                <div className="text-xs text-slate-400 font-mono px-2">
+                  Showing <strong>{filteredRegistrations.length}</strong> of <strong>{registrations.length}</strong>
+                </div>
+              </div>
             </div>
-            <div className="text-[10px] text-cyan-300 font-mono mt-1">1v1 Disc Pool</div>
-          </div>
-        </div>
-
-        {/* Filter and Search Bar */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#070b29] border border-white/10 flex flex-col md:flex-row gap-3 items-center justify-between">
-          {/* Search Box */}
-          <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Name, ID, Phone..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/15 bg-black/40 text-sm text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder:text-slate-500"
-            />
-          </div>
-
-          {/* Filter Dropdowns */}
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-            {/* Game Filter */}
-            <select
-              value={selectedGameFilter}
-              onChange={(e) => setSelectedGameFilter(e.target.value)}
-              className="px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-200 text-xs font-semibold focus:border-cyan-400"
-            >
-              <option value="ALL">All Disciplines (6 Games)</option>
-              <option value="Free Fire">Free Fire (BR)</option>
-              <option value="BGMI">BGMI (BR)</option>
-              <option value="Mini Militia">Mini Militia (FFA)</option>
-              <option value="eFootball">eFootball (1v1)</option>
-              <option value="Ludo">Ludo (4P Board)</option>
-              <option value="Carrom">Carrom (1v1 Disc)</option>
-            </select>
-
-            {/* Year Filter */}
-            <select
-              value={selectedYearFilter}
-              onChange={(e) => setSelectedYearFilter(e.target.value)}
-              className="px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-200 text-xs font-semibold focus:border-cyan-400"
-            >
-              <option value="ALL">All Academic Years</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-            </select>
-
-            {/* Showing count */}
-            <div className="text-xs text-slate-400 font-mono px-2">
-              Showing <strong>{filteredRegistrations.length}</strong> of <strong>{registrations.length}</strong>
-            </div>
-          </div>
-        </div>
 
             {/* Notifications */}
             {deleteSuccessMsg && (
@@ -787,19 +783,18 @@ export const AdminDashboard = ({ onBack }) => {
                           </td>
                           <td className="py-3 px-4">
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono ${
-                                row.game === 'Free Fire'
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono ${row.game === 'Free Fire'
                                   ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                                   : row.game === 'BGMI'
-                                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                                  : row.game === 'Mini Militia'
-                                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                                  : row.game === 'eFootball'
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                  : row.game === 'Ludo'
-                                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                                  : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                              }`}
+                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                    : row.game === 'Mini Militia'
+                                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                      : row.game === 'eFootball'
+                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        : row.game === 'Ludo'
+                                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                          : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                }`}
                             >
                               <Gamepad2 className="w-3 h-3" />
                               {row.game}
@@ -813,11 +808,10 @@ export const AdminDashboard = ({ onBack }) => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold font-mono ${
-                                    (row.paymentStatus || 'PENDING') === 'PAID'
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold font-mono ${(row.paymentStatus || 'PENDING') === 'PAID'
                                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                                       : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                  }`}
+                                    }`}
                                 >
                                   {row.paymentStatus || 'PENDING'}
                                 </span>
@@ -952,28 +946,28 @@ export const AdminDashboard = ({ onBack }) => {
           </div>
         )}
 
-    {/* TAB 2: VOLUNTEERS & PASSWORDS MANAGER */}
-    {activeTab === 'VOLUNTEERS' && (
-      <div className="animate-in fade-in duration-200">
-        <VolunteersManager token={token} />
-      </div>
-    )}
+        {/* TAB 2: VOLUNTEERS & PASSWORDS MANAGER */}
+        {activeTab === 'VOLUNTEERS' && (
+          <div className="animate-in fade-in duration-200">
+            <VolunteersManager token={token} />
+          </div>
+        )}
 
-    {/* TAB 3: CHECK-INS AUDIT LEDGER */}
-    {activeTab === 'CHECKINS' && (
-      <div className="animate-in fade-in duration-200">
-        <CheckInsViewer token={token} />
-      </div>
-    )}
+        {/* TAB 3: CHECK-INS AUDIT LEDGER */}
+        {activeTab === 'CHECKINS' && (
+          <div className="animate-in fade-in duration-200">
+            <CheckInsViewer token={token} />
+          </div>
+        )}
 
-    {/* Connected Google Sheets Info Banner */}
-    {spreadsheetId && (
+        {/* Connected Google Sheets Info Banner */}
+        {spreadsheetId && (
           <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs flex items-center justify-between">
             <span className="font-mono">
               Live Google Sheets Synchronization Active: <code>{spreadsheetId}</code>
             </span>
             <a
-              href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}`}
+              href={`https://docs.google.com/spreadsheets/d/1zXmDtU8GpNxrxByklbvSgZArBcmHwJdCbro0JQDLIcs/edit?gid=330608042#gid=330608042`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-cyan-300 hover:text-cyan-100 font-bold underline ml-2"

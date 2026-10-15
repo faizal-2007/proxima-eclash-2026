@@ -40,53 +40,29 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       if (sheetsClient && spreadsheetId) {
         const volunteers = await getVolunteers(sheetsClient, spreadsheetId, true);
-        if (volunteers && volunteers.length > 0) {
-          // Sanitize: do not send passwordHash to client
-          const sanitized = volunteers.map((v) => ({
-            volunteerId: v.volunteerId,
-            name: v.name,
-            username: v.username,
-            campusId: v.username,
-            role: v.role || 'volunteer',
-            station: v.station || 'All',
-            active: Boolean(v.active),
-            createdAt: v.createdAt || '',
-          }));
+        const sanitized = (volunteers || []).map((v) => ({
+          volunteerId: v.volunteerId,
+          name: v.name,
+          username: v.username,
+          campusId: v.username,
+          role: v.role || 'volunteer',
+          station: v.station || 'All',
+          active: Boolean(v.active),
+          createdAt: v.createdAt || '',
+        }));
 
-          return res.status(200).json({
-            success: true,
-            count: sanitized.length,
-            volunteers: sanitized,
-          });
-        }
+        return res.status(200).json({
+          success: true,
+          count: sanitized.length,
+          volunteers: sanitized,
+        });
       }
 
-      // Mock fallback
+      // No mock fallback: return empty list
       return res.status(200).json({
         success: true,
-        count: 2,
-        volunteers: [
-          {
-            volunteerId: 'VOL-001',
-            name: 'Alan Ray',
-            username: '11111',
-            campusId: '11111',
-            role: 'volunteer',
-            station: 'All',
-            active: true,
-            createdAt: '2026-10-14T00:00:00.000Z',
-          },
-          {
-            volunteerId: 'VOL-002',
-            name: 'Samir Khan',
-            username: '22222',
-            campusId: '22222',
-            role: 'volunteer',
-            station: 'Free Fire',
-            active: true,
-            createdAt: '2026-10-14T00:00:00.000Z',
-          },
-        ],
+        count: 0,
+        volunteers: [],
       });
     }
 
@@ -152,19 +128,8 @@ export default async function handler(req, res) {
         });
       }
 
-      // Mock creation
-      return res.status(201).json({
-        success: true,
-        message: `Volunteer '${name}' created (simulated).`,
-        volunteer: {
-          volunteerId: `VOL-MOCK-${Date.now().toString().slice(-4)}`,
-          name: name.trim(),
-          username: cleanCampusId,
-          campusId: cleanCampusId,
-          role: 'volunteer',
-          station,
-          active,
-        },
+      return res.status(503).json({
+        error: 'Google Sheets database connection unavailable. Volunteer cannot be created.',
       });
     }
 
@@ -230,9 +195,8 @@ export default async function handler(req, res) {
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Volunteer updated successfully (simulated).',
+      return res.status(503).json({
+        error: 'Google Sheets database connection unavailable. Volunteer cannot be updated.',
       });
     }
 
@@ -258,9 +222,8 @@ export default async function handler(req, res) {
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: `Volunteer '${volunteerId}' deleted (simulated).`,
+      return res.status(503).json({
+        error: 'Google Sheets database connection unavailable. Volunteer cannot be deleted.',
       });
     }
 

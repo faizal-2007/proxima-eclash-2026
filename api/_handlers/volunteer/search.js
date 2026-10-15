@@ -38,35 +38,6 @@ export default async function handler(req, res) {
     let list = [];
     if (sheetsClient && spreadsheetId) {
       list = await getAllRegistrations(sheetsClient, spreadsheetId, sheetTitle);
-    } else {
-      list = [
-        {
-          registrationId: 'ECL-2026-0001',
-          fullName: 'Aarav Patel',
-          phone: '9876543210',
-          campusId: '22222',
-          campusEmail: '22222@yenepoya.edu.in',
-          year: '1st Year',
-          game: 'BGMI',
-          status: 'CONFIRMED',
-          checkedIn: true,
-          checkedInAt: '2026-10-14T05:04:20.178Z',
-          checkedInBy: 'Alan Ray (VOL-001)',
-        },
-        {
-          registrationId: 'ECL-2026-0003',
-          fullName: 'Faizan Ahmed',
-          phone: '9876543212',
-          campusId: '44444',
-          campusEmail: '44444@yenepoya.edu.in',
-          year: '2nd Year',
-          game: 'Free Fire',
-          status: 'CONFIRMED',
-          checkedIn: false,
-          checkedInAt: '',
-          checkedInBy: '',
-        },
-      ];
     }
 
     // Filter results matching query against name, campus ID, phone, email, or registration ID

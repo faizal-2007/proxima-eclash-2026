@@ -71,11 +71,6 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
     }
   };
 
-  const handleFillDemo = (demoUser, demoPass) => {
-    setUsername(demoUser);
-    setPassword(demoPass);
-    setErrorMessage('');
-  };
 
   return (
     <div className="min-h-screen bg-[#05071a] text-slate-100 flex flex-col justify-between p-4 sm:p-6 font-sans relative selection:bg-cyan-500 selection:text-black">
@@ -154,7 +149,7 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
                       setPassword(val);
                     }
                   }}
-                  placeholder="e.g. 11111 or 22222"
+                  placeholder="Enter your Campus ID"
                   required
                   className="w-full pl-10 pr-4 py-3 bg-[#030617] border border-white/15 focus:border-[#00e5ff] focus:ring-2 focus:ring-[#00e5ff]/20 rounded-xl text-white placeholder-slate-500 text-sm outline-none transition-all"
                 />
@@ -214,31 +209,7 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
             </div>
           </form>
 
-          {/* Quick Seed Credentials Box for Verification */}
-          <div className="mt-6 pt-5 border-t border-white/10 text-xs space-y-2">
-            <span className="text-slate-400 block font-semibold text-[11px] uppercase tracking-wider">
-              Quick Test Volunteer Campus IDs:
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <button
-                type="button"
-                onClick={() => handleFillDemo('11111', '11111')}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-colors cursor-pointer"
-              >
-                <div className="font-bold text-cyan-300">Volunteer 1 (Alan Ray)</div>
-                <div className="font-mono text-slate-400 truncate">ID: 11111</div>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => handleFillDemo('22222', '22222')}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-colors cursor-pointer"
-              >
-                <div className="font-bold text-fuchsia-300">Volunteer 2 (Samir Khan)</div>
-                <div className="font-mono text-slate-400 truncate">ID: 22222</div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 

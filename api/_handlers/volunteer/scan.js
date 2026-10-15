@@ -7,35 +7,6 @@ import {
   appendCheckInLog,
 } from '../../_lib/googleSheets.js';
 
-// In-memory fallback dev participants if Google Sheets is not configured
-const MOCK_DEV_PARTICIPANTS = [
-  {
-    registrationId: 'ECL-2026-0001',
-    fullName: 'Rahul Sharma',
-    phone: '9876543210',
-    campusId: '11111',
-    campusEmail: '11111@yenepoya.edu.in',
-    year: '1st Year',
-    game: 'Free Fire',
-    status: 'CONFIRMED',
-    checkedIn: false,
-    checkedInAt: '',
-    checkedInBy: '',
-  },
-  {
-    registrationId: 'ECL-2026-0002',
-    fullName: 'Aarav Patel',
-    phone: '9876543211',
-    campusId: '22222',
-    campusEmail: '22222@yenepoya.edu.in',
-    year: '1st Year',
-    game: 'BGMI',
-    status: 'CONFIRMED',
-    checkedIn: true,
-    checkedInAt: '2026-10-14T08:30:00.000Z',
-    checkedInBy: 'Alan Ray (11111)',
-  },
-];
 
 /**
  * Vercel Serverless Function: POST /api/volunteer/scan
@@ -111,8 +82,6 @@ export default async function handler(req, res) {
 
     if (sheetsClient && spreadsheetId) {
       participant = await findRegistrationById(sheetsClient, spreadsheetId, sheetTitle, registrationId);
-    } else {
-      participant = MOCK_DEV_PARTICIPANTS.find((p) => p.registrationId === registrationId) || null;
     }
 
     if (!participant) {
@@ -183,16 +152,9 @@ export default async function handler(req, res) {
           message: 'Player verified and checked in successfully.',
         });
       } else {
-        // Dev mock fallback
-        participant.checkedIn = true;
-        participant.checkedInAt = new Date().toISOString();
-        participant.checkedInBy = `${volunteer.name} (${volunteer.username})`;
-
-        return res.status(200).json({
-          success: true,
-          status: 'checkedIn',
-          participant,
-          message: 'Player verified and checked in successfully (dev mock).',
+        return res.status(503).json({
+          success: false,
+          error: 'Google Sheets database connection unavailable. Check-in cannot be recorded.',
         });
       }
     }

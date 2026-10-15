@@ -85,7 +85,7 @@ export function ManualSearchModal({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type name, campus ID (e.g. 11111), or phone..."
+              placeholder="Type name, campus ID, or phone..."
               className="w-full pl-10 pr-10 py-3 bg-[#080d2c] border border-white/15 focus:border-cyan-400 rounded-xl text-white placeholder-slate-500 text-sm outline-none transition-colors"
             />
             {query && (

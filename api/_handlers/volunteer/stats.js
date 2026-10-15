@@ -47,20 +47,20 @@ export default async function handler(req, res) {
       });
     }
 
-    // Mock fallback if sheets not configured
+    // Fallback if sheets not configured or empty: return 0 counts
     return res.status(200).json({
       success: true,
       stats: {
-        total: 2,
-        checkedIn: 1,
-        pending: 1,
+        total: 0,
+        checkedIn: 0,
+        pending: 0,
         byGame: {
-          'Free Fire': { total: 1, checkedIn: 0, pending: 1 },
-          'BGMI': { total: 1, checkedIn: 1, pending: 0 },
+          'Free Fire': { total: 0, checkedIn: 0, pending: 0 },
+          'BGMI': { total: 0, checkedIn: 0, pending: 0 },
           'Mini Militia': { total: 0, checkedIn: 0, pending: 0 },
           'Valorant': { total: 0, checkedIn: 0, pending: 0 },
         },
-        volunteerScanCount: 1,
+        volunteerScanCount: 0,
       },
       station: volunteer.station || 'All',
       timestamp: new Date().toISOString(),

@@ -10,45 +10,6 @@ import {
   signVolunteerToken,
 } from '../../_lib/auth.js';
 
-/**
- * In-memory fallback dev volunteers when Google Sheets is not configured or in offline dev testing.
- * Fallback dev volunteers (Campus ID is both username and password, equal authority):
- * - 11111: "11111"
- * - 22222: "22222"
- * - 33333: "33333" (inactive)
- */
-const MOCK_DEV_VOLUNTEERS = [
-  {
-    volunteerId: 'VOL-001',
-    name: 'Alan Ray',
-    username: '11111',
-    passwordHash: '$2b$10$35JKrSRlGms0kS8Qa1Sd4uMojKFxMLq3qpH830OeztvHq4xdlFErW', // 11111
-    role: 'volunteer',
-    station: 'All',
-    active: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    volunteerId: 'VOL-002',
-    name: 'Samir Khan',
-    username: '22222',
-    passwordHash: '$2b$10$QtBa455abpVslyb2thsgWeMjkMEmo8DBk5hvd3bjKQVUkwPwdZ17K', // 22222
-    role: 'volunteer',
-    station: 'BGMI',
-    active: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    volunteerId: 'VOL-003',
-    name: 'Rohan Gupta',
-    username: '33333',
-    passwordHash: '$2b$10$kpJHjf5AE4/1nhsuY4IrQOz7U.XZFpqoSWiQpSU1wpEvhGvocZtES', // 33333
-    role: 'volunteer',
-    station: 'Free Fire',
-    active: false,
-    createdAt: new Date().toISOString(),
-  },
-];
 
 /**
  * Vercel Serverless Function: POST /api/volunteer/login
@@ -103,11 +64,6 @@ export default async function handler(req, res) {
 
     if (sheetsClient && spreadsheetId) {
       volunteer = await getVolunteerByUsername(sheetsClient, spreadsheetId, cleanUsername);
-    }
-    
-    if (!volunteer) {
-      // Development / default roster fallback
-      volunteer = MOCK_DEV_VOLUNTEERS.find((v) => v.username === cleanUsername) || null;
     }
 
     // 3. Verify user existence and password hash
