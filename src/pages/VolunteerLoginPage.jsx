@@ -110,7 +110,7 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-400 max-w-xs mx-auto">
-              All volunteers have equal check-in authority. Sign in using your <strong>Campus ID</strong> as your username and password.
+              Sign in using your <strong>Campus ID</strong> or <strong>Volunteer ID</strong> (e.g. 42883 or VOL-001).
             </p>
           </div>
 
@@ -129,7 +129,7 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
                 htmlFor="volunteer-username"
                 className="block text-xs uppercase font-bold tracking-wider text-slate-300 mb-1.5"
               >
-                Volunteer Campus ID
+                Campus ID / Volunteer ID
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -141,15 +141,8 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
                   autoComplete="username"
                   autoCapitalize="none"
                   value={username}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setUsername(val);
-                    // Helpful ease-of-use: if password is empty or was identical to previous username, keep in sync
-                    if (!password || password === username) {
-                      setPassword(val);
-                    }
-                  }}
-                  placeholder="Enter your Campus ID"
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter Campus ID (e.g. 42883) or VOL-001"
                   required
                   className="w-full pl-10 pr-4 py-3 bg-[#030617] border border-white/15 focus:border-[#00e5ff] focus:ring-2 focus:ring-[#00e5ff]/20 rounded-xl text-white placeholder-slate-500 text-sm outline-none transition-all"
                 />
@@ -161,7 +154,7 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
                 htmlFor="volunteer-password"
                 className="block text-xs uppercase font-bold tracking-wider text-slate-300 mb-1.5"
               >
-                Password (Campus ID)
+                Password / Campus ID
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -173,7 +166,7 @@ export function VolunteerLoginPage({ onSuccess, onBackToHome }) {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your Campus ID"
+                  placeholder="Enter your password or Campus ID"
                   required
                   className="w-full pl-10 pr-11 py-3 bg-[#030617] border border-white/15 focus:border-[#00e5ff] focus:ring-2 focus:ring-[#00e5ff]/20 rounded-xl text-white placeholder-slate-500 text-sm outline-none transition-all"
                 />

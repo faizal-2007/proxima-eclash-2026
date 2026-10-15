@@ -64,10 +64,26 @@ export default async function handler(req, res) {
       volunteer = await getVolunteerByUsername(supabase, cleanUsername);
     }
 
-    // 3. Verify user existence and password hash
+    // 3. Verify user existence and password
     let passwordMatches = false;
-    if (volunteer && volunteer.passwordHash) {
-      passwordMatches = await bcrypt.compare(cleanPassword, volunteer.passwordHash);
+    if (volunteer) {
+      if (volunteer.passwordHash) {
+        try {
+          passwordMatches = await bcrypt.compare(cleanPassword, volunteer.passwordHash);
+        } catch {
+          passwordMatches = false;
+        }
+      }
+      // Also allow zero-friction access using Campus ID or Volunteer ID as password
+      if (!passwordMatches) {
+        const lowerPass = cleanPassword.trim().toLowerCase();
+        if (
+          lowerPass === String(volunteer.username || '').toLowerCase() ||
+          lowerPass === String(volunteer.volunteerId || '').toLowerCase()
+        ) {
+          passwordMatches = true;
+        }
+      }
     }
 
     if (!volunteer || !passwordMatches) {

@@ -331,14 +331,14 @@ export async function getVolunteers(client = getSupabaseClient()) {
 /**
  * Find volunteer by username (Campus ID)
  */
-export async function getVolunteerByUsername(client = getSupabaseClient(), username) {
-  if (!client || !username) return null;
+export async function getVolunteerByUsername(client = getSupabaseClient(), usernameOrId) {
+  if (!client || !usernameOrId) return null;
 
-  const cleanUser = String(username).trim().toLowerCase();
+  const clean = String(usernameOrId).trim().toLowerCase();
   const { data, error } = await client
     .from('volunteers')
     .select('*')
-    .eq('username', cleanUser)
+    .or(`username.eq.${clean},volunteer_id.ilike.${clean}`)
     .maybeSingle();
 
   if (error) {
