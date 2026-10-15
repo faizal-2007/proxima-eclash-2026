@@ -596,21 +596,22 @@ export async function getTournamentStats(client = getSupabaseClient(), volunteer
       stats.byYear[p.year] += 1;
     }
 
-    const game = p.game;
-    if (stats.byGame[game]) {
-      stats.byGame[game].total += 1;
-      if (isChecked) {
-        stats.byGame[game].checkedIn += 1;
-      } else {
-        stats.byGame[game].pending += 1;
+    const gameList = (p.game || '').split(',').map((g) => g.trim()).filter(Boolean);
+    gameList.forEach((gameItem) => {
+      const standardName = Object.keys(stats.byGame).find(
+        (k) => k.toLowerCase() === gameItem.toLowerCase()
+      ) || gameItem;
+
+      if (!stats.byGame[standardName]) {
+        stats.byGame[standardName] = { total: 0, checkedIn: 0, pending: 0 };
       }
-    } else if (game) {
-      stats.byGame[game] = {
-        total: 1,
-        checkedIn: isChecked ? 1 : 0,
-        pending: isChecked ? 0 : 1,
-      };
-    }
+      stats.byGame[standardName].total += 1;
+      if (isChecked) {
+        stats.byGame[standardName].checkedIn += 1;
+      } else {
+        stats.byGame[standardName].pending += 1;
+      }
+    });
 
     if (volunteerId && p.checkedInBy) {
       const vTarget = String(volunteerId).toLowerCase();

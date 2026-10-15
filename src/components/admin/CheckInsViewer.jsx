@@ -16,18 +16,23 @@ export function CheckInsViewer({ token }) {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedResult, setSelectedResult] = useState('ALL');
+  const [lastRefreshed, setLastRefreshed] = useState(null);
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/volunteer/history?limit=200&filter=all', {
+      const res = await fetch('/api/admin/checkins?limit=500', {
         headers: {
           Authorization: `Bearer ${token}`,
+          'x-admin-key': token,
         },
       });
       const data = await res.json();
       if (data.success) {
         setLogs(data.logs || []);
+        setLastRefreshed(new Date());
+      } else {
+        console.warn('[CheckInsViewer] API returned error:', data.error);
       }
     } catch (err) {
       console.error('[CheckInsViewer] Error loading logs:', err);
@@ -38,6 +43,9 @@ export function CheckInsViewer({ token }) {
 
   useEffect(() => {
     fetchLogs();
+    // Auto-refresh every 30 seconds for live check-in updates
+    const interval = setInterval(fetchLogs, 30000);
+    return () => clearInterval(interval);
   }, [fetchLogs]);
 
   // Export to CSV
@@ -97,6 +105,7 @@ export function CheckInsViewer({ token }) {
   const checkedInCount = logs.filter((l) => l.result === 'CHECKED_IN').length;
   const overrideCount = logs.filter((l) => l.result === 'WRONG_STATION_OVERRIDE').length;
   const invalidCount = logs.filter((l) => l.result === 'INVALID').length;
+  const duplicateCount = logs.filter((l) => l.result === 'ALREADY_CHECKED_IN').length;
 
   return (
     <div className="space-y-6">
@@ -115,6 +124,11 @@ export function CheckInsViewer({ token }) {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
+          {lastRefreshed && (
+            <span className="text-[10px] text-slate-500 font-mono hidden sm:block">
+              Updated {lastRefreshed.toLocaleTimeString('en-IN', { timeStyle: 'short' })}
+            </span>
+          )}
           <button
             onClick={fetchLogs}
             disabled={isLoading}
@@ -136,7 +150,7 @@ export function CheckInsViewer({ token }) {
       </div>
 
       {/* KPI Counters */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-[#080d32] border border-white/10">
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Scans</div>
           <div className="text-2xl font-black font-orbitron text-white mt-1">{totalScans}</div>
@@ -152,6 +166,10 @@ export function CheckInsViewer({ token }) {
         <div className="p-4 rounded-2xl bg-[#080d32] border border-rose-500/30">
           <div className="text-[10px] font-bold uppercase tracking-wider text-rose-400">Invalid / Flagged</div>
           <div className="text-2xl font-black font-orbitron text-rose-300 mt-1">{invalidCount}</div>
+        </div>
+        <div className="p-4 rounded-2xl bg-[#080d32] border border-purple-500/30">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Duplicate Attempts</div>
+          <div className="text-2xl font-black font-orbitron text-purple-300 mt-1">{duplicateCount}</div>
         </div>
       </div>
 
@@ -181,6 +199,7 @@ export function CheckInsViewer({ token }) {
             <option value="ALL">All Results</option>
             <option value="CHECKED_IN">Checked In</option>
             <option value="WRONG_STATION_OVERRIDE">Wrong Station Override</option>
+            <option value="ALREADY_CHECKED_IN">Duplicate Scan</option>
             <option value="INVALID">Invalid Tickets</option>
           </select>
         </div>
@@ -211,6 +230,7 @@ export function CheckInsViewer({ token }) {
                 {filteredLogs.map((log) => {
                   const isSuccess = log.result === 'CHECKED_IN';
                   const isOverride = log.result === 'WRONG_STATION_OVERRIDE';
+                  const isDuplicate = log.result === 'ALREADY_CHECKED_IN';
                   const isInvalid = log.result === 'INVALID';
 
                   const timeStr = log.timestamp
@@ -245,6 +265,11 @@ export function CheckInsViewer({ token }) {
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
                             <AlertTriangle className="w-3 h-3" />
                             Override
+                          </span>
+                        ) : isDuplicate ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                            <AlertTriangle className="w-3 h-3" />
+                            Duplicate
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">

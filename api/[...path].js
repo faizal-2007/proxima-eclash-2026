@@ -1,6 +1,7 @@
 import healthHandler from './_handlers/health.js';
 import ticketHandler from './_handlers/ticket.js';
 import adminLoginHandler from './_handlers/admin/login.js';
+import adminCheckInsHandler from './_handlers/admin/checkins.js';
 import adminRegistrationsHandler from './_handlers/admin/registrations.js';
 import adminVolunteersHandler from './_handlers/admin/volunteers.js';
 import legacyRegisterHandler from './_handlers/register/eclash.js';
@@ -15,6 +16,7 @@ import volunteerSearchHandler from './_handlers/volunteer/search.js';
 import volunteerStatsHandler from './_handlers/volunteer/stats.js';
 
 const handlers = {
+  'admin/checkins': adminCheckInsHandler,
   'admin/login': adminLoginHandler,
   'admin/registrations': adminRegistrationsHandler,
   'admin/volunteers': adminVolunteersHandler,

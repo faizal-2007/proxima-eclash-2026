@@ -66,16 +66,22 @@ export default async function handler(req, res) {
       registrations = await getAllRegistrations(supabase);
     }
 
+    const countPlayersForGame = (gameName) =>
+      registrations.filter((r) => {
+        const games = (r.game || '').split(',').map((g) => g.trim().toLowerCase());
+        return games.includes(gameName.toLowerCase());
+      }).length;
+
     // Compute aggregate statistics
     const stats = {
       total: registrations.length,
       byGame: {
-        'Free Fire': registrations.filter((r) => r.game === 'Free Fire').length,
-        BGMI: registrations.filter((r) => r.game === 'BGMI').length,
-        'Mini Militia': registrations.filter((r) => r.game === 'Mini Militia').length,
-        eFootball: registrations.filter((r) => r.game === 'eFootball').length,
-        Ludo: registrations.filter((r) => r.game === 'Ludo').length,
-        Carrom: registrations.filter((r) => r.game === 'Carrom').length,
+        'Free Fire': countPlayersForGame('Free Fire'),
+        BGMI: countPlayersForGame('BGMI'),
+        'Mini Militia': countPlayersForGame('Mini Militia'),
+        eFootball: countPlayersForGame('eFootball'),
+        Ludo: countPlayersForGame('Ludo'),
+        Carrom: countPlayersForGame('Carrom'),
       },
       byYear: {
         '1st Year': registrations.filter((r) => r.year === '1st Year').length,

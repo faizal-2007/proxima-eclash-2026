@@ -219,12 +219,26 @@ export const AdminDashboard = ({ onBack }) => {
     }
   }, [isAuthenticated]);
 
+  // Helper to count registered players for a game (supports multi-game comma-separated selections)
+  const getGameCount = (gameName) => {
+    if (stats?.byGame?.[gameName] !== undefined && stats?.byGame?.[gameName] !== null) {
+      return stats.byGame[gameName];
+    }
+    return registrations.filter((r) => {
+      const games = (r.game || '').split(',').map((g) => g.trim().toLowerCase());
+      return games.includes(gameName.toLowerCase());
+    }).length;
+  };
+
   // Filtered registrations
   const filteredRegistrations = useMemo(() => {
     return registrations.filter((r) => {
-      // Game filter
-      if (selectedGameFilter !== 'ALL' && r.game !== selectedGameFilter) {
-        return false;
+      // Game filter (matches any game in comma-separated list like "Free Fire, eFootball")
+      if (selectedGameFilter !== 'ALL') {
+        const games = (r.game || '').split(',').map((g) => g.trim().toLowerCase());
+        if (!games.includes(selectedGameFilter.toLowerCase())) {
+          return false;
+        }
       }
       // Year filter
       if (selectedYearFilter !== 'ALL' && r.year !== selectedYearFilter) {
@@ -553,7 +567,15 @@ export const AdminDashboard = ({ onBack }) => {
             {/* KPI Cards Row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-3.5">
               {/* Card 1: Total Registrations */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-cyan-500/30 shadow-[0_0_20px_rgba(0,229,255,0.1)] flex flex-col justify-between col-span-2 sm:col-span-1">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter('ALL')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between col-span-2 sm:col-span-1 ${
+                  selectedGameFilter === 'ALL'
+                    ? 'border-cyan-400 ring-2 ring-cyan-400/30 shadow-[0_0_25px_rgba(0,229,255,0.25)]'
+                    : 'border-cyan-500/30 hover:border-cyan-400/60 shadow-[0_0_20px_rgba(0,229,255,0.1)]'
+                }`}
+              >
                 <div className="flex items-center justify-between text-cyan-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     Total Players
@@ -564,10 +586,18 @@ export const AdminDashboard = ({ onBack }) => {
                   {stats?.total ?? registrations.length}
                 </div>
                 <div className="text-[10px] text-cyan-300 font-mono mt-1">Confirmed Arena Entries</div>
-              </div>
+              </button>
 
               {/* Card 2: Free Fire */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-amber-500/30 shadow-sm flex flex-col justify-between">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter(selectedGameFilter === 'Free Fire' ? 'ALL' : 'Free Fire')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                  selectedGameFilter === 'Free Fire'
+                    ? 'border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_25px_rgba(251,191,36,0.25)]'
+                    : 'border-amber-500/30 hover:border-amber-400/60 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center justify-between text-amber-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     Free Fire
@@ -575,13 +605,21 @@ export const AdminDashboard = ({ onBack }) => {
                   <Flame className="w-4 h-4" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {stats?.byGame?.['Free Fire'] ?? registrations.filter((r) => r.game === 'Free Fire').length}
+                  {getGameCount('Free Fire')}
                 </div>
                 <div className="text-[10px] text-amber-300 font-mono mt-1">Battle Royale</div>
-              </div>
+              </button>
 
               {/* Card 3: BGMI */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-blue-500/30 shadow-sm flex flex-col justify-between">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter(selectedGameFilter === 'BGMI' ? 'ALL' : 'BGMI')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                  selectedGameFilter === 'BGMI'
+                    ? 'border-blue-400 ring-2 ring-blue-400/30 shadow-[0_0_25px_rgba(59,130,246,0.25)]'
+                    : 'border-blue-500/30 hover:border-blue-400/60 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center justify-between text-blue-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     BGMI
@@ -589,13 +627,21 @@ export const AdminDashboard = ({ onBack }) => {
                   <Crosshair className="w-4 h-4" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {stats?.byGame?.BGMI ?? registrations.filter((r) => r.game === 'BGMI').length}
+                  {getGameCount('BGMI')}
                 </div>
                 <div className="text-[10px] text-blue-300 font-mono mt-1">Battle Royale</div>
-              </div>
+              </button>
 
               {/* Card 4: Mini Militia */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-purple-500/30 shadow-sm flex flex-col justify-between">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter(selectedGameFilter === 'Mini Militia' ? 'ALL' : 'Mini Militia')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                  selectedGameFilter === 'Mini Militia'
+                    ? 'border-purple-400 ring-2 ring-purple-400/30 shadow-[0_0_25px_rgba(168,85,247,0.25)]'
+                    : 'border-purple-500/30 hover:border-purple-400/60 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center justify-between text-purple-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     Mini Militia
@@ -603,13 +649,21 @@ export const AdminDashboard = ({ onBack }) => {
                   <Gamepad2 className="w-4 h-4" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {stats?.byGame?.['Mini Militia'] ?? registrations.filter((r) => r.game === 'Mini Militia').length}
+                  {getGameCount('Mini Militia')}
                 </div>
                 <div className="text-[10px] text-purple-300 font-mono mt-1">Deathmatch FFA</div>
-              </div>
+              </button>
 
               {/* Card 5: eFootball */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-emerald-500/30 shadow-sm flex flex-col justify-between">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter(selectedGameFilter === 'eFootball' ? 'ALL' : 'eFootball')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                  selectedGameFilter === 'eFootball'
+                    ? 'border-emerald-400 ring-2 ring-emerald-400/30 shadow-[0_0_25px_rgba(16,185,129,0.25)]'
+                    : 'border-emerald-500/30 hover:border-emerald-400/60 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center justify-between text-emerald-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     eFootball
@@ -617,13 +671,21 @@ export const AdminDashboard = ({ onBack }) => {
                   <Trophy className="w-4 h-4" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {stats?.byGame?.eFootball ?? registrations.filter((r) => r.game === 'eFootball').length}
+                  {getGameCount('eFootball')}
                 </div>
                 <div className="text-[10px] text-emerald-300 font-mono mt-1">1v1 Mobile Sim</div>
-              </div>
+              </button>
 
               {/* Card 6: Ludo */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-rose-500/30 shadow-sm flex flex-col justify-between">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter(selectedGameFilter === 'Ludo' ? 'ALL' : 'Ludo')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                  selectedGameFilter === 'Ludo'
+                    ? 'border-rose-400 ring-2 ring-rose-400/30 shadow-[0_0_25px_rgba(244,63,94,0.25)]'
+                    : 'border-rose-500/30 hover:border-rose-400/60 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center justify-between text-rose-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     Ludo
@@ -631,13 +693,21 @@ export const AdminDashboard = ({ onBack }) => {
                   <Dices className="w-4 h-4" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {stats?.byGame?.Ludo ?? registrations.filter((r) => r.game === 'Ludo').length}
+                  {getGameCount('Ludo')}
                 </div>
                 <div className="text-[10px] text-rose-300 font-mono mt-1">4-Player Classic</div>
-              </div>
+              </button>
 
               {/* Card 7: Carrom */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#080d32] border border-cyan-500/30 shadow-sm flex flex-col justify-between col-span-2 sm:col-span-1">
+              <button
+                type="button"
+                onClick={() => setSelectedGameFilter(selectedGameFilter === 'Carrom' ? 'ALL' : 'Carrom')}
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between col-span-2 sm:col-span-1 ${
+                  selectedGameFilter === 'Carrom'
+                    ? 'border-cyan-400 ring-2 ring-cyan-400/30 shadow-[0_0_25px_rgba(6,182,212,0.25)]'
+                    : 'border-cyan-500/30 hover:border-cyan-400/60 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center justify-between text-cyan-400 mb-2">
                   <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
                     Carrom
@@ -645,10 +715,10 @@ export const AdminDashboard = ({ onBack }) => {
                   <Target className="w-4 h-4" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {stats?.byGame?.Carrom ?? registrations.filter((r) => r.game === 'Carrom').length}
+                  {getGameCount('Carrom')}
                 </div>
                 <div className="text-[10px] text-cyan-300 font-mono mt-1">1v1 Disc Pool</div>
-              </div>
+              </button>
             </div>
 
             {/* Filter and Search Bar */}
