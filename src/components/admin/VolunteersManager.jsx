@@ -21,7 +21,6 @@ const STATIONS = [
   'Mini Militia',
   'Valorant',
   'eFootball',
-  'Ludo',
   'Carrom',
 ];
 

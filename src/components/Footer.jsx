@@ -64,7 +64,7 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
               TOURNAMENT GAMES
             </div>
             <p className="text-xs text-slate-300 font-rajdhani">
-              Free Fire • BGMI • Mini Militia • eFootball • Ludo • Carrom
+              Free Fire • BGMI • Mini Militia • eFootball • Carrom
             </p>
             <ul className="space-y-2 text-xs text-slate-300 font-rajdhani">
               <li>
@@ -89,11 +89,6 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
               </li>
               <li>
                 <button onClick={() => handleLink('#tracks')} className="hover:text-[#00e5ff] transition-colors">
-                  → Ludo (4-Player Classic Board)
-                </button>
-              </li>
-              <li>
-                <button onClick={() => handleLink('#tracks')} className="hover:text-[#00e5ff] transition-colors">
                   → Carrom (1v1 Disc Pot Clash)
                 </button>
               </li>
@@ -113,7 +108,7 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
               <li>• Mobile Only — Emulators Strictly Prohibited</li>
               <li>• Campus ID & Email Verification Mandatory</li>
               <li>• Low Latency Arena Wi-Fi & Live Shoutcast</li>
-              <li>• ₹7,000 Prize Pool with Trophies & Medals</li>
+
             </ul>
           </div>
 

@@ -64,9 +64,10 @@ export const Navbar = ({ onNavigate }) => {
           <button onClick={() => handleLinkClick('#schedule')} className="hover:text-blue-300 transition-colors">
             Schedule
           </button>
-          <button onClick={() => handleLinkClick('#prizes')} className="hover:text-purple-300 transition-colors">
-            Prizes
+          <button onClick={() => handleLinkClick('#fixtures')} className="hover:text-cyan-300 transition-colors">
+            Fixtures
           </button>
+
           <button onClick={() => handleLinkClick('#faq')} className="hover:text-slate-100 transition-colors">
             Rules & FAQ
           </button>
@@ -149,9 +150,10 @@ export const Navbar = ({ onNavigate }) => {
             <button onClick={() => handleLinkClick('#schedule')} className="text-left py-1.5 hover:text-blue-300">
               Event Schedule
             </button>
-            <button onClick={() => handleLinkClick('#prizes')} className="text-left py-1.5 hover:text-purple-300">
-              Prizes & Awards (₹7,000)
+            <button onClick={() => handleLinkClick('#fixtures')} className="text-left py-1.5 hover:text-cyan-300">
+              Live Fixtures &amp; Draw
             </button>
+
             <button onClick={() => handleLinkClick('#faq')} className="text-left py-1.5 hover:text-slate-100">
               Rules & FAQ
             </button>

@@ -12,9 +12,9 @@ import { checkRateLimit, serializeRegistrationSubmission } from '../../_lib/rate
 import { decodePaymentImage, validatePaymentFields } from '../../_lib/paymentValidation.js';
 import { signQrToken } from '../../_lib/crypto.js';
 
-const VALID_GAMES = ['Free Fire', 'BGMI', 'Mini Militia', 'eFootball', 'Ludo', 'Carrom'];
+const VALID_GAMES = ['Free Fire', 'BGMI', 'Mini Militia', 'eFootball', 'Carrom'];
 const GROUP_ONE_GAMES = ['Free Fire', 'BGMI', 'Mini Militia'];
-const GROUP_TWO_GAMES = ['eFootball', 'Ludo', 'Carrom'];
+const GROUP_TWO_GAMES = ['eFootball', 'Carrom'];
 
 const replyRateLimited = (res, retryAfterSeconds) => {
   res.setHeader('Retry-After', String(retryAfterSeconds));

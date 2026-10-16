@@ -92,16 +92,19 @@ export const validatePaymentFields = (body, { emailConfig, validGames, groupOne,
   const uniqueGames = new Set(values.selection);
   const firstGroupCount = values.selection.filter((game) => groupOne.includes(game)).length;
   const secondGroupCount = values.selection.filter((game) => groupTwo.includes(game)).length;
-  if (
-    values.selection.length !== 2 ||
-    uniqueGames.size !== values.selection.length ||
-    values.selection.some((game) => !validGames.includes(game)) ||
-    !(
-      (firstGroupCount === 1 && secondGroupCount === 1) ||
-      (firstGroupCount === 0 && secondGroupCount === 2)
-    )
-  ) {
-    errors.selection = 'Select two games using the displayed game-group rule.';
+  const isValidSelection =
+    values.selection.length >= 1 &&
+    values.selection.length <= 2 &&
+    uniqueGames.size === values.selection.length &&
+    values.selection.every((game) => validGames.includes(game)) &&
+    (
+      (values.selection.length === 1 && secondGroupCount === 1) ||
+      (values.selection.length === 2 && firstGroupCount === 1 && secondGroupCount === 1) ||
+      (values.selection.length === 2 && firstGroupCount === 0 && secondGroupCount === 2)
+    );
+
+  if (!isValidSelection) {
+    errors.selection = 'Invalid game selection. You can select 1 game from Group 2, or 2 games (1 from Group 1 and 1 from Group 2, or both from Group 2).';
   }
   if (!/^\d{12}$/.test(values.utr)) {
     errors.utr = 'Enter a valid 12-digit UTR / Transaction ID.';

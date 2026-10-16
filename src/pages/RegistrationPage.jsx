@@ -58,7 +58,7 @@ const getInitialFormData = () => {
 export const RegistrationPage = ({ onBack, onSuccess }) => {
   const trackConfig = TRACKS_CONFIG.eclash;
   const GROUP_1_GAMES = ['Free Fire', 'BGMI', 'Mini Militia'];
-  const GROUP_2_GAMES = ['eFootball', 'Ludo', 'Carrom'];
+  const GROUP_2_GAMES = ['eFootball', 'Carrom'];
   const normalizeSelectionValue = (value) => {
     if (Array.isArray(value)) {
       return value.map((item) => String(item).trim()).filter(Boolean);
@@ -192,16 +192,29 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
       case 'selection': {
         const selectedGames = normalizeSelectionValue(value);
 
-        if (selectedGames.length !== 2) {
-          err = 'Select exactly 2 games. Choose 1 from Group 1 and 1 from Group 2, or 2 from Group 2 only.';
+        if (selectedGames.length === 0) {
+          err = 'Please select at least one tournament game.';
+          break;
+        }
+
+        if (selectedGames.length > 2) {
+          err = 'You can select at most 2 games.';
           break;
         }
 
         const group1Count = selectedGames.filter((game) => GROUP_1_GAMES.includes(game)).length;
         const group2Count = selectedGames.filter((game) => GROUP_2_GAMES.includes(game)).length;
 
-        if (!((group1Count === 1 && group2Count === 1) || (group1Count === 0 && group2Count === 2))) {
-          err = 'Invalid selection. Choose either 1 game from Group 1 and 1 game from Group 2, or exactly 2 games from Group 2 only.';
+        if (selectedGames.length === 1) {
+          if (group2Count !== 1) {
+            err = 'Single game selection is only allowed for Group 2 games (eFootball or Carrom). If choosing from Group 1, you must select 2 games (1 from Group 1 and 1 from Group 2).';
+          }
+        } else if (selectedGames.length === 2) {
+          if (group1Count === 2) {
+            err = 'Cannot choose two games from Group 1 due to schedule overlap. Choose 1 from Group 1 and 1 from Group 2, or both games from Group 2.';
+          } else if (!((group1Count === 1 && group2Count === 1) || (group1Count === 0 && group2Count === 2))) {
+            err = 'Invalid game combination. Choose 1 from Group 1 and 1 from Group 2, or both games from Group 2.';
+          }
         }
         break;
       }
@@ -469,7 +482,7 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
           </h1>
 
           <p className="text-xs sm:text-sm max-w-xl mx-auto text-slate-300 font-rajdhani">
-            Enter the battlefield for Free Fire, BGMI, Mini Militia, eFootball, Ludo or Carrom. Compete for ₹7,000 in prizes.
+            Enter the battlefield for Free Fire, BGMI, Mini Militia, eFootball or Carrom. Compete for ₹7,000 in prizes.
           </p>
 
           <div className="text-[10px] sm:text-[11px] font-mono text-cyan-300/80 pt-1 leading-relaxed">
@@ -684,12 +697,19 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
               </label>
 
               <div className="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4 space-y-4">
-                <div className={`rounded-xl border px-3 py-2 text-[11px] font-mono ${
-                  selectedGames.length >= 2
-                    ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
-                    : 'border-cyan-400/40 bg-cyan-500/10 text-cyan-200'
+                <div className={`rounded-xl border px-3 py-2 text-[11px] font-mono transition-all ${
+                  selectedGames.length === 0
+                    ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-200'
+                    : selectedGames.length === 1 && selectedGames.some((g) => GROUP_2_GAMES.includes(g))
+                      ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
+                      : selectedGames.length === 1
+                        ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
+                        : 'border-cyan-400/60 bg-cyan-500/10 text-cyan-200'
                 }`}>
-                  Only 2 selections allowed.
+                  {selectedGames.length === 0 && 'Rule: Select 1 game from Group 2, or 2 games (1 from Group 1 + 1 from Group 2, or both from Group 2).'}
+                  {selectedGames.length === 1 && selectedGames.some((g) => GROUP_2_GAMES.includes(g)) && '✓ 1 game selected from Group 2 (Valid! You can continue to payment, or optionally add a 2nd game).'}
+                  {selectedGames.length === 1 && !selectedGames.some((g) => GROUP_2_GAMES.includes(g)) && '1 game selected from Group 1. Group 1 games require selecting a 2nd game from Group 2.'}
+                  {selectedGames.length === 2 && '2 games selected (Maximum reached).'}
                 </div>
 
                 {[{ label: 'Group 1', games: GROUP_1_GAMES }, { label: 'Group 2', games: GROUP_2_GAMES }].map((group) => (
@@ -723,9 +743,7 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
                                 {trackConfig.options.find((opt) => opt.name === game)?.type || 'Tournament Game'} • {' '}
                                 {trackConfig.options.find((opt) => opt.name === game)?.platform || 'Mobile'}
                               </div>
-                              <div className="text-[10px] text-amber-300 font-mono mt-0.5">
-                                {trackConfig.options.find((opt) => opt.name === game)?.prize || 'Prize Pool'}
-                              </div>
+
                             </div>
                           </label>
                         );

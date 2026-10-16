@@ -112,22 +112,6 @@ export const GAMES_LIST = [
     maxPlayers: 32,
   },
   {
-    id: "Ludo",
-    name: "Ludo",
-    mode: "4-Player Classic Board",
-    platform: "Mobile Only",
-    badge: "Board Arena",
-    icon: "Dices",
-    color: "#f43f5e",
-    gradient: "from-rose-500 to-pink-600",
-    prize: "1st ₹500 • 2nd ₹250",
-    winnerPrize: 500,
-    runnerUpPrize: 250,
-    description: "Roll the dice, calculate token moves, cut opponent pawns, and race all four tokens home in high-stakes campus board matches.",
-    format: "4-Player Table Knockouts → Semi-Finals → 4-Way Championship Board",
-    maxPlayers: 32,
-  },
-  {
     id: "Carrom",
     name: "Carrom",
     mode: "1v1 Disc Pot Clash",
@@ -198,14 +182,14 @@ export const SCHEDULE_DATA = [
     phase: "After Lunch: Tournament Matches",
     timeframe: "01:30 PM – 02:30 PM",
     events: [
-      { time: "01:30 PM – 02:30 PM", track: "eclash", title: "Carrom, Ludo, Free Fire & BGMI — Tournament Matches", venue: "Tournament game stations" },
+      { time: "01:30 PM – 02:30 PM", track: "eclash", title: "Carrom, Free Fire & BGMI — Tournament Matches", venue: "Tournament game stations" },
     ],
   },
   {
     phase: "Finals: Championship Matches",
     timeframe: "02:30 PM – 03:00 PM",
     events: [
-      { time: "02:30 PM – 03:00 PM", track: "eclash", title: "Final matches for all six games", venue: "Tournament game stations" },
+      { time: "02:30 PM – 03:00 PM", track: "eclash", title: "Final matches for all five games", venue: "Tournament game stations" },
     ],
   },
   {
@@ -228,7 +212,7 @@ export const FAQ_DATA = [
   },
   {
     q: "What devices and platforms are allowed?",
-    a: "All tournaments (Free Fire, BGMI, Mini Militia, eFootball, Ludo, Carrom) are MOBILE ONLY. Strictly no emulators (Bluestacks, LDPlayer), iPads/tablets, or external hardware triggers are permitted. Routine device checks are conducted prior to match start.",
+    a: "All tournaments (Free Fire, BGMI, Mini Militia, eFootball, Carrom) are MOBILE ONLY. Strictly no emulators (Bluestacks, LDPlayer), iPads/tablets, or external hardware triggers are permitted. Routine device checks are conducted prior to match start.",
   },
   {
     q: "Do I need to bring my own gaming device & accessories?",

@@ -13,6 +13,7 @@ import {
   Target,
 } from 'lucide-react';
 import { EVENT_METADATA, GAMES_LIST, SCHEDULE_DATA, FAQ_DATA } from '../config/eventConfig';
+import { PublicFixtures } from './PublicFixtures.jsx';
 
 export const LandingSections = ({ onSelectTrack }) => {
   const [activePhase, setActivePhase] = useState(0);
@@ -100,12 +101,9 @@ export const LandingSections = ({ onSelectTrack }) => {
               className="rounded-2xl sm:rounded-3xl p-4 sm:p-8 bg-[#080d30] border-2 border-cyan-500/25 hover:border-[#00e5ff] shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-neon-blue transition-all flex flex-col justify-between space-y-4 sm:space-y-6"
             >
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-cyan-950 text-cyan-300 border border-cyan-500/40">
                     {game.badge}
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-mono font-bold text-amber-300">
-                    {game.prize}
                   </span>
                 </div>
 
@@ -217,44 +215,10 @@ export const LandingSections = ({ onSelectTrack }) => {
       </section>
 
       {/* ========================================================
-          4. PRIZES & AWARDS (₹7,000 CASH POOL)
+          4. LIVE FIXTURES & BRACKETS
       ======================================================== */}
-      <section id="prizes" className="py-10 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-950/80 border border-yellow-500/30 text-xs font-semibold text-yellow-300">
-            <Trophy className="w-3.5 h-3.5" />
-            Prize Pool Breakdown
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">
-            ₹7,000 Championship Prize Pool
-          </h2>
-          <p className="text-sm text-slate-300 font-rajdhani">
-            Winner and runner-up cash awards for all six games. Listed payouts total ₹6,750; the remaining ₹250 is unallocated.
-          </p>
-        </div>
+      <PublicFixtures />
 
-        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-          {GAMES_LIST.map((game) => (
-            <article
-              key={game.id}
-              className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#0c133f] to-[#04071d] border border-cyan-500/30 space-y-3 sm:space-y-4"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm sm:text-lg font-bold font-orbitron text-white">{game.name}</h3>
-                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-300" />
-              </div>
-              <div className="flex items-center justify-between gap-1 rounded-lg sm:rounded-xl bg-black/40 border border-cyan-500/20 p-2 sm:p-3">
-                <span className="text-xs sm:text-sm font-semibold text-slate-200">Winner</span>
-                <span className="text-xs sm:text-base font-mono font-bold text-amber-300">₹{game.winnerPrize.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex items-center justify-between gap-1 rounded-lg sm:rounded-xl bg-black/40 border border-purple-500/20 p-2 sm:p-3">
-                <span className="text-xs sm:text-sm font-semibold text-slate-200">Runner-up</span>
-                <span className="text-xs sm:text-base font-mono font-bold text-purple-200">₹{game.runnerUpPrize.toLocaleString('en-IN')}</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
 
       {/* ========================================================
           5. TOURNAMENT RULES & FAQ

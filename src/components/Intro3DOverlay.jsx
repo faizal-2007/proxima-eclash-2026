@@ -45,7 +45,7 @@ export const Intro3DOverlay = ({ onComplete }) => {
       { t: 0, pct: 0, text: 'Initializing Esports Engine...' },
       { t: 140, pct: 21, text: 'Compiling 3D Arena Shaders...' },
       { t: 480, pct: 52, text: 'Calibrating Free Fire & BGMI Lobbies...' },
-      { t: 660, pct: 64, text: 'Synchronizing eFootball, Mini Militia, Ludo & Carrom...' },
+      { t: 660, pct: 64, text: 'Synchronizing eFootball, Mini Militia & Carrom...' },
       { t: 900, pct: 70, text: 'Calibrating Tournament Brackets...' },
       { t: 1250, pct: 88, text: 'Configuring High-Speed Arena LAN...' },
       { t: 1520, pct: 93, text: 'Connecting Yenepoya Student Portal...' },
@@ -258,7 +258,7 @@ export const Intro3DOverlay = ({ onComplete }) => {
                       PROXIMA E-CLASH
                     </div>
                     <div className="text-xs font-mono text-cyan-300/80">
-                      FREE FIRE • BGMI • MINI MILITIA • eFOOTBALL • LUDO • CARROM
+                      FREE FIRE • BGMI • MINI MILITIA • eFOOTBALL • CARROM
                     </div>
                   </div>
                 </motion.div>

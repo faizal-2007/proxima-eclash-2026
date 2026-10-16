@@ -574,7 +574,6 @@ export async function getTournamentStats(client = getSupabaseClient(), volunteer
       'BGMI': { total: 0, checkedIn: 0, pending: 0 },
       'Mini Militia': { total: 0, checkedIn: 0, pending: 0 },
       'eFootball': { total: 0, checkedIn: 0, pending: 0 },
-      'Ludo': { total: 0, checkedIn: 0, pending: 0 },
       'Carrom': { total: 0, checkedIn: 0, pending: 0 },
     },
     byYear: {

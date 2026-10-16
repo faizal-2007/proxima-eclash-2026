@@ -201,7 +201,7 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
           </div>
 
           <p className="text-xs sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-rajdhani font-medium pt-1 sm:pt-2">
-            Game On. Compete. Connect. Conquer. The premier battlefield for Free Fire, BGMI, Mini Militia, eFootball, Ludo & Carrom at Yenepoya University.
+            Game On. Compete. Connect. Conquer. The premier battlefield for Free Fire, BGMI, Mini Militia, eFootball & Carrom at Yenepoya University.
           </p>
         </motion.div>
 
@@ -323,12 +323,9 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
               className="cursor-pointer group min-w-0 p-2.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[#070b2a]/90 border border-cyan-500/25 hover:border-[#00e5ff] backdrop-blur-xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(0,229,255,0.35)] transition-all flex flex-col justify-between space-y-2 sm:space-y-4"
             >
               <div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2 sm:mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-2 sm:mb-3">
                   <span className="w-fit text-[8px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-bold uppercase">
                     {game.badge}
-                  </span>
-                  <span className="text-[9px] sm:text-[11px] font-rajdhani font-bold text-amber-300 leading-tight">
-                    {game.prize}
                   </span>
                 </div>
 

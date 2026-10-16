@@ -80,7 +80,6 @@ export default async function handler(req, res) {
         BGMI: countPlayersForGame('BGMI'),
         'Mini Militia': countPlayersForGame('Mini Militia'),
         eFootball: countPlayersForGame('eFootball'),
-        Ludo: countPlayersForGame('Ludo'),
         Carrom: countPlayersForGame('Carrom'),
       },
       byYear: {

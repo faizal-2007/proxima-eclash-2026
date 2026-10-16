@@ -21,12 +21,13 @@ import {
   Trash2,
   AlertTriangle,
   Sparkles,
-  Dices,
   Target,
+  Swords,
 } from 'lucide-react';
 import { EVENT_METADATA } from '../config/eventConfig';
 import { VolunteersManager } from '../components/admin/VolunteersManager';
 import { CheckInsViewer } from '../components/admin/CheckInsViewer';
+import { FixturesTab } from '../components/admin/FixturesTab';
 
 export const AdminDashboard = ({ onBack }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -35,7 +36,7 @@ export const AdminDashboard = ({ onBack }) => {
   const [token, setToken] = useState(() => {
     return sessionStorage.getItem('proxima_admin_token') || '';
   });
-  const [activeTab, setActiveTab] = useState('REGISTRATIONS'); // 'REGISTRATIONS' | 'VOLUNTEERS' | 'CHECKINS'
+  const [activeTab, setActiveTab] = useState('REGISTRATIONS'); // 'REGISTRATIONS' | 'VOLUNTEERS' | 'CHECKINS' | 'FIXTURES'
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -202,7 +203,6 @@ export const AdminDashboard = ({ onBack }) => {
         BGMI: 0,
         'Mini Militia': 0,
         eFootball: 0,
-        Ludo: 0,
         Carrom: 0,
       },
       byYear: {
@@ -559,18 +559,29 @@ export const AdminDashboard = ({ onBack }) => {
             <History className="w-4 h-4 text-fuchsia-400" />
             <span>Check-in Audit Ledger</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('FIXTURES')}
+            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'FIXTURES'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+              }`}
+          >
+            <Swords className="w-4 h-4 text-emerald-400" />
+            <span>Fixtures &amp; Draw</span>
+          </button>
         </div>
 
         {/* TAB 1: PLAYER REGISTRATIONS */}
         {activeTab === 'REGISTRATIONS' && (
           <div className="space-y-8 animate-in fade-in duration-200">
             {/* KPI Cards Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-3.5">
               {/* Card 1: Total Registrations */}
               <button
                 type="button"
                 onClick={() => setSelectedGameFilter('ALL')}
-                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between col-span-2 sm:col-span-1 ${
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                   selectedGameFilter === 'ALL'
                     ? 'border-cyan-400 ring-2 ring-cyan-400/30 shadow-[0_0_25px_rgba(0,229,255,0.25)]'
                     : 'border-cyan-500/30 hover:border-cyan-400/60 shadow-[0_0_20px_rgba(0,229,255,0.1)]'
@@ -676,33 +687,11 @@ export const AdminDashboard = ({ onBack }) => {
                 <div className="text-[10px] text-emerald-300 font-mono mt-1">1v1 Mobile Sim</div>
               </button>
 
-              {/* Card 6: Ludo */}
-              <button
-                type="button"
-                onClick={() => setSelectedGameFilter(selectedGameFilter === 'Ludo' ? 'ALL' : 'Ludo')}
-                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
-                  selectedGameFilter === 'Ludo'
-                    ? 'border-rose-400 ring-2 ring-rose-400/30 shadow-[0_0_25px_rgba(244,63,94,0.25)]'
-                    : 'border-rose-500/30 hover:border-rose-400/60 shadow-sm'
-                }`}
-              >
-                <div className="flex items-center justify-between text-rose-400 mb-2">
-                  <span className="text-[11px] font-bold uppercase font-mono tracking-wider text-slate-300">
-                    Ludo
-                  </span>
-                  <Dices className="w-4 h-4" />
-                </div>
-                <div className="text-2xl sm:text-3xl font-black font-orbitron text-white">
-                  {getGameCount('Ludo')}
-                </div>
-                <div className="text-[10px] text-rose-300 font-mono mt-1">4-Player Classic</div>
-              </button>
-
-              {/* Card 7: Carrom */}
+              {/* Card 6: Carrom */}
               <button
                 type="button"
                 onClick={() => setSelectedGameFilter(selectedGameFilter === 'Carrom' ? 'ALL' : 'Carrom')}
-                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between col-span-2 sm:col-span-1 ${
+                className={`p-4 sm:p-5 rounded-2xl bg-[#080d32] border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                   selectedGameFilter === 'Carrom'
                     ? 'border-cyan-400 ring-2 ring-cyan-400/30 shadow-[0_0_25px_rgba(6,182,212,0.25)]'
                     : 'border-cyan-500/30 hover:border-cyan-400/60 shadow-sm'
@@ -743,12 +732,11 @@ export const AdminDashboard = ({ onBack }) => {
                   onChange={(e) => setSelectedGameFilter(e.target.value)}
                   className="px-3.5 py-2.5 rounded-xl border border-white/15 bg-black/50 text-slate-200 text-xs font-semibold focus:border-cyan-400"
                 >
-                  <option value="ALL">All Disciplines (6 Games)</option>
+                  <option value="ALL">All Disciplines (5 Games)</option>
                   <option value="Free Fire">Free Fire (BR)</option>
                   <option value="BGMI">BGMI (BR)</option>
                   <option value="Mini Militia">Mini Militia (FFA)</option>
                   <option value="eFootball">eFootball (1v1)</option>
-                  <option value="Ludo">Ludo (4P Board)</option>
                   <option value="Carrom">Carrom (1v1 Disc)</option>
                 </select>
 
@@ -861,9 +849,7 @@ export const AdminDashboard = ({ onBack }) => {
                                       ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                                       : row.game === 'eFootball'
                                         ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                        : row.game === 'Ludo'
-                                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                                          : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                        : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                                 }`}
                             >
                               <Gamepad2 className="w-3 h-3" />
@@ -1027,6 +1013,13 @@ export const AdminDashboard = ({ onBack }) => {
         {activeTab === 'CHECKINS' && (
           <div className="animate-in fade-in duration-200">
             <CheckInsViewer token={token} />
+          </div>
+        )}
+
+        {/* TAB 4: FIXTURES & DRAW */}
+        {activeTab === 'FIXTURES' && (
+          <div className="animate-in fade-in duration-200">
+            <FixturesTab token={token} registrations={registrations} />
           </div>
         )}
 

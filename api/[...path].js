@@ -4,6 +4,7 @@ import adminLoginHandler from './_handlers/admin/login.js';
 import adminCheckInsHandler from './_handlers/admin/checkins.js';
 import adminRegistrationsHandler from './_handlers/admin/registrations.js';
 import adminVolunteersHandler from './_handlers/admin/volunteers.js';
+import adminFixturesHandler from './_handlers/admin/fixtures.js';
 import legacyRegisterHandler from './_handlers/register/eclash.js';
 import legacyPaymentHandler from './_handlers/register/payment.js';
 import registerHandler from './_handlers/register/manualPayment.js';
@@ -20,6 +21,7 @@ const handlers = {
   'admin/login': adminLoginHandler,
   'admin/registrations': adminRegistrationsHandler,
   'admin/volunteers': adminVolunteersHandler,
+  'admin/fixtures': adminFixturesHandler,
   health: healthHandler,
   register: registerHandler,
   'register/eclash': legacyRegisterHandler,
