@@ -23,6 +23,15 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: authCheck.error || 'Unauthorized: Admin authentication token required.' });
   }
 
+  // Prevent mutations if role is viewer
+  if (req.method === 'PATCH' || req.method === 'DELETE') {
+    if (authCheck.role === 'viewer') {
+      return res.status(403).json({
+        error: 'Forbidden: You have read-only viewer access. You cannot modify or delete registrations.',
+      });
+    }
+  }
+
   const supabase = getSupabaseClient();
 
   // ==========================================

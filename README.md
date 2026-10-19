@@ -275,7 +275,7 @@ All routes are served by the Vercel catch-all at `api/[...path].js`.
 
 ## ?? Security
 
-- **Admin auth:** Passkey compared against `ADMIN_SECRET_KEY` env variable; session stored in `sessionStorage`
+- **Admin & Viewer auth:** Full administrator passkey (`ADMIN_SECRET_KEY`) vs Read-only viewer passkey (`ADMIN_VIEWER_KEY`); session stored in `sessionStorage` with role-based access control protecting all backend API routes
 - **Volunteer auth:** `bcryptjs` password hashing + `jsonwebtoken` (12-hour expiry)
 - **QR integrity:** Each ticket QR contains an HMAC-SHA256 signature (keyed by `QR_SECRET`) � invalid or tampered QRs are rejected at scan time
 - **Rate limiting:** In-memory rate limiter on all API endpoints
@@ -359,6 +359,7 @@ SUPABASE_ANON_KEY
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 ADMIN_SECRET_KEY
+ADMIN_VIEWER_KEY
 QR_SECRET
 VOLUNTEER_JWT_SECRET
 BLOB_READ_WRITE_TOKEN

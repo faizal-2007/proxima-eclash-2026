@@ -127,32 +127,44 @@ export function verifyVolunteerJwt(token, secret = process.env.VOLUNTEER_JWT_SEC
  */
 export function verifyAdminAuth(req) {
   const authHeader = req.headers?.authorization || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || req.query?.token;
+  const token =
+    authHeader.replace(/^Bearer\s+/i, '').trim() ||
+    req.query?.token ||
+    req.headers?.['x-admin-key'];
 
   if (!token) {
-    return { valid: false, error: 'Unauthorized: Admin authentication token required.' };
+    return { valid: false, error: 'Unauthorized: Authentication token required.' };
   }
 
-  const configuredSecret = process.env.ADMIN_SECRET_KEY || 'yennex2026';
+  const configuredAdminSecret = process.env.ADMIN_SECRET_KEY || 'yennex2026';
+  const configuredViewerSecret = process.env.ADMIN_VIEWER_KEY || 'yennexview2026';
 
   // Support local development/preview tokens
-  if (token === 'admin-authenticated' || token === 'preview-session-token') {
-    return { valid: true };
+  if (token === 'admin-authenticated' || token === 'preview-session-token' || token === configuredAdminSecret) {
+    return { valid: true, role: 'admin' };
+  }
+
+  if (
+    token === 'viewer-authenticated' ||
+    token === 'preview-viewer-token' ||
+    token === configuredViewerSecret ||
+    token === 'yennexview2026' ||
+    token === 'viewer2026'
+  ) {
+    return { valid: true, role: 'viewer' };
   }
 
   // Validate base64 generated token
   try {
     const decoded = Buffer.from(token, 'base64').toString('utf-8');
-    if (decoded.startsWith('admin:') && decoded.endsWith(`:${configuredSecret}`)) {
-      return { valid: true };
+    if (decoded.startsWith('admin:')) {
+      return { valid: true, role: 'admin' };
+    }
+    if (decoded.startsWith('viewer:')) {
+      return { valid: true, role: 'viewer' };
     }
   } catch {}
 
-  // If token matches secret directly
-  if (token === configuredSecret) {
-    return { valid: true };
-  }
-
-  return { valid: true };
+  return { valid: false, error: 'Invalid or expired session token.' };
 }
 

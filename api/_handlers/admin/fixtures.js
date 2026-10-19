@@ -66,6 +66,7 @@ export default async function handler(req, res) {
   // All mutating methods require admin auth
   const auth = verifyAdminAuth(req);
   if (!auth.valid) return res.status(401).json({ error: auth.error || 'Unauthorized.' });
+  if (auth.role === 'viewer') return res.status(403).json({ error: 'Forbidden: Read-only access cannot modify fixtures.' });
 
   // ── POST — upsert full draw ─────────────────────────────────────────────────
   if (req.method === 'POST') {

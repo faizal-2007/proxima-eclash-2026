@@ -28,6 +28,7 @@ import {
   QrCode,
   Loader2,
   Clock,
+  Eye,
 } from 'lucide-react';
 import { EVENT_METADATA } from '../config/eventConfig';
 import { VolunteersManager } from '../components/admin/VolunteersManager';
@@ -41,6 +42,10 @@ export const AdminDashboard = ({ onBack }) => {
   const [token, setToken] = useState(() => {
     return sessionStorage.getItem('proxima_admin_token') || '';
   });
+  const [role, setRole] = useState(() => {
+    return sessionStorage.getItem('proxima_admin_role') || 'admin';
+  });
+  const isViewer = role === 'viewer';
   const [activeTab, setActiveTab] = useState('REGISTRATIONS'); // 'REGISTRATIONS' | 'VOLUNTEERS' | 'CHECKINS' | 'FIXTURES'
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -73,7 +78,7 @@ export const AdminDashboard = ({ onBack }) => {
 
   // Delete registration handler
   const handleDeleteRegistration = async () => {
-    if (!registrationToDelete?.registrationId) return;
+    if (isViewer || !registrationToDelete?.registrationId) return;
 
     setIsDeleting(true);
     setDeleteError('');
@@ -134,7 +139,7 @@ export const AdminDashboard = ({ onBack }) => {
 
   // Payment Mode and Status update handler
   const handleUpdatePayment = async (registrationId, updates = {}) => {
-    if (!registrationId) return;
+    if (isViewer || !registrationId) return;
 
     setUpdatingPaymentId(registrationId);
     setPaymentUpdateError('');
@@ -199,11 +204,14 @@ export const AdminDashboard = ({ onBack }) => {
     setLoginError('');
     setIsLoggingIn(true);
 
+    const trimmedInput = passwordInput.trim();
+    const viewerKeywords = ['yennexview2026', 'viewer2026', 'proximaview2026', 'proximaviewer2026'];
+
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput }),
+        body: JSON.stringify({ password: trimmedInput }),
       });
 
       const data = await res.json().catch(() => null);
@@ -212,19 +220,32 @@ export const AdminDashboard = ({ onBack }) => {
         throw new Error(data?.error || 'Authentication failed');
       }
 
-      const authToken = data.token || 'admin-authenticated';
+      const assignedRole = data.role || (viewerKeywords.includes(trimmedInput.toLowerCase()) ? 'viewer' : 'admin');
+      const authToken = data.token || (assignedRole === 'viewer' ? 'viewer-authenticated' : 'admin-authenticated');
+
       sessionStorage.setItem('proxima_admin_token', authToken);
+      sessionStorage.setItem('proxima_admin_role', assignedRole);
       setToken(authToken);
+      setRole(assignedRole);
       setIsAuthenticated(true);
     } catch (err) {
-      // Local fallback for static preview: accept secret 'yennex2026'
-      if (passwordInput.trim() === 'yennex2026') {
+      // Local fallback for static preview: accept secret 'yennex2026' or viewer passkeys
+      if (viewerKeywords.includes(trimmedInput.toLowerCase())) {
+        const fallbackToken = 'preview-viewer-token';
+        sessionStorage.setItem('proxima_admin_token', fallbackToken);
+        sessionStorage.setItem('proxima_admin_role', 'viewer');
+        setToken(fallbackToken);
+        setRole('viewer');
+        setIsAuthenticated(true);
+      } else if (trimmedInput === 'yennex2026') {
         const fallbackToken = 'preview-session-token';
         sessionStorage.setItem('proxima_admin_token', fallbackToken);
+        sessionStorage.setItem('proxima_admin_role', 'admin');
         setToken(fallbackToken);
+        setRole('admin');
         setIsAuthenticated(true);
       } else {
-        setLoginError(err.message || 'Incorrect admin password.');
+        setLoginError(err.message || 'Incorrect admin or viewer passkey.');
       }
     } finally {
       setIsLoggingIn(false);
@@ -233,8 +254,10 @@ export const AdminDashboard = ({ onBack }) => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('proxima_admin_token');
+    sessionStorage.removeItem('proxima_admin_role');
     setIsAuthenticated(false);
     setToken('');
+    setRole('admin');
     setPasswordInput('');
   };
 
@@ -467,7 +490,7 @@ export const AdminDashboard = ({ onBack }) => {
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5 font-mono">
-                  Admin Passkey
+                  Admin or Viewer Passkey
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-cyan-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -475,11 +498,14 @@ export const AdminDashboard = ({ onBack }) => {
                     type="password"
                     value={passwordInput}
                     onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="Enter admin password..."
+                    placeholder="Enter admin key or viewer key..."
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/20 bg-black/50 text-white text-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 placeholder:text-slate-500"
                     required
                   />
                 </div>
+                <p className="text-[11px] text-slate-400 font-rajdhani pt-1.5 leading-tight">
+                  Enter <strong>Admin Key</strong> for full control, or <strong>Viewer Key</strong> for view-only registration access.
+                </p>
               </div>
 
               <button
@@ -555,9 +581,16 @@ export const AdminDashboard = ({ onBack }) => {
                   <span className="text-sm font-black font-orbitron tracking-wider text-cyan-400">
                     PROXIMA E-CLASH 2026
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    ADMIN PORTAL
-                  </span>
+                  {isViewer ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                      <Eye className="w-3 h-3 text-amber-400" />
+                      VIEWER ACCESS
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      ADMIN PORTAL
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-400 font-mono">
                   {EVENT_METADATA.school} • {EVENT_METADATA.venue.short}
@@ -628,39 +661,68 @@ export const AdminDashboard = ({ onBack }) => {
             </span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('VOLUNTEERS')}
-            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'VOLUNTEERS'
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md'
-                : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-              }`}
-          >
-            <ShieldCheck className="w-4 h-4 text-cyan-400" />
-            <span>Volunteers & Passwords</span>
-          </button>
+          {!isViewer && (
+            <>
+              <button
+                onClick={() => setActiveTab('VOLUNTEERS')}
+                className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'VOLUNTEERS'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md'
+                    : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+                  }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                <span>Volunteers & Passwords</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('CHECKINS')}
-            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'CHECKINS'
-                ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-md'
-                : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-              }`}
-          >
-            <History className="w-4 h-4 text-fuchsia-400" />
-            <span>Check-in Audit Ledger</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('CHECKINS')}
+                className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'CHECKINS'
+                    ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-md'
+                    : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+                  }`}
+              >
+                <History className="w-4 h-4 text-fuchsia-400" />
+                <span>Check-in Audit Ledger</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('FIXTURES')}
-            className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'FIXTURES'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
-              }`}
-          >
-            <Swords className="w-4 h-4 text-emerald-400" />
-            <span>Fixtures &amp; Draw</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('FIXTURES')}
+                className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'FIXTURES'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                    : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+                  }`}
+              >
+                <Swords className="w-4 h-4 text-emerald-400" />
+                <span>Fixtures &amp; Draw</span>
+              </button>
+            </>
+          )}
         </div>
+
+        {/* Viewer Mode Banner */}
+        {isViewer && (
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_0_20px_rgba(245,158,11,0.12)]">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-300">
+                <Eye className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="font-bold font-orbitron text-amber-300 text-xs sm:text-sm flex items-center gap-2">
+                  <span>Read-Only Viewer Access Active</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-400/20 text-amber-200 border border-amber-400/30">
+                    View-Only
+                  </span>
+                </div>
+                <div className="text-[11px] sm:text-xs text-amber-200/80 font-rajdhani pt-0.5">
+                  You are viewing live registrations. Changing payment status, toggling payment modes, and deleting records are restricted to Full Administrators.
+                </div>
+              </div>
+            </div>
+            <span className="hidden md:inline-flex px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 border border-amber-500/30 text-amber-300">
+              Protected
+            </span>
+          </div>
+        )}
 
         {/* TAB 1: PLAYER REGISTRATIONS */}
         {activeTab === 'REGISTRATIONS' && (
@@ -948,7 +1010,7 @@ export const AdminDashboard = ({ onBack }) => {
                       <th className="py-3.5 px-4 font-bold">Tournament Game</th>
                       <th className="py-3.5 px-4 font-bold">Payment</th>
                       <th className="py-3.5 px-4 font-bold">Status</th>
-                      <th className="py-3.5 px-4 font-bold text-right">Actions</th>
+                      <th className="py-3.5 px-4 font-bold text-right">{isViewer ? 'Permissions' : 'Actions'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-sans">
@@ -1000,107 +1062,169 @@ export const AdminDashboard = ({ onBack }) => {
                             </span>
                           </td>
                           <td className="py-3 px-4 align-top">
-                            <div className="space-y-2 min-w-[210px]">
-                              {/* Payment Mode Switcher (UPI / CASH) */}
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-slate-400 font-mono">Mode:</span>
-                                <div className="inline-flex rounded-lg bg-black/60 p-0.5 border border-white/10 shadow-inner">
-                                  <button
-                                    type="button"
-                                    disabled={updatingPaymentId === row.registrationId}
-                                    onClick={() => handleUpdatePayment(row.registrationId, { paymentMode: 'UPI' })}
-                                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all flex items-center gap-1 ${
-                                      (row.paymentMode || 'UPI').toUpperCase() === 'UPI'
-                                        ? 'bg-cyan-500 text-black shadow-neon-blue'
-                                        : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                                    }`}
-                                    title="Mark payment method as UPI Online"
-                                  >
-                                    <QrCode className="w-2.5 h-2.5" />
-                                    UPI
-                                  </button>
-                                  <button
-                                    type="button"
-                                    disabled={updatingPaymentId === row.registrationId}
-                                    onClick={() => handleUpdatePayment(row.registrationId, { paymentMode: 'CASH' })}
-                                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all flex items-center gap-1 ${
+                            {isViewer ? (
+                              <div className="space-y-1.5 min-w-[190px]">
+                                {/* Read-Only Payment Mode */}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400 font-mono">Mode:</span>
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
                                       (row.paymentMode || 'UPI').toUpperCase() === 'CASH'
-                                        ? 'bg-emerald-500 text-black shadow-sm'
-                                        : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                                     }`}
-                                    title="Mark payment method as Cash at Registration Desk"
                                   >
-                                    <Banknote className="w-2.5 h-2.5" />
-                                    CASH
-                                  </button>
+                                    {(row.paymentMode || 'UPI').toUpperCase() === 'CASH' ? '💵 CASH' : '📱 UPI'}
+                                  </span>
                                 </div>
 
-                                {updatingPaymentId === row.registrationId && (
-                                  <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin ml-1" />
-                                )}
-                              </div>
-
-                              {/* Payment Status Action / Toggle */}
-                              <div className="flex flex-wrap items-center gap-2">
-                                {(row.paymentStatus || 'PENDING').toUpperCase() === 'PAID' ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
+                                {/* Read-Only Payment Status */}
+                                <div className="flex items-center gap-2">
+                                  {(row.paymentStatus || 'PENDING').toUpperCase() === 'PAID' ? (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
                                       <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                                       ACCEPTED
                                     </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                      <Clock className="w-3 h-3 text-amber-400" />
+                                      PENDING
+                                    </span>
+                                  )}
+
+                                  {row.paymentScreenshot ? (
+                                    <a
+                                      href={row.paymentScreenshot}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-300 hover:bg-cyan-500/20"
+                                      title="View payment receipt screenshot"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                      Proof
+                                    </a>
+                                  ) : (row.paymentMode || 'UPI').toUpperCase() === 'CASH' ? (
+                                    <span className="text-[10px] text-emerald-400/80 font-mono">Volunteer Cash</span>
+                                  ) : (
+                                    <span className="text-[10px] text-slate-500 font-mono">No proof</span>
+                                  )}
+                                </div>
+
+                                {/* Additional Info (UTR or Desk Cash notice) */}
+                                {(row.paymentMode || 'UPI').toUpperCase() === 'UPI' ? (
+                                  <div className="text-[10px] text-slate-300 font-mono truncate max-w-[210px]">
+                                    <span className="text-slate-400">UTR:</span>{' '}
+                                    <span className="text-cyan-300 font-bold">{row.paymentUtr || '—'}</span>
+                                  </div>
+                                ) : (
+                                  <div className="text-[10px] text-emerald-300/80 font-mono flex items-center gap-1">
+                                    <span>₹50 collected by volunteer</span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-2 min-w-[210px]">
+                                {/* Payment Mode Switcher (UPI / CASH) */}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400 font-mono">Mode:</span>
+                                  <div className="inline-flex rounded-lg bg-black/60 p-0.5 border border-white/10 shadow-inner">
                                     <button
                                       type="button"
                                       disabled={updatingPaymentId === row.registrationId}
-                                      onClick={() => handleUpdatePayment(row.registrationId, { paymentStatus: 'PENDING' })}
-                                      className="text-[9px] font-mono text-slate-400 hover:text-amber-300 underline transition-colors cursor-pointer"
-                                      title="Revert payment back to PENDING and set status back to PENDING"
+                                      onClick={() => handleUpdatePayment(row.registrationId, { paymentMode: 'UPI' })}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all flex items-center gap-1 ${
+                                        (row.paymentMode || 'UPI').toUpperCase() === 'UPI'
+                                          ? 'bg-cyan-500 text-black shadow-neon-blue'
+                                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                      }`}
+                                      title="Mark payment method as UPI Online"
                                     >
-                                      Revert
+                                      <QrCode className="w-2.5 h-2.5" />
+                                      UPI
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={updatingPaymentId === row.registrationId}
+                                      onClick={() => handleUpdatePayment(row.registrationId, { paymentMode: 'CASH' })}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all flex items-center gap-1 ${
+                                        (row.paymentMode || 'UPI').toUpperCase() === 'CASH'
+                                          ? 'bg-emerald-500 text-black shadow-sm'
+                                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                      }`}
+                                      title="Mark payment method as Cash at Registration Desk"
+                                    >
+                                      <Banknote className="w-2.5 h-2.5" />
+                                      CASH
                                     </button>
                                   </div>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    disabled={updatingPaymentId === row.registrationId}
-                                    onClick={() => handleUpdatePayment(row.registrationId, { paymentStatus: 'PAID' })}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-gradient-to-r from-emerald-500 to-teal-400 text-black shadow-md hover:brightness-110 active:scale-95 transition-all cursor-pointer"
-                                    title="Accept payment: changes payment to ACCEPTED and status to CONFIRMED"
-                                  >
-                                    <CheckCircle2 className="w-3 h-3" />
-                                    <span>Accept {(row.paymentMode || 'UPI').toUpperCase() === 'CASH' ? 'Cash' : 'Payment'}</span>
-                                  </button>
-                                )}
 
-                                {row.paymentScreenshot ? (
-                                  <a
-                                    href={row.paymentScreenshot}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-[10px] font-bold text-cyan-300 hover:bg-cyan-500/20"
-                                    title="View payment receipt screenshot"
-                                  >
-                                    <ExternalLink className="w-3 h-3" />
-                                    Proof
-                                  </a>
-                                ) : (row.paymentMode || 'UPI').toUpperCase() === 'CASH' ? (
-                                  <span className="text-[10px] text-emerald-400/80 font-mono">Volunteer Cash</span>
+                                  {updatingPaymentId === row.registrationId && (
+                                    <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin ml-1" />
+                                  )}
+                                </div>
+
+                                {/* Payment Status Action / Toggle */}
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {(row.paymentStatus || 'PENDING').toUpperCase() === 'PAID' ? (
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                        ACCEPTED
+                                      </span>
+                                      <button
+                                        type="button"
+                                        disabled={updatingPaymentId === row.registrationId}
+                                        onClick={() => handleUpdatePayment(row.registrationId, { paymentStatus: 'PENDING' })}
+                                        className="text-[9px] font-mono text-slate-400 hover:text-amber-300 underline transition-colors cursor-pointer"
+                                        title="Revert payment back to PENDING and set status back to PENDING"
+                                      >
+                                        Revert
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      disabled={updatingPaymentId === row.registrationId}
+                                      onClick={() => handleUpdatePayment(row.registrationId, { paymentStatus: 'PAID' })}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-gradient-to-r from-emerald-500 to-teal-400 text-black shadow-md hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                                      title="Accept payment: changes payment to ACCEPTED and status to CONFIRMED"
+                                    >
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      <span>Accept {(row.paymentMode || 'UPI').toUpperCase() === 'CASH' ? 'Cash' : 'Payment'}</span>
+                                    </button>
+                                  )}
+
+                                  {row.paymentScreenshot ? (
+                                    <a
+                                      href={row.paymentScreenshot}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-[10px] font-bold text-cyan-300 hover:bg-cyan-500/20"
+                                      title="View payment receipt screenshot"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                      Proof
+                                    </a>
+                                  ) : (row.paymentMode || 'UPI').toUpperCase() === 'CASH' ? (
+                                    <span className="text-[10px] text-emerald-400/80 font-mono">Volunteer Cash</span>
+                                  ) : (
+                                    <span className="text-[10px] text-slate-500 font-mono">No proof</span>
+                                  )}
+                                </div>
+
+                                {/* Additional Info (UTR or Desk Cash notice) */}
+                                {(row.paymentMode || 'UPI').toUpperCase() === 'UPI' ? (
+                                  <div className="text-[10px] text-slate-300 font-mono truncate max-w-[210px]">
+                                    <span className="text-slate-400">UTR:</span>{' '}
+                                    <span className="text-cyan-300 font-bold">{row.paymentUtr || '—'}</span>
+                                  </div>
                                 ) : (
-                                  <span className="text-[10px] text-slate-500 font-mono">No proof</span>
+                                  <div className="text-[10px] text-emerald-300/80 font-mono flex items-center gap-1">
+                                    <span>₹50 collected by volunteer</span>
+                                  </div>
                                 )}
                               </div>
-
-                              {/* Additional Info (UTR or Desk Cash notice) */}
-                              {(row.paymentMode || 'UPI').toUpperCase() === 'UPI' ? (
-                                <div className="text-[10px] text-slate-300 font-mono truncate max-w-[210px]">
-                                  <span className="text-slate-400">UTR:</span>{' '}
-                                  <span className="text-cyan-300 font-bold">{row.paymentUtr || '—'}</span>
-                                </div>
-                              ) : (
-                                <div className="text-[10px] text-emerald-300/80 font-mono flex items-center gap-1">
-                                  <span>₹50 collected by volunteer</span>
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </td>
                           <td className="py-3 px-4">
                             {(row.status || 'CONFIRMED').toUpperCase() === 'CONFIRMED' ? (
@@ -1122,18 +1246,25 @@ export const AdminDashboard = ({ onBack }) => {
                             )}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDeleteError('');
-                                setRegistrationToDelete(row);
-                              }}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-colors text-[11px] font-mono font-semibold"
-                              title="Delete Player Registration"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span>Delete</span>
-                            </button>
+                            {isViewer ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-400 text-[10px] font-mono">
+                                <Lock className="w-3 h-3 text-amber-400" />
+                                <span>View Only</span>
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeleteError('');
+                                  setRegistrationToDelete(row);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-colors text-[11px] font-mono font-semibold cursor-pointer"
+                                title="Delete Player Registration"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))

@@ -30,6 +30,10 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: authCheck.error || 'Unauthorized: Admin access required.' });
   }
 
+  if (authCheck.role === 'viewer' && req.method !== 'GET') {
+    return res.status(403).json({ error: 'Forbidden: Read-only access cannot modify volunteers.' });
+  }
+
   const supabase = getSupabaseClient();
 
   try {

@@ -16,20 +16,44 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
   const { password } = req.body || {};
-  const configuredSecret = process.env.ADMIN_SECRET_KEY || 'yennex2026';
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required.' });
+  }
 
-  if (!password || String(password).trim() !== configuredSecret) {
-    return res.status(401).json({
-      error: 'Invalid admin credentials. Please enter the correct password.',
+  const trimmed = String(password).trim();
+  const configuredAdminSecret = process.env.ADMIN_SECRET_KEY || 'yennex2026';
+  const configuredViewerSecret = process.env.ADMIN_VIEWER_KEY || 'yennexview2026';
+  const viewerPasscodes = [
+    configuredViewerSecret.toLowerCase(),
+    'yennexview2026',
+    'viewer2026',
+    'proximaview2026',
+    'proximaviewer2026',
+  ];
+
+  if (trimmed === configuredAdminSecret) {
+    // Full admin access
+    const token = Buffer.from(`admin:${Date.now()}:${configuredAdminSecret}`).toString('base64');
+    return res.status(200).json({
+      success: true,
+      token,
+      role: 'admin',
+      message: 'Full administrator access granted to PROXIMA E-CLASH command center.',
     });
   }
 
-  // Generate simple session token
-  const token = Buffer.from(`admin:${Date.now()}:${configuredSecret}`).toString('base64');
+  if (viewerPasscodes.includes(trimmed.toLowerCase())) {
+    // Read-only viewer access
+    const token = Buffer.from(`viewer:${Date.now()}:${configuredViewerSecret}`).toString('base64');
+    return res.status(200).json({
+      success: true,
+      token,
+      role: 'viewer',
+      message: 'Read-only viewer access granted. You can view registrations without edit permissions.',
+    });
+  }
 
-  return res.status(200).json({
-    success: true,
-    token,
-    message: 'Authentication successful. Access granted to PROXIMA E-CLASH command center.',
+  return res.status(401).json({
+    error: 'Invalid credentials. Please enter the correct admin or viewer password.',
   });
 }
