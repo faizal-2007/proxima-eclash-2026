@@ -82,9 +82,12 @@ export default async function handler(req, res) {
     });
   }
 
-  const image = decodePaymentImage(body.paymentScreenshot);
-  if (!image.valid) {
-    return res.status(422).json({ error: image.error, validationErrors: { paymentScreenshot: image.error } });
+  let image = null;
+  if (validation.values.paymentMode === 'UPI') {
+    image = decodePaymentImage(body.paymentScreenshot);
+    if (!image.valid) {
+      return res.status(422).json({ error: image.error, validationErrors: { paymentScreenshot: image.error } });
+    }
   }
 
   const supabase = getSupabaseClient();
@@ -109,7 +112,9 @@ export default async function handler(req, res) {
       // 1. Uniqueness check via Blob locks if Blob token is configured
       if (hasBlob) {
         const reservationKeys = [
-          { kind: 'utr', value: validation.values.utr, conflictField: 'utr' },
+          ...(validation.values.utr
+            ? [{ kind: 'utr', value: validation.values.utr, conflictField: 'utr' }]
+            : []),
           ...(!ALLOW_MULTIPLE_GAMES
             ? [
                 { kind: 'campus-id', value: validation.values.campusId, conflictField: 'campusId' },
@@ -134,32 +139,37 @@ export default async function handler(req, res) {
             });
             reservations.push({ url: result.url, ...reservation });
           } catch (error) {
-            if (!isReservationConflict(error)) throw error;
-            if (reservation.conflictField === 'utr') {
-              try {
-                await appendPaymentAuditEvent(supabase, {
-                  event: 'DUPLICATE_UTR_BLOCKED',
-                  campusId: validation.values.campusId,
-                  utr: validation.values.utr,
-                  actor: 'SYSTEM',
-                  note: 'A concurrent or previous submission already reserved this UTR.',
+            if (isReservationConflict(error)) {
+              if (reservation.conflictField === 'utr') {
+                try {
+                  await appendPaymentAuditEvent(supabase, {
+                    event: 'DUPLICATE_UTR_BLOCKED',
+                    campusId: validation.values.campusId,
+                    utr: validation.values.utr,
+                    actor: 'SYSTEM',
+                    note: 'A concurrent or previous submission already reserved this UTR.',
+                  });
+                } catch (auditError) {
+                  console.error('[Payment Registration] Could not write duplicate UTR audit event:', auditError);
+                }
+                return res.status(409).json({
+                  error: 'This UTR has already been used.',
+                  code: 'DUPLICATE_UTR',
+                  conflictField: 'utr',
                 });
-              } catch (auditError) {
-                console.error('[Payment Registration] Could not write duplicate UTR audit event:', auditError);
               }
               return res.status(409).json({
-                error: 'This UTR has already been used.',
-                code: 'DUPLICATE_UTR',
-                conflictField: 'utr',
+                error: reservation.conflictField === 'campusId'
+                  ? 'This Campus ID already has a registration.'
+                  : 'This campus email already has a registration.',
+                code: 'DUPLICATE_REGISTRATION',
+                conflictField: reservation.conflictField,
               });
+            } else {
+              // Token invalid, expired, or Blob unavailable — fall back gracefully to Supabase DB check
+              console.warn('[Vercel Blob] Blob reservation skipped (falling back to database check):', error.message);
+              break;
             }
-            return res.status(409).json({
-              error: reservation.conflictField === 'campusId'
-                ? 'This Campus ID already has a registration.'
-                : 'This campus email already has a registration.',
-              code: 'DUPLICATE_REGISTRATION',
-              conflictField: reservation.conflictField,
-            });
           }
         }
       }
@@ -169,7 +179,7 @@ export default async function handler(req, res) {
         supabase,
         validation.values.campusId,
         validation.values.campusEmail,
-        validation.values.utr
+        validation.values.utr || null
       );
 
       if (duplicate.isDuplicate) {
@@ -200,58 +210,73 @@ export default async function handler(req, res) {
         });
       }
 
-      // 3. Upload screenshot: Use Vercel Blob if configured, otherwise Supabase Storage
-      const format = image.format === 'jpeg' ? 'jpg' : image.format;
-      const fileName = `${crypto.randomUUID()}.${format}`;
+      // 3. Upload screenshot: Use Vercel Blob if configured, otherwise Supabase Storage (only for UPI)
+      if (validation.values.paymentMode === 'UPI' && image) {
+        const format = image.format === 'jpeg' ? 'jpg' : image.format;
+        const fileName = `${crypto.randomUUID()}.${format}`;
+        let uploaded = false;
 
-      if (hasBlob) {
-        const blobPath = `payment-proofs/${fileName}`;
-        const blob = await put(blobPath, image.bytes, {
-          access: 'public',
-          addRandomSuffix: true,
-          contentType: image.contentType,
-          token: process.env.BLOB_READ_WRITE_TOKEN,
-          cacheControlMaxAge: 0,
-        });
-        screenshotUrl = blob.url;
-      } else {
-        // Upload to Supabase Storage bucket 'payment-proofs'
-        const bucketName = 'payment-proofs';
-        const { error: uploadError } = await supabase.storage
-          .from(bucketName)
-          .upload(fileName, image.bytes, {
-            contentType: image.contentType,
-            upsert: true,
-          });
+        if (hasBlob) {
+          try {
+            const blobPath = `payment-proofs/${fileName}`;
+            const blob = await put(blobPath, image.bytes, {
+              access: 'public',
+              addRandomSuffix: true,
+              contentType: image.contentType,
+              token: process.env.BLOB_READ_WRITE_TOKEN,
+              cacheControlMaxAge: 0,
+            });
+            screenshotUrl = blob.url;
+            uploaded = true;
+          } catch (blobError) {
+            console.warn('[Vercel Blob] Upload failed, falling back to Supabase Storage:', blobError.message);
+          }
+        }
 
-        if (uploadError) {
-          // Attempt to create bucket if it does not exist yet
-          await supabase.storage.createBucket(bucketName, { public: true }).catch(() => null);
-          const retry = await supabase.storage
+        if (!uploaded) {
+          // Upload to Supabase Storage bucket 'payment-proofs'
+          const bucketName = 'payment-proofs';
+          const { error: uploadError } = await supabase.storage
             .from(bucketName)
             .upload(fileName, image.bytes, {
               contentType: image.contentType,
               upsert: true,
             });
 
-          if (retry.error) {
-            console.error('[Supabase Storage] Screenshot upload failed:', retry.error);
-            throw new Error(`Failed to store payment proof image: ${retry.error.message}`);
+          if (uploadError) {
+            // Attempt to create bucket if it does not exist yet
+            await supabase.storage.createBucket(bucketName, { public: true }).catch(() => null);
+            const retry = await supabase.storage
+              .from(bucketName)
+              .upload(fileName, image.bytes, {
+                contentType: image.contentType,
+                upsert: true,
+              });
+
+            if (retry.error) {
+              console.error('[Supabase Storage] Screenshot upload failed:', retry.error);
+              throw new Error(`Failed to store payment proof image: ${retry.error.message}`);
+            }
           }
+
+          const { data: publicUrlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(fileName);
+
+          screenshotUrl = publicUrlData?.publicUrl || '';
         }
-
-        const { data: publicUrlData } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(fileName);
-
-        screenshotUrl = publicUrlData?.publicUrl || '';
       }
 
       // 4. Save registration to Supabase
+      const isCash = validation.values.paymentMode === 'CASH';
       const registration = await appendPaymentRegistration(supabase, {
         ...validation.values,
         screenshotUrl,
         selection: validation.values.selection.join(', '),
+        paymentMode: validation.values.paymentMode,
+        paymentUtr: validation.values.utr || null,
+        paymentStatus: 'PENDING',
+        status: isCash ? 'PENDING' : 'CONFIRMED',
       });
       registrationId = registration.registrationId;
       rowStored = true;
@@ -261,9 +286,9 @@ export default async function handler(req, res) {
         event: 'SUBMITTED',
         registrationId,
         campusId: validation.values.campusId,
-        utr: validation.values.utr,
+        utr: validation.values.utr || null,
         actor: 'STUDENT',
-        note: `Manual UPI payment proof submitted; amount INR ${PAYMENT_CONFIG.ENTRY_FEE}.`,
+        note: `${validation.values.paymentMode} payment registration submitted; amount INR ${PAYMENT_CONFIG.ENTRY_FEE}. Status is ${isCash ? 'PENDING' : 'CONFIRMED'}.`,
       });
 
       const qrToken = signQrToken(registrationId, qrSecret);
@@ -282,8 +307,10 @@ export default async function handler(req, res) {
           year: validation.values.year,
           game: validation.values.selection.join(', '),
           games: validation.values.selection,
+          paymentMode: validation.values.paymentMode,
           paymentAmount: PAYMENT_CONFIG.ENTRY_FEE,
-          paymentStatus: 'UNVERIFIED',
+          paymentStatus: 'PENDING',
+          status: isCash ? 'PENDING' : 'CONFIRMED',
         },
       });
     } catch (error) {

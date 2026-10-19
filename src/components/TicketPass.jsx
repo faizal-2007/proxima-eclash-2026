@@ -16,6 +16,9 @@ export const TicketPass = ({ registrationData, onBackToHome }) => {
     campusEmail = '',
     year = '1st Year',
     selection = 'Free Fire',
+    paymentMode = 'UPI',
+    paymentStatus = 'PENDING',
+    status = 'PENDING',
   } = registrationData || {};
 
   // Generate live QR Code on mount from signed qrToken (with fallback to registrationId)
@@ -220,6 +223,26 @@ export const TicketPass = ({ registrationData, onBackToHome }) => {
             <span className="text-slate-400 uppercase font-bold text-[10px] block">Venue</span>
             <span className="font-medium text-slate-200 flex items-center gap-1">
               <MapPin className="w-3 h-3 text-rose-400" /> Balmatta Arena
+            </span>
+          </div>
+
+          <div className="col-span-2 pt-1 border-t border-white/5 flex items-center justify-between">
+            <span className="text-slate-400 uppercase font-bold text-[10px]">Payment &amp; Status:</span>
+            <span className="flex items-center gap-2">
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                paymentMode === 'CASH'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+              }`}>
+                {paymentMode === 'CASH' ? 'CASH' : 'UPI'}
+              </span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                (status || 'PENDING') === 'CONFIRMED'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+              }`}>
+                {(status || 'PENDING') === 'CONFIRMED' ? 'STATUS: CONFIRMED' : 'STATUS: PENDING'}
+              </span>
             </span>
           </div>
         </div>

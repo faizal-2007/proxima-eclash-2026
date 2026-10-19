@@ -1,15 +1,16 @@
-import { getSupabaseClient, getAllRegistrations, deleteRegistration } from '../../_lib/supabase.js';
+import { getSupabaseClient, getAllRegistrations, deleteRegistration, updateRegistrationPayment } from '../../_lib/supabase.js';
 import { verifyAdminAuth } from '../../_lib/auth.js';
 
 /**
  * Vercel Serverless Function: /api/admin/registrations
  * - GET: Returns all registered players with summary counts from Supabase.
+ * - PATCH: Updates paymentMode (CASH / UPI) or paymentStatus (PAID / PENDING).
  * - DELETE: Permanently deletes a player registration row from Supabase.
  */
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,PATCH,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-admin-key');
 
   if (req.method === 'OPTIONS') {
@@ -23,6 +24,41 @@ export default async function handler(req, res) {
   }
 
   const supabase = getSupabaseClient();
+
+  // ==========================================
+  // PATCH: Update payment mode or payment status
+  // ==========================================
+  if (req.method === 'PATCH') {
+    const { registrationId, paymentMode, paymentStatus, note } = req.body || {};
+    if (!registrationId) {
+      return res.status(400).json({ error: 'registrationId is required to update payment.' });
+    }
+
+    try {
+      if (supabase) {
+        const updated = await updateRegistrationPayment(supabase, registrationId, {
+          paymentMode,
+          paymentStatus,
+          note,
+        });
+        return res.status(200).json({
+          success: true,
+          message: `Payment updated for registration ${registrationId}.`,
+          registration: updated,
+        });
+      }
+
+      return res.status(503).json({
+        error: 'Supabase database client unavailable.',
+      });
+    } catch (error) {
+      console.error('[Admin API] Error updating payment:', error);
+      return res.status(500).json({
+        error: 'Failed to update payment.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      });
+    }
+  }
 
   // ==========================================
   // DELETE: Delete a player registration
@@ -56,7 +92,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed. Use GET or DELETE.' });
+    return res.status(405).json({ error: 'Method not allowed. Use GET, PATCH or DELETE.' });
   }
 
   try {

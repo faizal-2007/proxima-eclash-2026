@@ -15,6 +15,7 @@ import {
   QrCode,
   UploadCloud,
   X,
+  Banknote,
 } from 'lucide-react';
 import {
   TRACKS_CONFIG,
@@ -89,6 +90,7 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
     )
   );
   const [apiError, setApiError] = useState(null);
+  const [paymentMode, setPaymentMode] = useState('UPI'); // 'UPI' | 'CASH'
   const [utr, setUtr] = useState('');
   const [paymentImage, setPaymentImage] = useState('');
   const [imageError, setImageError] = useState('');
@@ -338,9 +340,16 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
     setApiError(null);
 
     const cleanUtr = utr.trim();
-    if (!/^\d{12}$/.test(cleanUtr) || !paymentImage || !agreeToTerms || isProcessingImage) {
-      setApiError('Enter a 12-digit UTR, attach a payment screenshot, and accept the payment terms.');
-      return;
+    if (paymentMode === 'UPI') {
+      if (!/^\d{12}$/.test(cleanUtr) || !paymentImage || !agreeToTerms || isProcessingImage) {
+        setApiError('Enter a 12-digit UTR, attach a payment screenshot, and accept the payment terms.');
+        return;
+      }
+    } else {
+      if (!agreeToTerms || isProcessingImage) {
+        setApiError('Please accept the payment terms before submitting your registration.');
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -351,8 +360,9 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
       const payload = JSON.stringify({
         ...formData,
         selection: selectedGames,
-        utr: cleanUtr,
-        paymentScreenshot: paymentImage,
+        paymentMode,
+        utr: paymentMode === 'UPI' ? cleanUtr : undefined,
+        paymentScreenshot: paymentMode === 'UPI' ? paymentImage : undefined,
         agreeToTerms,
       });
       const result = await new Promise((resolve, reject) => {
@@ -402,8 +412,10 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
         game: selectedGames.join(', '),
         selection: selectedGames.join(', '),
         games: selectedGames,
-        paymentStatus: result.details?.paymentStatus || 'UNVERIFIED',
-        paymentUtr: cleanUtr,
+        paymentMode: result.details?.paymentMode || paymentMode,
+        paymentStatus: result.details?.paymentStatus || 'PENDING',
+        status: result.details?.status || (paymentMode === 'CASH' ? 'PENDING' : 'CONFIRMED'),
+        paymentUtr: paymentMode === 'UPI' ? cleanUtr : null,
         paymentAmount: result.details?.paymentAmount || PAYMENT_CONFIG.ENTRY_FEE,
       };
 
@@ -482,7 +494,7 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
           </h1>
 
           <p className="text-xs sm:text-sm max-w-xl mx-auto text-slate-300 font-rajdhani">
-            Enter the battlefield for Free Fire, BGMI, Mini Militia, eFootball or Carrom. Compete for ₹7,000 in prizes.
+            Enter the battlefield for Free Fire, BGMI, Mini Militia, eFootball or Carrom. Compete for prizes and glory.
           </p>
 
           <div className="text-[10px] sm:text-[11px] font-mono text-cyan-300/80 pt-1 leading-relaxed">
@@ -785,173 +797,257 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
                   <p className="mt-1 text-xs text-slate-300">Same entry fee for all selected games</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5 space-y-4">
-                  <div className="flex items-center gap-2 text-cyan-200">
-                    <QrCode className="w-4 h-4" />
-                    <h2 className="text-sm font-bold font-orbitron">Pay by UPI QR</h2>
-                  </div>
-
-                  <div className="flex justify-center">
-                    {isQrAvailable ? (
-                      <button
-                        type="button"
-                        onClick={() => setIsQrZoomed(true)}
-                        className="group rounded-2xl border border-cyan-300/30 bg-white p-2 shadow-[0_0_25px_rgba(0,229,255,0.14)] focus:outline-none focus:ring-2 focus:ring-cyan-300"
-                        aria-label="Enlarge UPI payment QR code"
-                      >
-                        <img
-                          src={PAYMENT_CONFIG.QR_IMAGE_PATH}
-                          alt="UPI payment QR code"
-                          onError={() => setIsQrAvailable(false)}
-                          className="h-56 w-56 sm:h-72 sm:w-72 object-contain"
-                        />
-                        <span className="block pt-1 text-center text-[10px] font-mono text-slate-600 group-hover:text-slate-900">
-                          Tap to enlarge
-                        </span>
-                      </button>
-                    ) : (
-                      <div
-                        role="status"
-                        className="flex min-h-56 w-full max-w-sm flex-col items-center justify-center rounded-2xl border border-dashed border-amber-300/50 bg-amber-400/5 px-5 text-center"
-                      >
-                        <QrCode className="mb-3 h-9 w-9 text-amber-200" />
-                        <p className="text-sm font-bold text-amber-100">Payment QR not available yet</p>
-                        <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                          The organizer will add the QR image at <code className="text-cyan-200">/public/payment/upi-qr.jpeg</code>.
-                        </p>
+                {/* Payment Mode Selector Tabs */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                    Payment Method <span className="text-red-400">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMode('UPI');
+                        setApiError(null);
+                      }}
+                      className={`p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex items-center gap-3 ${
+                        paymentMode === 'UPI'
+                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400 ring-2 ring-cyan-400/40 shadow-[0_0_20px_rgba(0,229,255,0.2)]'
+                          : 'bg-black/30 border-white/10 hover:border-white/20 text-slate-400'
+                      }`}
+                    >
+                      <div className={`p-2.5 rounded-xl border ${paymentMode === 'UPI' ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300' : 'bg-white/5 border-white/10 text-slate-400'}`}>
+                        <QrCode className="w-5 h-5" />
                       </div>
-                    )}
-                  </div>
-                  <p className="text-center text-xs text-slate-300">
-                    You can screenshot this QR or scan it from another phone.
-                  </p>
-
-                  <div className="rounded-xl border border-white/10 bg-[#05071a]/80 p-3">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">UPI ID</p>
-                        <p className="break-all font-mono font-bold text-cyan-200">{PAYMENT_CONFIG.UPI_ID}</p>
+                        <div className={`text-sm font-bold font-orbitron ${paymentMode === 'UPI' ? 'text-white' : 'text-slate-300'}`}>
+                          UPI Online
+                        </div>
+                        <p className="text-[11px] text-slate-400 truncate">Scan QR / Any UPI App</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyUpiId}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 text-xs font-bold text-cyan-100 hover:bg-cyan-400/20 focus:outline-none focus:ring-2 focus:ring-cyan-300"
-                      >
-                        <Copy className="h-4 w-4" />
-                        Copy
-                      </button>
-                    </div>
-                    <p className="mt-2 text-xs text-slate-300">
-                      Payee: <span className="font-semibold text-white">{PAYMENT_CONFIG.UPI_PAYEE_NAME}</span>
-                    </p>
-                    {copyMessage && <p role="status" className="mt-2 text-xs text-emerald-300">{copyMessage}</p>}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMode('CASH');
+                        setApiError(null);
+                      }}
+                      className={`p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex items-center gap-3 ${
+                        paymentMode === 'CASH'
+                          ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400 ring-2 ring-emerald-400/40 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                          : 'bg-black/30 border-white/10 hover:border-white/20 text-slate-400'
+                      }`}
+                    >
+                      <div className={`p-2.5 rounded-xl border ${paymentMode === 'CASH' ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300' : 'bg-white/5 border-white/10 text-slate-400'}`}>
+                        <Banknote className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className={`text-sm font-bold font-orbitron ${paymentMode === 'CASH' ? 'text-white' : 'text-slate-300'}`}>
+                          Cash Payment
+                        </div>
+                        <p className="text-[11px] text-slate-400 truncate">Volunteers collect ₹50 cash</p>
+                      </div>
+                    </button>
                   </div>
-
-                  <a
-                    href={upiPayUri}
-                    className="flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-center text-sm font-black text-[#04120b] shadow-lg shadow-emerald-900/30 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 sm:hidden"
-                  >
-                    Pay with UPI app
-                  </a>
                 </div>
 
-                <div className="rounded-xl border border-cyan-400/25 bg-cyan-400/5 p-3 text-sm font-semibold leading-relaxed text-cyan-100">
-                  Pay ₹{PAYMENT_CONFIG.ENTRY_FEE}, then upload the payment screenshot and enter the UTR / Transaction ID below.
-                </div>
+                {paymentMode === 'UPI' ? (
+                  <>
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5 space-y-4">
+                      <div className="flex items-center gap-2 text-cyan-200">
+                        <QrCode className="w-4 h-4" />
+                        <h2 className="text-sm font-bold font-orbitron">Pay by UPI QR</h2>
+                      </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="payment-utr" className="block text-xs font-bold uppercase tracking-wider text-slate-200">
-                    UTR / Transaction ID <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    id="payment-utr"
-                    name="utr"
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    maxLength={12}
-                    value={utr}
-                    onChange={(event) => setUtr(event.target.value)}
-                    aria-invalid={Boolean(cleanUtr) && !isUtrValid}
-                    aria-describedby="payment-utr-help payment-utr-error"
-                    placeholder="Enter 12-digit UTR"
-                    className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-base font-mono text-white placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
-                  />
-                  <p id="payment-utr-help" className="text-[11px] leading-relaxed text-slate-400">
-                    Find it in your payment app’s transaction details: Google Pay (Transaction ID), PhonePe (UTR), or Paytm (UPI Ref. No.). Enter 12 digits.
-                  </p>
-                  {Boolean(cleanUtr) && !isUtrValid && (
-                    <p id="payment-utr-error" role="alert" className="text-xs text-red-300">
-                      Enter exactly 12 digits. Spaces at the beginning or end are ignored.
-                    </p>
-                  )}
-                </div>
+                      <div className="flex justify-center">
+                        {isQrAvailable ? (
+                          <button
+                            type="button"
+                            onClick={() => setIsQrZoomed(true)}
+                            className="group rounded-2xl border border-cyan-300/30 bg-white p-2 shadow-[0_0_25px_rgba(0,229,255,0.14)] focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                            aria-label="Enlarge UPI payment QR code"
+                          >
+                            <img
+                              src={PAYMENT_CONFIG.QR_IMAGE_PATH}
+                              alt="UPI payment QR code"
+                              onError={() => setIsQrAvailable(false)}
+                              className="h-56 w-56 sm:h-72 sm:w-72 object-contain"
+                            />
+                            <span className="block pt-1 text-center text-[10px] font-mono text-slate-600 group-hover:text-slate-900">
+                              Tap to enlarge
+                            </span>
+                          </button>
+                        ) : (
+                          <div
+                            role="status"
+                            className="flex min-h-56 w-full max-w-sm flex-col items-center justify-center rounded-2xl border border-dashed border-amber-300/50 bg-amber-400/5 px-5 text-center"
+                          >
+                            <QrCode className="mb-3 h-9 w-9 text-amber-200" />
+                            <p className="text-sm font-bold text-amber-100">Payment QR not available yet</p>
+                            <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                              The organizer will add the QR image at <code className="text-cyan-200">/public/payment/upi-qr.jpeg</code>.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-center text-xs text-slate-300">
+                        You can screenshot this QR or scan it from another phone.
+                      </p>
 
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
-                    Payment Screenshot <span className="text-red-400">*</span>
-                  </label>
-                  <p className="text-[11px] text-slate-400">JPG, PNG, or WebP • Maximum original size 5 MB • compressed before submission</p>
-                  {paymentImage ? (
-                    <div className="overflow-hidden rounded-xl border border-emerald-400/30 bg-black/30">
-                      <img src={paymentImage} alt="Compressed payment screenshot preview" className="max-h-64 w-full object-contain" />
-                      <div className="flex flex-wrap gap-2 border-t border-white/10 p-3">
-                        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 text-xs font-bold text-cyan-100 hover:bg-cyan-400/20 focus-within:ring-2 focus-within:ring-cyan-300">
-                          <UploadCloud className="h-4 w-4" />
-                          Replace screenshot
+                      <div className="rounded-xl border border-white/10 bg-[#05071a]/80 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">UPI ID</p>
+                            <p className="break-all font-mono font-bold text-cyan-200">{PAYMENT_CONFIG.UPI_ID}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleCopyUpiId}
+                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 text-xs font-bold text-cyan-100 hover:bg-cyan-400/20 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                          >
+                            <Copy className="h-4 w-4" />
+                            Copy
+                          </button>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-300">
+                          Payee: <span className="font-semibold text-white">{PAYMENT_CONFIG.UPI_PAYEE_NAME}</span>
+                        </p>
+                        {copyMessage && <p role="status" className="mt-2 text-xs text-emerald-300">{copyMessage}</p>}
+                      </div>
+
+                      <a
+                        href={upiPayUri}
+                        className="flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-center text-sm font-black text-[#04120b] shadow-lg shadow-emerald-900/30 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 sm:hidden"
+                      >
+                        Pay with UPI app
+                      </a>
+                    </div>
+
+                    <div className="rounded-xl border border-cyan-400/25 bg-cyan-400/5 p-3 text-sm font-semibold leading-relaxed text-cyan-100">
+                      Pay ₹{PAYMENT_CONFIG.ENTRY_FEE}, then upload the payment screenshot and enter the UTR / Transaction ID below.
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="payment-utr" className="block text-xs font-bold uppercase tracking-wider text-slate-200">
+                        UTR / Transaction ID <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        id="payment-utr"
+                        name="utr"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        maxLength={12}
+                        value={utr}
+                        onChange={(event) => setUtr(event.target.value)}
+                        aria-invalid={Boolean(cleanUtr) && !isUtrValid}
+                        aria-describedby="payment-utr-help payment-utr-error"
+                        placeholder="Enter 12-digit UTR"
+                        className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-base font-mono text-white placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
+                      />
+                      <p id="payment-utr-help" className="text-[11px] leading-relaxed text-slate-400">
+                        Find it in your payment app’s transaction details: Google Pay (Transaction ID), PhonePe (UTR), or Paytm (UPI Ref. No.). Enter 12 digits.
+                      </p>
+                      {Boolean(cleanUtr) && !isUtrValid && (
+                        <p id="payment-utr-error" role="alert" className="text-xs text-red-300">
+                          Enter exactly 12 digits. Spaces at the beginning or end are ignored.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
+                        Payment Screenshot <span className="text-red-400">*</span>
+                      </label>
+                      <p className="text-[11px] text-slate-400">JPG, PNG, or WebP • Maximum original size 5 MB • compressed before submission</p>
+                      {paymentImage ? (
+                        <div className="overflow-hidden rounded-xl border border-emerald-400/30 bg-black/30">
+                          <img src={paymentImage} alt="Compressed payment screenshot preview" className="max-h-64 w-full object-contain" />
+                          <div className="flex flex-wrap gap-2 border-t border-white/10 p-3">
+                            <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 text-xs font-bold text-cyan-100 hover:bg-cyan-400/20 focus-within:ring-2 focus-within:ring-cyan-300">
+                              <UploadCloud className="h-4 w-4" />
+                              Replace screenshot
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handlePaymentImageChange}
+                                className="sr-only"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPaymentImage('');
+                                setImageError('');
+                              }}
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-300/30 bg-red-400/10 px-3 text-xs font-bold text-red-200 hover:bg-red-400/20 focus:outline-none focus:ring-2 focus:ring-red-300"
+                            >
+                              <X className="h-4 w-4" />
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/25 bg-black/20 px-4 py-5 text-center text-sm text-slate-200 hover:border-cyan-300 hover:bg-cyan-400/5 focus-within:ring-2 focus-within:ring-cyan-300">
+                          {isProcessingImage ? (
+                            <>
+                              <Loader2 className="h-6 w-6 animate-spin text-cyan-300" />
+                              <span>Optimizing screenshot…</span>
+                            </>
+                          ) : (
+                            <>
+                              <UploadCloud className="h-6 w-6 text-cyan-300" />
+                              <span className="font-semibold">Choose screenshot or take a photo</span>
+                              <span className="text-[11px] text-slate-400">Camera and gallery options are available on mobile</span>
+                            </>
+                          )}
                           <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
                             onChange={handlePaymentImageChange}
+                            disabled={isProcessingImage}
                             className="sr-only"
                           />
                         </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPaymentImage('');
-                            setImageError('');
-                          }}
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-300/30 bg-red-400/10 px-3 text-xs font-bold text-red-200 hover:bg-red-400/20 focus:outline-none focus:ring-2 focus:ring-red-300"
-                        >
-                          <X className="h-4 w-4" />
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/25 bg-black/20 px-4 py-5 text-center text-sm text-slate-200 hover:border-cyan-300 hover:bg-cyan-400/5 focus-within:ring-2 focus-within:ring-cyan-300">
-                      {isProcessingImage ? (
-                        <>
-                          <Loader2 className="h-6 w-6 animate-spin text-cyan-300" />
-                          <span>Optimizing screenshot…</span>
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="h-6 w-6 text-cyan-300" />
-                          <span className="font-semibold">Choose screenshot or take a photo</span>
-                          <span className="text-[11px] text-slate-400">Camera and gallery options are available on mobile</span>
-                        </>
                       )}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        onChange={handlePaymentImageChange}
-                        disabled={isProcessingImage}
-                        className="sr-only"
-                      />
-                    </label>
-                  )}
-                  {isProcessingImage && (
-                    <div role="status" className="space-y-1">
-                      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-2/3 animate-pulse rounded-full bg-cyan-300 motion-reduce:animate-none" />
-                      </div>
-                      <p className="text-[11px] text-cyan-200">Compressing image to under 1 MB…</p>
+                      {isProcessingImage && (
+                        <div role="status" className="space-y-1">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div className="h-full w-2/3 animate-pulse rounded-full bg-cyan-300 motion-reduce:animate-none" />
+                          </div>
+                          <p className="text-[11px] text-cyan-200">Compressing image to under 1 MB…</p>
+                        </div>
+                      )}
+                      {imageError && <p role="alert" className="text-xs text-red-300">{imageError}</p>}
                     </div>
-                  )}
-                  {imageError && <p role="alert" className="text-xs text-red-300">{imageError}</p>}
-                </div>
+                  </>
+                ) : (
+                  /* Cash Collection by Volunteers View */
+                  <div className="rounded-2xl border border-emerald-400/30 bg-gradient-to-b from-emerald-950/30 via-[#06141a]/60 to-[#030d12]/80 p-5 space-y-4 shadow-lg shadow-emerald-950/30">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 shadow-md">
+                        <Banknote className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold font-orbitron text-white">Cash Payment Selected</h3>
+                        <p className="text-xs text-emerald-300 font-mono">Volunteers will collect ₹{PAYMENT_CONFIG.ENTRY_FEE} in person</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5 text-xs text-slate-300 bg-black/40 p-4 rounded-xl border border-white/10">
+                      <p className="font-semibold text-white">How Cash Payment Works:</p>
+                      <ul className="space-y-2 list-disc list-inside text-slate-300">
+                        <li>You get successfully registered immediately and receive your player pass.</li>
+                        <li>Tournament volunteers will come to you to collect the <span className="font-bold text-white">₹{PAYMENT_CONFIG.ENTRY_FEE}</span> cash payment.</li>
+                        <li>Your registration status will remain <span className="font-mono font-bold text-amber-300 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">PENDING</span> until the admin accepts the payment.</li>
+                        <li>Once the admin marks the payment as accepted, your tournament status will change to <span className="font-mono font-bold text-emerald-300 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20">CONFIRMED</span>!</li>
+                      </ul>
+                      <p className="text-[11px] text-cyan-300/90 pt-1 font-mono">
+                        ✓ No transaction screenshot or UTR number required for cash entries.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3.5 focus-within:ring-2 focus-within:ring-cyan-300">
                   <input
@@ -997,13 +1093,22 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
                   </button>
                   <button
                     type="submit"
-                    disabled={!isUtrValid || !paymentImage || !agreeToTerms || isProcessingImage || isSubmitting}
+                    disabled={
+                      paymentMode === 'UPI'
+                        ? (!isUtrValid || !paymentImage || !agreeToTerms || isProcessingImage || isSubmitting)
+                        : (!agreeToTerms || isSubmitting)
+                    }
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 via-blue-600 to-violet-600 px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-neon-blue hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-cyan-300 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
                         Submitting…
+                      </>
+                    ) : paymentMode === 'CASH' ? (
+                      <>
+                        <Banknote className="h-4 w-4" />
+                        Register with Cash &amp; Get Ticket
                       </>
                     ) : (
                       <>

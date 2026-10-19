@@ -64,6 +64,7 @@ export const validatePaymentFields = (body, { emailConfig, validGames, groupOne,
       : typeof body.selection === 'string'
         ? body.selection.split(',').map((value) => value.trim()).filter(Boolean)
         : [],
+    paymentMode: String(body.paymentMode || 'UPI').trim().toUpperCase() === 'CASH' ? 'CASH' : 'UPI',
     utr: String(body.utr || '').trim(),
   };
   const errors = {};
@@ -106,8 +107,10 @@ export const validatePaymentFields = (body, { emailConfig, validGames, groupOne,
   if (!isValidSelection) {
     errors.selection = 'Invalid game selection. You can select 1 game from Group 2, or 2 games (1 from Group 1 and 1 from Group 2, or both from Group 2).';
   }
-  if (!/^\d{12}$/.test(values.utr)) {
-    errors.utr = 'Enter a valid 12-digit UTR / Transaction ID.';
+  if (values.paymentMode === 'UPI') {
+    if (!/^\d{12}$/.test(values.utr)) {
+      errors.utr = 'Enter a valid 12-digit UTR / Transaction ID.';
+    }
   }
   if (!body.agreeToTerms) {
     errors.agreeToTerms = 'Accept the payment terms before submitting.';

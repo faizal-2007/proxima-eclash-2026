@@ -18,10 +18,10 @@ import volunteerStatsHandler from './_handlers/volunteer/stats.js';
 
 const handlers = {
   'admin/checkins': adminCheckInsHandler,
+  'admin/fixtures': adminFixturesHandler,
   'admin/login': adminLoginHandler,
   'admin/registrations': adminRegistrationsHandler,
   'admin/volunteers': adminVolunteersHandler,
-  'admin/fixtures': adminFixturesHandler,
   health: healthHandler,
   register: registerHandler,
   'register/eclash': legacyRegisterHandler,

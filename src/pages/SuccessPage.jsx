@@ -22,16 +22,24 @@ export const SuccessPage = ({ registrationData, onBackToHome }) => (
           <CheckCircle2 className="w-10 h-10" />
         </div>
         <h1 className="text-3xl sm:text-4xl font-black font-orbitron tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-[#00e5ff]">
-          Registration Confirmed!
+          {registrationData?.paymentMode === 'CASH' ? 'Registration Received!' : 'Registration Confirmed!'}
         </h1>
         <p className="text-sm sm:text-base max-w-xl mx-auto text-slate-300 font-rajdhani">
-          Your payment proof has been submitted. The organizer will verify the UTR against the payment statement.
+          {registrationData?.paymentMode === 'CASH'
+            ? 'You are successfully registered! Tournament volunteers will collect the ₹50 cash payment from you. Your status will stay in PENDING until the admin accepts your payment, after which it will become CONFIRMED.'
+            : 'Your payment proof has been submitted. The organizer will verify the UTR against the payment statement.'}
         </p>
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-amber-200">
+        <div className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wider ${
+          registrationData?.paymentMode === 'CASH'
+            ? 'border-amber-400/40 bg-amber-400/10 text-amber-200'
+            : 'border-cyan-400/40 bg-cyan-400/10 text-cyan-200'
+        }`}>
           <Sparkles className="h-4 w-4" />
-          Payment submitted · Awaiting verification
+          {registrationData?.paymentMode === 'CASH'
+            ? 'Status: PENDING · Volunteer will collect cash'
+            : 'UPI Payment · Awaiting verification'}
         </div>
-        {registrationData?.paymentUtr && (
+        {registrationData?.paymentMode === 'UPI' && registrationData?.paymentUtr && (
           <p className="text-xs font-mono text-slate-400">
             UTR submitted: <span className="text-cyan-200">{registrationData.paymentUtr}</span>
           </p>
@@ -44,8 +52,12 @@ export const SuccessPage = ({ registrationData, onBackToHome }) => (
             <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-300 font-mono">Entry Pass</p>
             <h2 className="text-lg font-black font-orbitron text-white">PROXIMA E-CLASH 2026</h2>
           </div>
-          <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-bold text-amber-100">
-            Payment submitted · ₹{PAYMENT_CONFIG.ENTRY_FEE}
+          <div className={`rounded-xl border px-3 py-2 text-xs font-bold ${
+            registrationData?.paymentMode === 'CASH'
+              ? 'border-amber-400/30 bg-amber-400/10 text-amber-100'
+              : 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100'
+          }`}>
+            {registrationData?.paymentMode === 'CASH' ? 'Cash · ₹50 (Pending Acceptance)' : `UPI · ₹${PAYMENT_CONFIG.ENTRY_FEE}`}
           </div>
         </div>
         <TicketPass registrationData={registrationData} onBackToHome={onBackToHome} />

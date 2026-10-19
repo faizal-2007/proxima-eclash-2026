@@ -201,7 +201,7 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
           </div>
 
           <p className="text-xs sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-rajdhani font-medium pt-1 sm:pt-2">
-            Game On. Compete. Connect. Conquer. The premier battlefield for Free Fire, BGMI, Mini Militia, eFootball & Carrom at Yenepoya University.
+            Where Virtual Worlds Become Battlefields. The premier battlefield for Free Fire, BGMI, Mini Militia, eFootball & Carrom at Yenepoya University.
           </p>
         </motion.div>
 

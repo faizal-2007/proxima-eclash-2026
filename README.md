@@ -1,7 +1,7 @@
 # ?? PROXIMA E-CLASH 2026
 
-> **Inter-College Esports Championship** — Yenepoya (Deemed to be University)
-> *Game On. Compete. Connect. Conquer. Battle for the Ultimate Gaming Crown.*
+> **Inter-College Esports Championship** ï¿½ Yenepoya (Deemed to be University)
+> *Where Virtual Worlds Become Battlefields.*
 
 A full-stack event management web application built for **PROXIMA E-CLASH 2026**, a 1-day mega esports festival hosted at Yenepoya School of Engineering and Technology, Mangaluru on **October 26, 2026**.
 
@@ -27,48 +27,47 @@ A full-stack event management web application built for **PROXIMA E-CLASH 2026**
 | **BGMI** | Battle Royale (Mobile) | ?1,000 / ?500 |
 | **Mini Militia** | Deathmatch FFA (Mobile) | ?1,000 / ?500 |
 | **eFootball** | Football 1v1 (Mobile) | ?500 / ?250 |
-| **Ludo** | 4-Player Board (Mobile) | ?500 / ?250 |
-| **Carrom** | 1v1 Disc Pot (Mobile) | ?500 / ?250 |
+| **Carrom** | 1v1 Disc Pot (Mobile) | â‚¹500 / â‚¹250 |
 
 ---
 
 ## ? Features Built
 
 ### ?? Public Landing Page
-- **3D Cinematic Intro Overlay** — Full-screen animated opening experience with skip option and replay button in footer; auto-skips for returning visitors (stored in `sessionStorage`)
-- **Split Hero Section** — Parallax esports arena hero with live countdown to event date, glowing game badges, and a "Register Now" CTA
+- **3D Cinematic Intro Overlay** ï¿½ Full-screen animated opening experience with skip option and replay button in footer; auto-skips for returning visitors (stored in `sessionStorage`)
+- **Split Hero Section** ï¿½ Parallax esports arena hero with live countdown to event date, glowing game badges, and a "Register Now" CTA
 - **Landing Sections:**
-  - **About** — Event overview with prize pool and student eligibility info
-  - **Games** — Interactive cards for all 6 games with prize details, format, and max player counts
-  - **Schedule** — Full day-of-event timeline from 9:00 AM to 3:45 PM
-  - **Prizes** — Champions, runner-up, and MVP prize breakdown
-  - **Rules / FAQ** — Expandable FAQ covering eligibility, devices, payment, and pass delivery
-  - **Contact** — Technical admin contact details and social links
-- **Navbar** — Sticky navigation with smooth scroll to all landing sections, volunteer portal link, and admin access
-- **Footer** — Full footer with event details, quick links, and intro replay button
+  - **About** ï¿½ Event overview with prize pool and student eligibility info
+  - **Games** ï¿½ Interactive cards for all 5 games with prize details, format, and max player counts
+  - **Schedule** ï¿½ Full day-of-event timeline from 9:00 AM to 3:45 PM
+  - **Prizes** ï¿½ Champions, runner-up, and MVP prize breakdown
+  - **Rules / FAQ** ï¿½ Expandable FAQ covering eligibility, devices, payment, and pass delivery
+  - **Contact** ï¿½ Technical admin contact details and social links
+- **Navbar** ï¿½ Sticky navigation with smooth scroll to all landing sections, volunteer portal link, and admin access
+- **Footer** ï¿½ Full footer with event details, quick links, and intro replay button
 
 ### ?? Registration System
 - **Multi-step registration flow:** Player details ? Game selection ? Payment ? Confirmation
-- **Form auto-save** — Draft form state persisted to `sessionStorage` across refreshes
-- **Game selection** — Grouped by category (Battle Royale / Board Games); single-game entry enforced via config
+- **Form auto-save** ï¿½ Draft form state persisted to `sessionStorage` across refreshes
+- **Game selection** ï¿½ Grouped by category (Battle Royale / Board Games); single-game entry enforced via config
 - **UPI payment flow:**
   - Displays live UPI QR code (`/public/payment/upi-qr.jpeg`)
   - UPI ID with one-click copy
   - Payment screenshot upload with client-side **image compression** (Canvas API)
   - UTR (transaction reference) input and validation
 - **Honeypot bot protection** on the registration form
-- **Ticket Recovery** — Players can re-fetch their pass by entering Campus ID
+- **Ticket Recovery** ï¿½ Players can re-fetch their pass by entering Campus ID
 - **Post-registration:** Confetti burst + auto-navigate to `SuccessPage`
 
 ### ?? Digital Player Pass (Ticket)
 - Generated immediately on successful registration
 - Contains: Player name, Campus ID, game, Registration ID, event date/venue
-- **HMAC-SHA256 signed QR code** — Cryptographically secure, tamper-evident
+- **HMAC-SHA256 signed QR code** ï¿½ Cryptographically secure, tamper-evident
 - Downloadable as image via `TicketPass` component
 - QR code is scannable by the Volunteer Scanner system
 
 ### ??? Admin Command Center (`#admin`)
-- **Passkey-protected** — Session-based admin token stored in `sessionStorage`
+- **Passkey-protected** ï¿½ Session-based admin token stored in `sessionStorage`
 - **Registrations Tab:**
   - Live stats dashboard: Total, checked-in, pending, per-game breakdown
   - Full searchable, filterable registrations table (by name, campus ID, game, year)
@@ -87,15 +86,15 @@ A full-stack event management web application built for **PROXIMA E-CLASH 2026**
   - Filterable by result type: `CHECKED_IN`, `ALREADY_CHECKED_IN`, `INVALID`, `WRONG_STATION_OVERRIDE`
 
 ### ?? Volunteer Portal
-- **`VolunteerLoginPage`** — JWT-authenticated login using Campus ID & password; 12-hour session with token expiry detection
+- **`VolunteerLoginPage`** ï¿½ JWT-authenticated login using Campus ID & password; 12-hour session with token expiry detection
 - **`VolunteerScannerDashboard`:**
-  - **Camera QR Scanner** — Uses `html5-qrcode` library for real-time camera-based QR scanning
-  - **Manual Search Modal** — Text search by name or Registration ID for players without QR access
-  - **Scan Result Card** — Shows player details, game, check-in status; supports override for wrong-station scans
-  - **Station Stats HUD** — Live per-station scan count, last scan time, and success rate
-  - **Audio Feedback** — Distinct audio cues for success, already-checked-in, and invalid QR scans
-  - **Offline Queue** — Queues scan events when offline and auto-syncs when network returns
-- **`VolunteerHistoryPage`** — Personal scan history for the logged-in volunteer with filters
+  - **Camera QR Scanner** ï¿½ Uses `html5-qrcode` library for real-time camera-based QR scanning
+  - **Manual Search Modal** ï¿½ Text search by name or Registration ID for players without QR access
+  - **Scan Result Card** ï¿½ Shows player details, game, check-in status; supports override for wrong-station scans
+  - **Station Stats HUD** ï¿½ Live per-station scan count, last scan time, and success rate
+  - **Audio Feedback** ï¿½ Distinct audio cues for success, already-checked-in, and invalid QR scans
+  - **Offline Queue** ï¿½ Queues scan events when offline and auto-syncs when network returns
+- **`VolunteerHistoryPage`** ï¿½ Personal scan history for the logged-in volunteer with filters
 
 ---
 
@@ -124,78 +123,78 @@ A full-stack event management web application built for **PROXIMA E-CLASH 2026**
 ```
 proxima-eclash-2026/
 +-- api/
-¦   +-- [...path].js              # Unified API router (Vercel catch-all)
-¦   +-- _lib/
-¦   ¦   +-- supabase.js           # Supabase client + all DB query helpers
-¦   ¦   +-- auth.js               # Admin & volunteer JWT auth middleware
-¦   ¦   +-- crypto.js             # HMAC-SHA256 QR signature utils
-¦   ¦   +-- paymentValidation.js  # UTR + payment proof validation logic
-¦   ¦   +-- rateLimit.js          # In-memory rate limiter for API endpoints
-¦   +-- _handlers/
-¦       +-- health.js             # GET /api/health — DB health check
-¦       +-- ticket.js             # GET /api/ticket — ticket recovery by campus ID
-¦       +-- register/
-¦       ¦   +-- index.js          # Registration entrypoint
-¦       ¦   +-- eclash.js         # POST /api/register/eclash — main registration handler
-¦       ¦   +-- payment.js        # POST /api/register/payment — payment record creation
-¦       ¦   +-- manualPayment.js  # POST /api/register/manual — admin manual payment entry
-¦       +-- admin/
-¦       ¦   +-- login.js          # POST /api/admin/login — admin passkey auth
-¦       ¦   +-- registrations.js  # GET/DELETE /api/admin/registrations
-¦       ¦   +-- volunteers.js     # CRUD /api/admin/volunteers
-¦       ¦   +-- checkins.js       # GET /api/admin/checkins — check-in audit logs
-¦       +-- volunteer/
-¦           +-- login.js          # POST /api/volunteer/login — JWT issue
-¦           +-- me.js             # GET /api/volunteer/me — current volunteer profile
-¦           +-- scan.js           # POST /api/volunteer/scan — QR scan + check-in
-¦           +-- checkin.js        # POST /api/volunteer/checkin — manual check-in
-¦           +-- search.js         # GET /api/volunteer/search — player search
-¦           +-- stats.js          # GET /api/volunteer/stats — station stats
-¦           +-- history.js        # GET /api/volunteer/history — volunteer scan history
+ï¿½   +-- [...path].js              # Unified API router (Vercel catch-all)
+ï¿½   +-- _lib/
+ï¿½   ï¿½   +-- supabase.js           # Supabase client + all DB query helpers
+ï¿½   ï¿½   +-- auth.js               # Admin & volunteer JWT auth middleware
+ï¿½   ï¿½   +-- crypto.js             # HMAC-SHA256 QR signature utils
+ï¿½   ï¿½   +-- paymentValidation.js  # UTR + payment proof validation logic
+ï¿½   ï¿½   +-- rateLimit.js          # In-memory rate limiter for API endpoints
+ï¿½   +-- _handlers/
+ï¿½       +-- health.js             # GET /api/health ï¿½ DB health check
+ï¿½       +-- ticket.js             # GET /api/ticket ï¿½ ticket recovery by campus ID
+ï¿½       +-- register/
+ï¿½       ï¿½   +-- index.js          # Registration entrypoint
+ï¿½       ï¿½   +-- eclash.js         # POST /api/register/eclash ï¿½ main registration handler
+ï¿½       ï¿½   +-- payment.js        # POST /api/register/payment ï¿½ payment record creation
+ï¿½       ï¿½   +-- manualPayment.js  # POST /api/register/manual ï¿½ admin manual payment entry
+ï¿½       +-- admin/
+ï¿½       ï¿½   +-- login.js          # POST /api/admin/login ï¿½ admin passkey auth
+ï¿½       ï¿½   +-- registrations.js  # GET/DELETE /api/admin/registrations
+ï¿½       ï¿½   +-- volunteers.js     # CRUD /api/admin/volunteers
+ï¿½       ï¿½   +-- checkins.js       # GET /api/admin/checkins ï¿½ check-in audit logs
+ï¿½       +-- volunteer/
+ï¿½           +-- login.js          # POST /api/volunteer/login ï¿½ JWT issue
+ï¿½           +-- me.js             # GET /api/volunteer/me ï¿½ current volunteer profile
+ï¿½           +-- scan.js           # POST /api/volunteer/scan ï¿½ QR scan + check-in
+ï¿½           +-- checkin.js        # POST /api/volunteer/checkin ï¿½ manual check-in
+ï¿½           +-- search.js         # GET /api/volunteer/search ï¿½ player search
+ï¿½           +-- stats.js          # GET /api/volunteer/stats ï¿½ station stats
+ï¿½           +-- history.js        # GET /api/volunteer/history ï¿½ volunteer scan history
 +-- src/
-¦   +-- App.jsx                   # Root app + hash-based SPA router
-¦   +-- main.jsx                  # React entry point
-¦   +-- config/
-¦   ¦   +-- eventConfig.js        # All event data: games, schedule, prizes, FAQ, metadata
-¦   +-- pages/
-¦   ¦   +-- RegistrationPage.jsx  # Full registration wizard (details ? game ? payment ? confirm)
-¦   ¦   +-- SuccessPage.jsx       # Post-registration success with confetti
-¦   ¦   +-- AdminDashboard.jsx    # Admin command center (registrations, volunteers, check-ins)
-¦   ¦   +-- VolunteerLoginPage.jsx
-¦   ¦   +-- VolunteerScannerDashboard.jsx
-¦   ¦   +-- VolunteerHistoryPage.jsx
-¦   +-- components/
-¦   ¦   +-- Navbar.jsx
-¦   ¦   +-- SplitHero.jsx         # Hero with countdown + parallax
-¦   ¦   +-- LandingSections.jsx   # About, Games, Schedule, Prizes, FAQ, Contact
-¦   ¦   +-- Footer.jsx
-¦   ¦   +-- Intro3DOverlay.jsx    # 3D cinematic opening animation
-¦   ¦   +-- HeroArtworkLayers.jsx # Parallax hero background layers
-¦   ¦   +-- TicketPass.jsx        # Digital player pass + QR code
-¦   ¦   +-- TicketRecoveryForm.jsx
-¦   ¦   +-- RegistrationSteps.jsx # Step indicator component
-¦   ¦   +-- admin/
-¦   ¦   ¦   +-- VolunteersManager.jsx
-¦   ¦   ¦   +-- CheckInsViewer.jsx
-¦   ¦   +-- volunteer/
-¦   ¦       +-- CameraScanner.jsx
-¦   ¦       +-- ManualSearchModal.jsx
-¦   ¦       +-- ScanResultCard.jsx
-¦   ¦       +-- StationStatsHud.jsx
-¦   +-- utils/
-¦       +-- volunteerAuth.js       # JWT storage, decode, expiry check helpers
-¦       +-- audioFeedback.js       # Web Audio API scan sound effects
-¦       +-- compressPaymentImage.js# Canvas-based image resize + compression
-¦       +-- offlineQueue.js        # IndexedDB offline scan queue + sync
+ï¿½   +-- App.jsx                   # Root app + hash-based SPA router
+ï¿½   +-- main.jsx                  # React entry point
+ï¿½   +-- config/
+ï¿½   ï¿½   +-- eventConfig.js        # All event data: games, schedule, prizes, FAQ, metadata
+ï¿½   +-- pages/
+ï¿½   ï¿½   +-- RegistrationPage.jsx  # Full registration wizard (details ? game ? payment ? confirm)
+ï¿½   ï¿½   +-- SuccessPage.jsx       # Post-registration success with confetti
+ï¿½   ï¿½   +-- AdminDashboard.jsx    # Admin command center (registrations, volunteers, check-ins)
+ï¿½   ï¿½   +-- VolunteerLoginPage.jsx
+ï¿½   ï¿½   +-- VolunteerScannerDashboard.jsx
+ï¿½   ï¿½   +-- VolunteerHistoryPage.jsx
+ï¿½   +-- components/
+ï¿½   ï¿½   +-- Navbar.jsx
+ï¿½   ï¿½   +-- SplitHero.jsx         # Hero with countdown + parallax
+ï¿½   ï¿½   +-- LandingSections.jsx   # About, Games, Schedule, Prizes, FAQ, Contact
+ï¿½   ï¿½   +-- Footer.jsx
+ï¿½   ï¿½   +-- Intro3DOverlay.jsx    # 3D cinematic opening animation
+ï¿½   ï¿½   +-- HeroArtworkLayers.jsx # Parallax hero background layers
+ï¿½   ï¿½   +-- TicketPass.jsx        # Digital player pass + QR code
+ï¿½   ï¿½   +-- TicketRecoveryForm.jsx
+ï¿½   ï¿½   +-- RegistrationSteps.jsx # Step indicator component
+ï¿½   ï¿½   +-- admin/
+ï¿½   ï¿½   ï¿½   +-- VolunteersManager.jsx
+ï¿½   ï¿½   ï¿½   +-- CheckInsViewer.jsx
+ï¿½   ï¿½   +-- volunteer/
+ï¿½   ï¿½       +-- CameraScanner.jsx
+ï¿½   ï¿½       +-- ManualSearchModal.jsx
+ï¿½   ï¿½       +-- ScanResultCard.jsx
+ï¿½   ï¿½       +-- StationStatsHud.jsx
+ï¿½   +-- utils/
+ï¿½       +-- volunteerAuth.js       # JWT storage, decode, expiry check helpers
+ï¿½       +-- audioFeedback.js       # Web Audio API scan sound effects
+ï¿½       +-- compressPaymentImage.js# Canvas-based image resize + compression
+ï¿½       +-- offlineQueue.js        # IndexedDB offline scan queue + sync
 +-- supabase/
-¦   +-- schema.sql                # Full PostgreSQL schema + RLS policies
+ï¿½   +-- schema.sql                # Full PostgreSQL schema + RLS policies
 +-- scripts/
-¦   +-- seed-volunteers.js        # Bulk volunteer account seeder
-¦   +-- verify-supabase.js        # DB connection health check script
-¦   +-- clear-checkin-logs.js     # Dev utility: clears checkin_logs table
+ï¿½   +-- seed-volunteers.js        # Bulk volunteer account seeder
+ï¿½   +-- verify-supabase.js        # DB connection health check script
+ï¿½   +-- clear-checkin-logs.js     # Dev utility: clears checkin_logs table
 +-- public/
-¦   +-- payment/
-¦       +-- upi-qr.jpeg           # UPI QR code for payment
+ï¿½   +-- payment/
+ï¿½       +-- upi-qr.jpeg           # UPI QR code for payment
 +-- .env.example                  # Environment variable template
 +-- vercel.json                   # Vercel deployment config (rewrites + headers)
 +-- vite.config.js                # Vite build config
@@ -240,7 +239,7 @@ proxima-eclash-2026/
 | `active` | BOOLEAN | Account active status |
 
 ### `checkin_logs`
-Immutable audit log of every QR scan event — stores result, volunteer, station, and timestamp.
+Immutable audit log of every QR scan event ï¿½ stores result, volunteer, station, and timestamp.
 
 ### `payment_audit_logs`
 Audit trail for all payment-related events (creation, verification, rejection).
@@ -278,7 +277,7 @@ All routes are served by the Vercel catch-all at `api/[...path].js`.
 
 - **Admin auth:** Passkey compared against `ADMIN_SECRET_KEY` env variable; session stored in `sessionStorage`
 - **Volunteer auth:** `bcryptjs` password hashing + `jsonwebtoken` (12-hour expiry)
-- **QR integrity:** Each ticket QR contains an HMAC-SHA256 signature (keyed by `QR_SECRET`) — invalid or tampered QRs are rejected at scan time
+- **QR integrity:** Each ticket QR contains an HMAC-SHA256 signature (keyed by `QR_SECRET`) ï¿½ invalid or tampered QRs are rejected at scan time
 - **Rate limiting:** In-memory rate limiter on all API endpoints
 - **Honeypot field:** Hidden field on registration form to catch bots
 - **RLS:** All Supabase tables have Row-Level Security enabled; direct client access is blocked
@@ -390,4 +389,4 @@ BLOB_READ_WRITE_TOKEN
 
 ---
 
-*Built with love for Yenepoya School of Engineering and Technology — PROXIMA 2026*
+*Built with love for Yenepoya School of Engineering and Technology ï¿½ PROXIMA 2026*

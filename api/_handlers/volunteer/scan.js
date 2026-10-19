@@ -107,7 +107,8 @@ export default async function handler(req, res) {
       cleanStation === 'All / Registration Desk' ||
       cleanStation === '';
 
-    const isWrongStation = !isStationDesk && cleanStation !== participant.game;
+    const games = (participant.game || '').split(',').map((g) => g.trim().toLowerCase());
+    const isWrongStation = !isStationDesk && !games.includes(cleanStation.toLowerCase());
 
     if (isWrongStation) {
       return res.status(200).json({

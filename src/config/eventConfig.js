@@ -5,7 +5,7 @@ export const EVENT_METADATA = {
   name: "PROXIMA 2026",
   title: "PROXIMA E-CLASH 2026 🎮",
   subtitle: "Inter-College Esports Championship",
-  tagline: "Game On. Compete. Connect. Conquer. Battle for the Ultimate Gaming Crown.",
+  tagline: "Where Virtual Worlds Become Battlefields.",
   institution: "Yenepoya (Deemed to be University)",
   school: "Yenepoya School of Engineering and Technology",
   campus: "Yenepoya Complex, Balmatta, Mangaluru, Karnataka 575002",
@@ -32,7 +32,7 @@ export const EMAIL_CONFIG = {
 };
 
 export const PAYMENT_CONFIG = {
-  ENTRY_FEE: 49,
+  ENTRY_FEE: 50,
   UPI_ID: "8073942691@sbi",
   UPI_PAYEE_NAME: "Mohammad Sadeed Hasan",
   PAYMENT_TERMS_TEXT: "Entry fee is non-refundable except if the event is cancelled",
@@ -135,7 +135,7 @@ export const TRACKS_CONFIG = {
     name: "PROXIMA E-CLASH 🎮",
     shortName: "E-Clash",
     badge: "Esports Arena",
-    header: "PROXIMA ESPORTS 2026 — Game On. Compete. Connect. Conquer. Compete for the Crown. 🏆",
+    header: "PROXIMA ESPORTS 2026 — Where Virtual Worlds Become Battlefields. 🏆",
     description: "Battle it out against the sharpest campus tacticians in the premier collegiate esports tournament.",
     prefix: "ECL-2026-",
     colorScheme: {
@@ -196,7 +196,7 @@ export const SCHEDULE_DATA = [
     phase: "Prize Distribution",
     timeframe: "03:00 PM – 03:45 PM",
     events: [
-      { time: "03:00 PM – 03:45 PM", track: "eclash", title: "Championship Trophy & ₹7,000 Prize Distribution", venue: "Auditorium Main Hall" },
+      { time: "03:00 PM – 03:45 PM", track: "eclash", title: "Championship Trophy & Prize Distribution", venue: "Auditorium Main Hall" },
     ],
   },
 ];
@@ -212,7 +212,7 @@ export const FAQ_DATA = [
   },
   {
     q: "What devices and platforms are allowed?",
-    a: "All tournaments (Free Fire, BGMI, Mini Militia, eFootball, Carrom) are MOBILE ONLY. Strictly no emulators (Bluestacks, LDPlayer), iPads/tablets, or external hardware triggers are permitted. Routine device checks are conducted prior to match start.",
+    a: "All tournaments (Free Fire, BGMI, Mini Militia, eFootball, Carrom) are MOBILE / ARENA ONLY. Strictly no emulators (Bluestacks, LDPlayer), iPads/tablets, or external hardware triggers are permitted. Routine device checks are conducted prior to match start.",
   },
   {
     q: "Do I need to bring my own gaming device & accessories?",

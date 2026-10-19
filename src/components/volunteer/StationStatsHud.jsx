@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BarChart3, RefreshCw, ChevronDown, ChevronUp, UserCheck, Shield, Flame, Crosshair, Target, Swords } from 'lucide-react';
+import { BarChart3, RefreshCw, ChevronDown, ChevronUp, UserCheck, Shield, Flame, Crosshair, Target, Swords, Crown, Trophy } from 'lucide-react';
 
 const GAME_ICONS = {
   'Free Fire': Flame,
   'BGMI': Target,
   'Mini Militia': Crosshair,
+  'eFootball': Trophy,
+  'Carrom': Target,
   'Valorant': Swords,
 };
 

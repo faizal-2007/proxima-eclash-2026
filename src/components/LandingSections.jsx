@@ -36,10 +36,10 @@ export const LandingSections = ({ onSelectTrack }) => {
             About The Championship
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-orbitron tracking-tight text-white">
-            One Arena. Six Games. Ultimate Glory.
+            One Arena. Five Games. Ultimate Glory.
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-rajdhani">
-            Organized by <strong>{EVENT_METADATA.school}</strong> under {EVENT_METADATA.institution}, PROXIMA 2026 unites the most skilled mobile tacticians on campus. Whether dropping into custom rooms in Free Fire & BGMI, out-flying opponents in Mini Militia, or delivering clutch stoppage-time goals in eFootball — this is your stage to dominate.
+            Organized by <strong>{EVENT_METADATA.school}</strong> under {EVENT_METADATA.institution}, PROXIMA 2026 unites the most skilled tacticians on campus. Whether dropping into custom rooms in Free Fire & BGMI, out-flying opponents in Mini Militia, dominating the Carrom board, or delivering clutch stoppage-time goals in eFootball — this is your stage to dominate.
           </p>
         </div>
 

@@ -219,7 +219,7 @@ export async function appendPaymentRegistration(client = getSupabaseClient(), re
     campus_email: String(registrationData.campusEmail || '').toLowerCase(),
     year: registrationData.year,
     game: registrationData.game || registrationData.selection,
-    status: registrationData.status || 'CONFIRMED',
+    status: registrationData.status || ((registrationData.paymentMode || '').toUpperCase() === 'CASH' ? 'PENDING' : 'CONFIRMED'),
     checked_in: Boolean(registrationData.checkedIn),
     checked_in_at: registrationData.checkedInAt || null,
     checked_in_by: registrationData.checkedInBy || '',
@@ -266,6 +266,49 @@ export async function deleteRegistration(client = getSupabaseClient(), registrat
   }
 
   return { success: true, deleted: registrationId };
+}
+
+/**
+ * Update payment mode and/or status for a registration
+ */
+export async function updateRegistrationPayment(client = getSupabaseClient(), registrationId, updates = {}) {
+  if (!client) throw new Error('Supabase client not configured.');
+
+  const updateFields = {};
+  if (updates.paymentMode !== undefined) {
+    updateFields.payment_mode = String(updates.paymentMode).toUpperCase() === 'CASH' ? 'CASH' : 'UPI';
+  }
+  if (updates.paymentStatus !== undefined) {
+    const isAccepted = String(updates.paymentStatus).toUpperCase() === 'PAID' || String(updates.paymentStatus).toUpperCase() === 'ACCEPTED';
+    updateFields.payment_status = isAccepted ? 'PAID' : 'PENDING';
+    if (isAccepted) {
+      updateFields.paid_at = new Date().toISOString();
+      updateFields.status = 'CONFIRMED';
+    } else {
+      updateFields.paid_at = null;
+      updateFields.status = 'PENDING';
+    }
+  }
+  if (updates.status !== undefined) {
+    updateFields.status = String(updates.status).toUpperCase();
+  }
+  if (updates.note !== undefined) {
+    updateFields.note = updates.note;
+  }
+
+  const { data, error } = await client
+    .from('registrations')
+    .update(updateFields)
+    .eq('registration_id', String(registrationId).trim().toUpperCase())
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[Supabase] updateRegistrationPayment error:', error);
+    throw error;
+  }
+
+  return mapRegistrationRow(data);
 }
 
 /**

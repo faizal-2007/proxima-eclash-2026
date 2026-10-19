@@ -38,7 +38,7 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
               </div>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed font-rajdhani">
-              The flagship annual inter-year esports championship of Yenepoya School of Engineering & Technology. Game On. Compete. Conquer.
+              The flagship annual inter-year esports championship of Yenepoya School of Engineering & Technology. Where Virtual Worlds Become Battlefields.
             </p>
             <div className="p-3 rounded-xl bg-white/[0.04] border border-cyan-500/20 space-y-1">
               <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-300 font-mono">

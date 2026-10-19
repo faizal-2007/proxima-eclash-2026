@@ -69,13 +69,15 @@ assert('Clearing winner empties the next-round slot', finalCleared?.players[0] =
 // ── 5. Swap ─────────────────────────────────────────────────────────────────
 console.log('\n5. swapPlayers');
 const ko4b = generateKnockout('Carrom', ['A', 'B', 'C', 'D']);
-// Current r1m1 = [A,B], r1m2 = [C,D]
-// Move C into slot 0 of match 1 (displacing A → match 2 slot 0)
-const swapped = swapPlayers(ko4b, 'C', 1, 1, 0, 'A');
+const targetMatch = ko4b.find(m => m.round === 1 && m.match_no === 1);
+const otherMatch = ko4b.find(m => m.round === 1 && m.match_no === 2);
+const occupant = targetMatch.players[0];
+const incoming = otherMatch.players[0];
+const swapped = swapPlayers(ko4b, incoming, 1, 1, 0, occupant);
 const m1 = swapped.find(m => m.round === 1 && m.match_no === 1);
 const m2 = swapped.find(m => m.round === 1 && m.match_no === 2);
-assert('Target slot now has C', m1?.players[0] === 'C');
-assert('Source slot now has displaced A', m2?.players[0] === 'A' || m2?.players.includes('A'));
+assert('Target slot now has incoming player', m1?.players[0] === incoming);
+assert('Source slot now has displaced occupant', m2?.players.includes(occupant));
 
 // ── 6. Re-shuffle with locked match ────────────────────────────────────────
 console.log('\n6. reshuffleFixtures with one locked match');
@@ -98,6 +100,13 @@ const maxLobbySize = Math.max(...lobbies.map(m => m.players.length));
 const minLobbySize = Math.min(...lobbies.map(m => m.players.length));
 assert('Lobbies are balanced (no lobby nearly empty)', maxLobbySize - minLobbySize <= 1,
   `sizes: ${lobbies.map(m=>m.players.length).join(', ')}`);
+
+// ── 8. Knockout generation for Carrom ───────────────────────────────────────
+console.log('\n8. Knockout generation for Carrom (8 players)');
+const carromKo = generateKnockout('Carrom', ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8']);
+const carromR1 = carromKo.filter(m => m.round === 1);
+assert('Carrom knockout generated 4 round-1 matches for 8 players', carromR1.length === 4);
+assert('Total 3 rounds generated for 8 players', Math.max(...carromKo.map(m => m.round)) === 3);
 
 // ── Summary ─────────────────────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(50)}`);
