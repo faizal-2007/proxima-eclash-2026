@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { ALLOW_MULTIPLE_GAMES } from '../../src/config/eventConfig.js';
+import { ALLOW_MULTIPLE_GAMES, PAYMENT_CONFIG } from '../../src/config/eventConfig.js';
 
 // Auto-load .env in Node runtime if running locally
 if (typeof process !== 'undefined' && typeof process.loadEnvFile === 'function') {
@@ -195,9 +195,26 @@ export async function appendPaymentRegistration(client = getSupabaseClient(), re
   if (!client) throw new Error('Supabase client not configured.');
 
   let regId = registrationData.registrationId;
+  let nextSeq = null;
+
   if (!regId) {
-    const { count } = await client.from('registrations').select('*', { count: 'exact', head: true });
-    const nextSeq = (count || 0) + 1;
+    const { data: latestRows } = await client
+      .from('registrations')
+      .select('registration_id')
+      .order('registration_id', { ascending: false })
+      .limit(50);
+
+    let maxNum = 0;
+    if (latestRows && latestRows.length > 0) {
+      for (const r of latestRows) {
+        const match = /ECL-2026-(\d+)/i.exec(r.registration_id || '');
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      }
+    }
+    nextSeq = maxNum + 1;
     regId = `ECL-2026-${String(nextSeq).padStart(4, '0')}`;
   }
 
@@ -227,7 +244,7 @@ export async function appendPaymentRegistration(client = getSupabaseClient(), re
     payment_screenshot: registrationData.paymentScreenshot || registrationData.screenshotUrl || '',
     payment_status: registrationData.paymentStatus || 'PENDING',
     paid_at: registrationData.paidAt || '',
-    amount: registrationData.amount || 49,
+    amount: registrationData.amount || PAYMENT_CONFIG?.ENTRY_FEE || 50,
     payment_mode: registrationData.paymentMode || 'UPI',
     verification_status: registrationData.verificationStatus || 'VERIFIED',
     verified_by: registrationData.verifiedBy || 'SYSTEM',
@@ -235,18 +252,44 @@ export async function appendPaymentRegistration(client = getSupabaseClient(), re
     note: registrationData.note || '',
   };
 
-  const { data, error } = await client
-    .from('registrations')
-    .insert([row])
-    .select()
-    .single();
+  let insertResult = null;
+  let insertError = null;
+  const maxAttempts = registrationData.registrationId ? 1 : 5;
 
-  if (error) {
-    console.error('[Supabase] appendPaymentRegistration error:', error);
-    throw error;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data, error } = await client
+      .from('registrations')
+      .insert([row])
+      .select()
+      .single();
+
+    if (!error) {
+      insertResult = data;
+      insertError = null;
+      break;
+    }
+
+    insertError = error;
+    const isIdConflict =
+      error.code === '23505' &&
+      (error.message?.includes('registration_id') || error.details?.includes('registration_id'));
+
+    if (isIdConflict && nextSeq !== null) {
+      nextSeq += 1;
+      regId = `ECL-2026-${String(nextSeq).padStart(4, '0')}`;
+      row.registration_id = regId;
+      continue;
+    }
+
+    break;
   }
 
-  return mapRegistrationRow(data);
+  if (insertError || !insertResult) {
+    console.error('[Supabase] appendPaymentRegistration error:', insertError);
+    throw insertError || new Error('Failed to insert registration row.');
+  }
+
+  return mapRegistrationRow(insertResult);
 }
 
 /**

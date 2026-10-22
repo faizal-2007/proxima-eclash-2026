@@ -102,7 +102,8 @@ export default async function handler(req, res) {
         }
 
         const passwordHash = await bcrypt.hash(String(password).trim(), 10);
-        const volunteerId = `VOL-${String(existing.length + 1).padStart(3, '0')}`;
+        const maxVolNum = existing.reduce((max, v) => Math.max(max, parseInt((v.volunteerId || '').replace(/\D+/g, ''), 10) || 0), 0);
+        const volunteerId = `VOL-${String(maxVolNum + 1).padStart(3, '0')}`;
 
         await saveVolunteer(supabase, {
           volunteerId,
