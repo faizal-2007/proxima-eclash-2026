@@ -477,7 +477,7 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
           </h1>
 
           <p className="text-xs sm:text-sm max-w-xl mx-auto text-slate-300 font-rajdhani">
-            Enter the battlefield for Free Fire, BGMI, Mini Militia, eFootball or Carrom. Compete for prizes and glory.
+            Enter the battlefield for Free Fire, BGMI, Mini Militia, eFootball or Carrom. Compete for campus glory.
           </p>
 
           <div className="text-[10px] sm:text-[11px] font-mono text-cyan-300/80 pt-1 leading-relaxed">
@@ -738,11 +738,6 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
                           <div className="text-[11px] text-cyan-300 font-rajdhani truncate">
                             {option.type || 'Tournament Game'} • {option.platform || 'Mobile'}
                           </div>
-                          {option.prize && (
-                            <div className="text-[10px] text-amber-300/90 font-rajdhani mt-0.5 truncate">
-                              🏆 {option.prize}
-                            </div>
-                          )}
                         </div>
                       </label>
                     );
