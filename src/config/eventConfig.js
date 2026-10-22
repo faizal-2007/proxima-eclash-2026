@@ -223,6 +223,10 @@ export const FAQ_DATA = [
     a: "Upon completing registration, a unique Registration ID (ECL-2026-XXXX) and a high-resolution Digital Player Pass featuring a live tournament check-in QR code will be generated instantly for download.",
   },
   {
+    q: "How many games can I register for?",
+    a: "You can choose either one game or two games (maximum 2 games allowed). You cannot select more than two games.",
+  },
+  {
     q: "Where and when does the tournament take place?",
     a: "The tournament takes place on Monday, October 26, 2026 at Yenepoya Complex, Balmatta, Mangaluru, Karnataka 575002. Doors open for check-in at 09:00 AM sharp.",
   },

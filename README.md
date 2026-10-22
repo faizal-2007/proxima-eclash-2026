@@ -49,7 +49,7 @@ A full-stack event management web application built for **PROXIMA E-CLASH 2026**
 ### ?? Registration System
 - **Multi-step registration flow:** Player details ? Game selection ? Payment ? Confirmation
 - **Form auto-save** � Draft form state persisted to `sessionStorage` across refreshes
-- **Game selection** � Grouped by category (Battle Royale / Board Games); single-game entry enforced via config
+- **Game selection** — Students can choose 1 game or 2 games (maximum 2 games allowed)
 - **UPI payment flow:**
   - Displays live UPI QR code (`/public/payment/upi-qr.jpeg`)
   - UPI ID with one-click copy

@@ -58,8 +58,6 @@ const getInitialFormData = () => {
 
 export const RegistrationPage = ({ onBack, onSuccess }) => {
   const trackConfig = TRACKS_CONFIG.eclash;
-  const GROUP_1_GAMES = ['Free Fire', 'BGMI', 'Mini Militia'];
-  const GROUP_2_GAMES = ['eFootball', 'Carrom'];
   const normalizeSelectionValue = (value) => {
     if (Array.isArray(value)) {
       return value.map((item) => String(item).trim()).filter(Boolean);
@@ -195,28 +193,13 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
         const selectedGames = normalizeSelectionValue(value);
 
         if (selectedGames.length === 0) {
-          err = 'Please select at least one tournament game.';
+          err = 'Please select 1 or 2 tournament games.';
           break;
         }
 
         if (selectedGames.length > 2) {
           err = 'You can select at most 2 games.';
           break;
-        }
-
-        const group1Count = selectedGames.filter((game) => GROUP_1_GAMES.includes(game)).length;
-        const group2Count = selectedGames.filter((game) => GROUP_2_GAMES.includes(game)).length;
-
-        if (selectedGames.length === 1) {
-          if (group2Count !== 1) {
-            err = 'Single game selection is only allowed for Group 2 games (eFootball or Carrom). If choosing from Group 1, you must select 2 games (1 from Group 1 and 1 from Group 2).';
-          }
-        } else if (selectedGames.length === 2) {
-          if (group1Count === 2) {
-            err = 'Cannot choose two games from Group 1 due to schedule overlap. Choose 1 from Group 1 and 1 from Group 2, or both games from Group 2.';
-          } else if (!((group1Count === 1 && group2Count === 1) || (group1Count === 0 && group2Count === 2))) {
-            err = 'Invalid game combination. Choose 1 from Group 1 and 1 from Group 2, or both games from Group 2.';
-          }
         }
         break;
       }
@@ -704,65 +687,67 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
 
             {/* Field 6: Game Selection */}
             <div className="space-y-2 pt-1" data-error={errors.selection && touched.selection ? 'true' : 'false'}>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
-                6. Select Your Tournament Games <span className="text-red-400">*</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
+                  6. Select Tournament Game(s) <span className="text-red-400">*</span>
+                </label>
+                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full border border-cyan-400/30 bg-cyan-500/10 text-cyan-300">
+                  {selectedGames.length}/2 Selected
+                </span>
+              </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4 space-y-3">
                 <div className={`rounded-xl border px-3 py-2 text-[11px] font-mono transition-all ${
                   selectedGames.length === 0
                     ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-200'
-                    : selectedGames.length === 1 && selectedGames.some((g) => GROUP_2_GAMES.includes(g))
+                    : selectedGames.length >= 1 && selectedGames.length <= 2
                       ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
-                      : selectedGames.length === 1
-                        ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
-                        : 'border-cyan-400/60 bg-cyan-500/10 text-cyan-200'
+                      : 'border-red-400/60 bg-red-500/10 text-red-200'
                 }`}>
-                  {selectedGames.length === 0 && 'Rule: Select 1 game from Group 2, or 2 games (1 from Group 1 + 1 from Group 2, or both from Group 2).'}
-                  {selectedGames.length === 1 && selectedGames.some((g) => GROUP_2_GAMES.includes(g)) && '✓ 1 game selected from Group 2 (Valid! You can continue to payment, or optionally add a 2nd game).'}
-                  {selectedGames.length === 1 && !selectedGames.some((g) => GROUP_2_GAMES.includes(g)) && '1 game selected from Group 1. Group 1 games require selecting a 2nd game from Group 2.'}
-                  {selectedGames.length === 2 && '2 games selected (Maximum reached).'}
+                  {selectedGames.length === 0 && 'Rule: Choose 1 game or 2 games (maximum 2 games allowed).'}
+                  {selectedGames.length === 1 && `✓ 1 game selected: ${selectedGames[0]} (Valid! You can proceed to payment, or optionally select 1 more game).`}
+                  {selectedGames.length === 2 && `✓ 2 games selected: ${selectedGames.join(' & ')} (Maximum 2 games reached).`}
+                  {selectedGames.length > 2 && 'You can select at most 2 games. Please deselect one.'}
                 </div>
 
-                {[{ label: 'Group 1', games: GROUP_1_GAMES }, { label: 'Group 2', games: GROUP_2_GAMES }].map((group) => (
-                  <div key={group.label} className="space-y-2">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-300">{group.label}</div>
-                    <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 sm:gap-3">
-                      {group.games.map((game) => {
-                        const isSelected = selectedGames.includes(game);
+                <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 sm:gap-3">
+                  {trackConfig.options.map((option) => {
+                    const game = option.name;
+                    const isSelected = selectedGames.includes(game);
 
-                        return (
-                          <label
-                            key={game}
-                            className={`flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border cursor-pointer transition-all ${
-                              isSelected
-                                ? 'bg-[#00e5ff]/20 border-[#00e5ff] shadow-neon-blue text-white font-bold'
-                                : 'bg-black/30 border-white/10 hover:bg-white/5 text-slate-300'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              name="selection"
-                              value={game}
-                              checked={isSelected}
-                              onChange={() => handleSelectionToggle(game)}
-                              disabled={!isSelected && selectedGames.length >= 2}
-                              className="accent-cyan-400 w-4 h-4 mt-0.5 disabled:cursor-not-allowed disabled:opacity-50"
-                            />
-                            <div>
-                              <div className="text-xs sm:text-sm font-bold font-orbitron">{game}</div>
-                              <div className="text-[11px] text-cyan-300 font-rajdhani">
-                                {trackConfig.options.find((opt) => opt.name === game)?.type || 'Tournament Game'} • {' '}
-                                {trackConfig.options.find((opt) => opt.name === game)?.platform || 'Mobile'}
-                              </div>
-
+                    return (
+                      <label
+                        key={game}
+                        className={`flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border cursor-pointer transition-all ${
+                          isSelected
+                            ? 'bg-[#00e5ff]/20 border-[#00e5ff] shadow-neon-blue text-white font-bold'
+                            : 'bg-black/30 border-white/10 hover:bg-white/5 text-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="selection"
+                          value={game}
+                          checked={isSelected}
+                          onChange={() => handleSelectionToggle(game)}
+                          disabled={!isSelected && selectedGames.length >= 2}
+                          className="accent-cyan-400 w-4 h-4 mt-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs sm:text-sm font-bold font-orbitron truncate">{game}</div>
+                          <div className="text-[11px] text-cyan-300 font-rajdhani truncate">
+                            {option.type || 'Tournament Game'} • {option.platform || 'Mobile'}
+                          </div>
+                          {option.prize && (
+                            <div className="text-[10px] text-amber-300/90 font-rajdhani mt-0.5 truncate">
+                              🏆 {option.prize}
                             </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                          )}
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
               {errors.selection && touched.selection && (
