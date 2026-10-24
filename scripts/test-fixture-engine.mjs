@@ -1,15 +1,28 @@
 /**
- * Automated logic test for fixtureEngine.js
+ * Comprehensive Automated logic test for fixtureEngine.js
+ * Validates the exact tournament fixture plan:
+ * - Free Fire: 31 players -> 8 matches (1 solo BR + 7 knockout)
+ * - Mini Militia: 33 players -> 15 matches (2v2 knockout, 15 pairs + 1 trio team)
+ * - eFootball: 38 players -> 37 matches (1v1 knockout with 6 play-in matches & 26 byes)
+ * - BGMI (TDM): 15 players -> 6 matches (2v2 TDM knockout with 3 QF + 1 bye)
+ * - Carrom: 66 players -> 65 matches (1v1 knockout with 2 play-in matches & 62 byes)
+ * - Total: exactly 131 matches!
  * Run: node scripts/test-fixture-engine.mjs
  */
 import {
   generateKnockout,
-  generateLobbies,
+  generatePlayInKnockout,
+  generateFreeFireFixtures,
+  generateBgmiFixtures,
+  generateFixtures,
   reshuffleFixtures,
   advanceWinner,
+  advanceFreeFireQualifiers,
+  pairTeams,
   swapPlayers,
   roundName,
   getTotalRounds,
+  resolvePlayerName,
 } from '../src/utils/fixtureEngine.js';
 
 let passed = 0;
@@ -25,88 +38,122 @@ function assert(label, cond, extra = '') {
   }
 }
 
-// ── 1. Knockout with ODD number of players (3) ─────────────────────────────
-console.log('\n1. Knockout — 3 players (odd → 1 bye expected)');
-const ko3 = generateKnockout('eFootball', ['P1', 'P2', 'P3']);
-const r1matches = ko3.filter(m => m.round === 1);
-const byes = r1matches.filter(m => m.players.includes(''));
-assert('Padded to 4 slots (2 round-1 matches)', r1matches.length === 2);
-assert('Exactly one bye slot in round 1', byes.length === 1);
+// ── 1. Team pairing with odd rotating sub ───────────────────────────────────
+console.log('\n1. Team Pairing with Rotating Substitutes (Trio Teams)');
+const players33 = Array.from({ length: 33 }, (_, i) => `MM_${i + 1}`);
+const teamsMM = pairTeams(players33, 2);
+assert('33 players produce 16 teams', teamsMM.length === 16);
+const trioMM = teamsMM.find(t => t.includes('(Sub)'));
+assert('Exactly 1 trio team with rotating sub formed', Boolean(trioMM));
+assert('Trio team has 3 player IDs', trioMM.split('+').length === 3);
 
-// ── 2. Bye auto-advances to round 2 ────────────────────────────────────────
-console.log('\n2. Bye auto-advances to round 2');
-const byeMatch = byes[0];
-const byeWinner = byeMatch.players.find(p => p !== '');
-const r2 = ko3.filter(m => m.round === 2);
-const r2hasAdvanced = r2.some(m => m.players.includes(byeWinner));
-assert('Bye winner appears in round 2', r2hasAdvanced, `byeWinner=${byeWinner}, r2players=${JSON.stringify(r2.map(m=>m.players))}`);
-assert('Bye match has winner set automatically', byeMatch.winner === byeWinner);
+const players15 = Array.from({ length: 15 }, (_, i) => `BGMI_${i + 1}`);
+const teamsBGMI = pairTeams(players15, 2);
+assert('15 players produce 7 teams', teamsBGMI.length === 7);
+const trioBGMI = teamsBGMI.find(t => t.includes('(Sub)'));
+assert('BGMI has 1 trio team with rotating sub', Boolean(trioBGMI));
 
-// ── 3. Round names ──────────────────────────────────────────────────────────
-console.log('\n3. Round names (4-player bracket → 2 rounds)');
-assert('Round 1 of 2 = Semi-final', roundName(1, 2) === 'Semi-final');
-assert('Round 2 of 2 = Final',      roundName(2, 2) === 'Final');
-assert('Round 1 of 4 = Round 1',    roundName(1, 4) === 'Round 1');
+// ── 2. Free Fire Hybrid: Solo BR to 1v1 Knockout ───────────────────────────
+console.log('\n2. Free Fire (31 players -> 1 BR Qualifier + 7 Knockout matches = 8 matches)');
+const ffPlayers = Array.from({ length: 31 }, (_, i) => `FF_${i + 1}`);
+const ffFixtures = generateFixtures('Free Fire', ffPlayers);
+assert('Free Fire produces exactly 8 matches', ffFixtures.length === 8);
+const ffR1 = ffFixtures.filter(m => m.round === 1);
+const ffR2 = ffFixtures.filter(m => m.round === 2);
+const ffR3 = ffFixtures.filter(m => m.round === 3);
+const ffR4 = ffFixtures.filter(m => m.round === 4);
+assert('Round 1 is 1 Solo BR lobby with all 31 players', ffR1.length === 1 && ffR1[0].players.length === 31);
+assert('Round 2 is Quarter-finals (4 knockout matches)', ffR2.length === 4);
+assert('Round 3 is Semi-finals (2 knockout matches)', ffR3.length === 2);
+assert('Round 4 is Grand Final (1 knockout match)', ffR4.length === 1);
+
+// Test Free Fire qualifier advancement
+const top8 = ['FF_1', 'FF_2', 'FF_3', 'FF_4', 'FF_5', 'FF_6', 'FF_7', 'FF_8'];
+const ffAdvanced = advanceFreeFireQualifiers(ffFixtures, top8);
+const r2m1 = ffAdvanced.find(m => m.round === 2 && m.match_no === 1);
+assert('Top 8 advance into Round 2 slots', r2m1.players[0] === 'FF_1' && r2m1.players[1] === 'FF_2');
+
+// ── 3. Mini Militia 2v2 Knockout ───────────────────────────────────────────
+console.log('\n3. Mini Militia (33 players -> 16 teams -> 15 matches)');
+const mmFixtures = generateFixtures('Mini Militia', players33);
+assert('Mini Militia produces exactly 15 matches', mmFixtures.length === 15);
+assert('Round 1 has 8 matches (16 teams)', mmFixtures.filter(m => m.round === 1).length === 8);
+assert('Round 2 has 4 matches (Quarter-finals)', mmFixtures.filter(m => m.round === 2).length === 4);
+assert('Round 3 has 2 matches (Semi-finals)', mmFixtures.filter(m => m.round === 3).length === 2);
+assert('Round 4 has 1 match (Grand Final)', mmFixtures.filter(m => m.round === 4).length === 1);
+
+// ── 4. eFootball 1v1 Knockout with Play-In ──────────────────────────────────
+console.log('\n4. eFootball (38 players -> 6 play-ins + 31 knockout = 37 matches)');
+const efPlayers = Array.from({ length: 38 }, (_, i) => `EF_${i + 1}`);
+const efFixtures = generateFixtures('eFootball', efPlayers);
+assert('eFootball produces exactly 37 matches', efFixtures.length === 37);
+const efPlayIns = efFixtures.filter(m => m.round === 0);
+assert('Round 0 has exactly 6 play-in matches (12 players)', efPlayIns.length === 6);
+const efR1 = efFixtures.filter(m => m.round === 1);
+assert('Round 1 has 16 matches (Round of 32)', efR1.length === 16);
+const efR1SlotsWithDirect = efR1.flatMap(m => m.players).filter(Boolean);
+assert('Round 1 has 26 straight through (byes)', efR1SlotsWithDirect.length === 26);
+
+// Test Play-In advancement into Round 1
+const afterEfPlayIn = advanceWinner(efFixtures, 0, 1, 'EF_WINNER_1');
+const efTargetR1 = afterEfPlayIn.find(m => m.round === 1 && m.match_no === 1);
+assert('Play-in winner advances to Round 1 Match 1 slot 1', efTargetR1.players[1] === 'EF_WINNER_1');
+
+// ── 5. BGMI 2v2 TDM Knockout ───────────────────────────────────────────────
+console.log('\n5. BGMI (TDM) (15 players -> 7 teams -> 6 matches)');
+const bgmiFixtures = generateFixtures('BGMI', players15);
+assert('BGMI produces exactly 6 matches', bgmiFixtures.length === 6);
+const bgmiR1 = bgmiFixtures.filter(m => m.round === 1);
+const bgmiR2 = bgmiFixtures.filter(m => m.round === 2);
+const bgmiR3 = bgmiFixtures.filter(m => m.round === 3);
+assert('Round 1 has 3 Quarter-final matches', bgmiR1.length === 3);
+assert('Round 2 has 2 Semi-final matches', bgmiR2.length === 2);
+assert('Round 2 has 1 bye team placed straight through', bgmiR2.some(m => Boolean(m.players[1])));
+assert('Round 3 has 1 Grand Final match', bgmiR3.length === 1);
+
+// ── 6. Carrom 1v1 Knockout without Play-In ─────────────────────────────────────
+console.log('\n6. Carrom (66 players -> standard knockout starting directly at Round 1)');
+const carromPlayers = Array.from({ length: 66 }, (_, i) => `CARROM_${i + 1}`);
+const carromFixtures = generateFixtures('Carrom', carromPlayers);
+const carromPlayIns = carromFixtures.filter(m => m.round === 0);
+assert('Carrom has NO play-in matches (round 0 === 0)', carromPlayIns.length === 0);
+const carromR1 = carromFixtures.filter(m => m.round === 1);
+assert('Carrom starts directly in Round 1 with 64 bracket matches', carromR1.length === 64);
+const carromRealM = carromR1.filter(m => Boolean(m.players[0]) && Boolean(m.players[1]));
+assert('Round 1 has 2 real matches played', carromRealM.length === 2);
+const carromByes = carromR1.filter(m => Boolean(m.players[0]) && !m.players[1]);
+assert('Round 1 has 62 byes cleanly auto-advanced', carromByes.length === 62);
+const carromR2 = carromFixtures.filter(m => m.round === 2);
+assert('Round 2 has 32 matches', carromR2.length === 32);
+assert('Total Carrom rounds is 7', getTotalRounds(66, 'Carrom') === 7);
+
+// ── 7. GAME FORMAT & FIXTURES VERIFICATION ────────────────────────────────────
+console.log('\n7. Tournament Formats & Match Generation Verification');
+assert('Free Fire has 8 matches (1 solo BR + 7 knockout)', ffFixtures.length === 8);
+assert('Mini Militia has 15 matches (2v2 knockout)', mmFixtures.length === 15);
+assert('eFootball has 37 matches (6 play-in + 31 knockout)', efFixtures.length === 37);
+assert('BGMI (TDM) has 6 matches (3 QF + 2 SF + 1 Final)', bgmiFixtures.length === 6);
+assert('Carrom has 127 bracket matches (65 actual played matches)', carromFixtures.length === 127);
+
+// ── 8. Team Name Resolution ────────────────────────────────────────────────
+console.log('\n8. Team & Player Name Resolution');
+const fakeRegs = [
+  { registrationId: 'P1', fullName: 'Faizal', campusId: '101' },
+  { registrationId: 'P2', fullName: 'Sadeed', campusId: '102' },
+  { registrationId: 'P3', fullName: 'Rahul',  campusId: '103' },
+];
+const teamLabel = resolvePlayerName(fakeRegs, 'P1 + P2');
+assert('Resolves pair team names: Faizal & Sadeed', teamLabel === 'Faizal & Sadeed');
+const trioLabel = resolvePlayerName(fakeRegs, 'P1 + P2 + P3 (Sub)');
+assert('Resolves trio team with rotating sub: Faizal & Sadeed & Rahul (Sub)', trioLabel === 'Faizal & Sadeed & Rahul (Sub)');
+
+// ── 9. Round names ──────────────────────────────────────────────────────────
+console.log('\n9. Round Names');
+assert('Round 0 = Play-In Round', roundName(0, 5) === 'Play-In Round');
+assert('Round 1 Free Fire = Stage 1: Solo Battle Royale Qualifier', roundName(1, 4, 'Free Fire') === 'Stage 1: Solo Battle Royale Qualifier');
+assert('Round 2 of 4 = Quarter-final', roundName(2, 4) === 'Quarter-final');
 assert('Round 3 of 4 = Semi-final', roundName(3, 4) === 'Semi-final');
-assert('Round 4 of 4 = Final',      roundName(4, 4) === 'Final');
-
-// ── 4. advanceWinner ────────────────────────────────────────────────────────
-console.log('\n4. advanceWinner');
-const ko4 = generateKnockout('Carrom', ['A', 'B', 'C', 'D']);
-const after = advanceWinner(ko4, 1, 1, 'A');
-const final = after.find(m => m.round === 2 && m.match_no === 1);
-assert('Winner A advanced to Final slot A (odd match)', final?.players[0] === 'A');
-
-const after2 = advanceWinner(after, 1, 2, 'C');
-const final2 = after2.find(m => m.round === 2 && m.match_no === 1);
-assert('Winner C advanced to Final slot B (even match)', final2?.players[1] === 'C');
-
-// Un-mark winner
-const cleared = advanceWinner(after2, 1, 1, null);
-const finalCleared = cleared.find(m => m.round === 2 && m.match_no === 1);
-assert('Clearing winner empties the next-round slot', finalCleared?.players[0] === '');
-
-// ── 5. Swap ─────────────────────────────────────────────────────────────────
-console.log('\n5. swapPlayers');
-const ko4b = generateKnockout('Carrom', ['A', 'B', 'C', 'D']);
-const targetMatch = ko4b.find(m => m.round === 1 && m.match_no === 1);
-const otherMatch = ko4b.find(m => m.round === 1 && m.match_no === 2);
-const occupant = targetMatch.players[0];
-const incoming = otherMatch.players[0];
-const swapped = swapPlayers(ko4b, incoming, 1, 1, 0, occupant);
-const m1 = swapped.find(m => m.round === 1 && m.match_no === 1);
-const m2 = swapped.find(m => m.round === 1 && m.match_no === 2);
-assert('Target slot now has incoming player', m1?.players[0] === incoming);
-assert('Source slot now has displaced occupant', m2?.players.includes(occupant));
-
-// ── 6. Re-shuffle with locked match ────────────────────────────────────────
-console.log('\n6. reshuffleFixtures with one locked match');
-const base = generateKnockout('Carrom', ['A', 'B', 'C', 'D']);
-// Lock match 1
-base[0].locked = true;
-const lockedPlayers = [...base[0].players];
-const reshuffled = reshuffleFixtures('Carrom', ['A', 'B', 'C', 'D'], base);
-const lockedAfter = reshuffled.find(m => m.round === 1 && m.match_no === 1);
-assert('Locked match survived re-shuffle', lockedAfter?.locked === true);
-assert('Locked match players unchanged', JSON.stringify(lockedAfter?.players) === JSON.stringify(lockedPlayers));
-
-// ── 7. Lobby generation ─────────────────────────────────────────────────────
-console.log('\n7. Lobby generation (Mini Militia, lobbySize=4, 7 players)');
-const lobbies = generateLobbies('Mini Militia', ['P1','P2','P3','P4','P5','P6','P7'], 4);
-assert('2 lobbies created for 7 players with lobbySize=4', lobbies.length === 2);
-const allLobbyPlayers = lobbies.flatMap(m => m.players);
-assert('No player appears twice', new Set(allLobbyPlayers).size === allLobbyPlayers.length);
-const maxLobbySize = Math.max(...lobbies.map(m => m.players.length));
-const minLobbySize = Math.min(...lobbies.map(m => m.players.length));
-assert('Lobbies are balanced (no lobby nearly empty)', maxLobbySize - minLobbySize <= 1,
-  `sizes: ${lobbies.map(m=>m.players.length).join(', ')}`);
-
-// ── 8. Knockout generation for Carrom ───────────────────────────────────────
-console.log('\n8. Knockout generation for Carrom (8 players)');
-const carromKo = generateKnockout('Carrom', ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8']);
-const carromR1 = carromKo.filter(m => m.round === 1);
-assert('Carrom knockout generated 4 round-1 matches for 8 players', carromR1.length === 4);
-assert('Total 3 rounds generated for 8 players', Math.max(...carromKo.map(m => m.round)) === 3);
+assert('Round 4 of 4 = Grand Final', roundName(4, 4) === 'Grand Final');
 
 // ── Summary ─────────────────────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(50)}`);

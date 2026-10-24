@@ -14,9 +14,10 @@ import {
   Loader2,
   AlertCircle,
   Layers,
+  Flame,
 } from 'lucide-react';
 import { useLiveFixtures } from '../utils/useLiveFixtures.js';
-import { GAME_FORMAT, GAME_NAMES, roundName } from '../utils/fixtureEngine.js';
+import { GAME_FORMAT, GAME_NAMES, roundName, isKnockoutFormat } from '../utils/fixtureEngine.js';
 
 // ── Connection status indicator ───────────────────────────────────────────────
 function LiveIndicator({ status }) {
@@ -49,7 +50,21 @@ function PlayerChip({ regId, nameMap, isWinner, isFlash, emptyLabel = 'Bye' }) {
   if (!regId) {
     return <span className="text-slate-600 italic text-xs">{emptyLabel}</span>;
   }
-  const name = nameMap[regId];
+  let displayName = regId;
+  if (regId.includes('+')) {
+    displayName = regId
+      .split('+')
+      .map((part) => {
+        const isSub = part.toLowerCase().includes('(sub)');
+        const id = part.replace(/\s*\(Sub\)/i, '').trim();
+        const name = nameMap?.[id] || id;
+        return isSub ? `${name} (Sub)` : name;
+      })
+      .join(' & ');
+  } else {
+    displayName = nameMap?.[regId] || regId;
+  }
+
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-colors duration-300 ${
@@ -57,41 +72,55 @@ function PlayerChip({ regId, nameMap, isWinner, isFlash, emptyLabel = 'Bye' }) {
       }`}
     >
       {isWinner && <Trophy className="w-3 h-3 text-amber-400 shrink-0" />}
-      {name || <span className="text-slate-500 font-normal">TBD</span>}
+      {displayName || <span className="text-slate-500 font-normal">TBD</span>}
     </span>
   );
 }
 
-// ── Team Pill (Matches the reference image's blue-gradient rounded pills) ────
-function TeamPill({ regId, nameMap, isWinner, isFlash, emptyLabel = 'TBD' }) {
+// ── Bracket Pill (Two separate rounded pills per match, matching reference image) ─
+function BracketPill({ regId, nameMap, isWinner, isFlash, emptyLabel = 'BYE' }) {
   const isBye = !regId;
-  const rawName = isBye ? emptyLabel : (nameMap?.[regId] || regId);
-  const displayName = isBye ? emptyLabel : rawName;
+  let displayName = emptyLabel;
+  if (!isBye) {
+    if (regId.includes('+')) {
+      displayName = regId
+        .split('+')
+        .map((part) => {
+          const isSub = part.toLowerCase().includes('(sub)');
+          const id = part.replace(/\s*\(Sub\)/i, '').trim();
+          const name = nameMap?.[id] || id;
+          return isSub ? `${name} (Sub)` : name;
+        })
+        .join(' & ');
+    } else {
+      displayName = nameMap?.[regId] || regId;
+    }
+  }
 
   return (
     <div
       title={displayName}
-      className={`group/pill relative w-36 sm:w-44 md:w-48 h-8 sm:h-9 rounded-full flex items-center justify-between px-3 sm:px-4 transition-all duration-300 select-none shadow-md ${
+      className={`group/pill relative w-36 sm:w-44 md:w-48 h-7 sm:h-8 rounded-lg flex items-center justify-between px-2.5 sm:px-3 transition-all duration-200 select-none ${
         isBye
-          ? 'bg-[#080d22]/90 border border-white/10 text-slate-500 shadow-inner'
+          ? 'bg-[#06091e]/75 border border-white/10 text-slate-500 shadow-inner'
           : isWinner
-            ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-extrabold ring-2 ring-yellow-300 shadow-[0_0_20px_rgba(251,191,36,0.65)] scale-[1.02]'
+            ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-600/25 border border-amber-400/90 text-amber-200 font-bold shadow-[0_0_15px_rgba(251,191,36,0.35)] ring-1 ring-amber-400/50'
             : isFlash
-              ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-black shadow-[0_0_20px_rgba(0,229,255,0.7)] animate-pulse'
-              : 'bg-gradient-to-r from-[#00b4d8] via-[#0096c7] to-[#0077b6] text-white font-bold hover:brightness-110 border border-cyan-300/40 shadow-[0_2px_12px_rgba(0,180,216,0.4)]'
+              ? 'bg-cyan-950/70 border border-cyan-400 text-cyan-200 font-bold shadow-[0_0_15px_rgba(0,229,255,0.5)] animate-pulse'
+              : 'bg-[#080d28]/90 hover:bg-[#0e1642] border border-cyan-500/30 hover:border-cyan-400 text-slate-200 font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
       }`}
     >
-      <span className="truncate text-[11px] sm:text-xs font-orbitron tracking-wider text-center w-full uppercase">
+      <span className="truncate text-[10px] sm:text-[11px] font-orbitron tracking-wide uppercase flex-1 text-center">
         {displayName}
       </span>
       {isWinner && (
-        <Trophy className="w-3.5 h-3.5 text-black shrink-0 ml-1 drop-shadow-sm" />
+        <Trophy className="w-3 h-3 text-amber-400 shrink-0 ml-1 drop-shadow-sm" />
       )}
     </div>
   );
 }
 
-// ── Match Pair Node (Stacked pair of Team Pills) ─────────────────────────────
+// ── Match Pair Node (Stacked pair of distinct pills matching reference) ─────
 function MatchPairNode({ match, nameMap, flashIds, isFinal = false }) {
   const [a, b] = match?.players ?? ['', ''];
   const winnerA = match?.winner === a && Boolean(a);
@@ -100,42 +129,195 @@ function MatchPairNode({ match, nameMap, flashIds, isFinal = false }) {
 
   return (
     <div
-      className={`flex flex-col gap-1.5 sm:gap-2 relative py-1.5 transition-all ${
+      className={`flex flex-col gap-1 sm:gap-1.5 relative py-1 transition-all ${
         isFinal ? 'scale-105' : ''
       }`}
     >
-      <TeamPill
+      <BracketPill
         regId={a}
         nameMap={nameMap}
         isWinner={winnerA}
         isFlash={isFlash}
-        emptyLabel={match?.round === 1 ? 'BYE' : 'TBD'}
+        emptyLabel={match?.round === 1 || match?.round === 0 ? 'BYE' : 'TBD'}
       />
-      <TeamPill
+      <BracketPill
         regId={b}
         nameMap={nameMap}
         isWinner={winnerB}
         isFlash={isFlash}
-        emptyLabel={match?.round === 1 ? 'BYE' : 'TBD'}
+        emptyLabel={match?.round === 1 || match?.round === 0 ? 'BYE' : 'TBD'}
       />
     </div>
   );
 }
 
-// ── Bracket SVG Connector Lines ──────────────────────────────────────────────
+// ── Champion Node (Single Pill at bottom of Grand Final, matching reference) ─
+function ChampionNode({ championId, championName }) {
+  const isCrowned = Boolean(championId);
+
+  return (
+    <div className="flex flex-col items-center">
+      {/* Vertical connector line from Grand Final */}
+      <div className="w-[2px] h-5 sm:h-7 bg-cyan-400/70 shadow-[0_0_8px_rgba(0,229,255,0.6)]" />
+
+      {/* Single Champion Capsule */}
+      <div
+        className={`w-40 sm:w-48 md:w-52 h-8 sm:h-9 rounded-lg flex items-center justify-center px-3 transition-all duration-300 select-none ${
+          isCrowned
+            ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 border border-yellow-300 text-black font-extrabold font-orbitron text-xs sm:text-sm tracking-wider shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-2 ring-yellow-300/80 scale-105 animate-pulse'
+            : 'bg-[#060a22]/85 border border-cyan-500/30 text-cyan-300/50 font-orbitron font-bold text-[10px] sm:text-xs tracking-widest uppercase shadow-inner'
+        }`}
+        title={championName ? `Champion: ${championName}` : 'Champion TBD'}
+      >
+        {isCrowned ? (
+          <span className="truncate flex items-center gap-1.5">
+            <Trophy className="w-4 h-4 text-black fill-black shrink-0" />
+            <span className="truncate">{championName}</span>
+          </span>
+        ) : (
+          <span>CHAMPION</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Laurel Trophy Emblem (Exact visual centerpiece matching reference) ──────
+function LaurelTrophyEmblem() {
+  return (
+    <div className="relative flex items-center justify-center my-2 select-none">
+      {/* Ambient background glow */}
+      <div className="absolute inset-0 bg-violet-600/30 rounded-full blur-2xl animate-pulse" />
+
+      <svg
+        className="w-20 h-20 sm:w-24 sm:h-24 relative z-10 drop-shadow-[0_0_15px_rgba(124,58,237,0.7)]"
+        viewBox="0 0 120 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="emblem-trophy-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#a855f7" />
+            <stop offset="50%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#06b6d4" />
+          </linearGradient>
+          <linearGradient id="wreath-grad-left" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ec4899" />
+            <stop offset="50%" stopColor="#8b5cf6" />
+            <stop offset="100%" stopColor="#3b82f6" />
+          </linearGradient>
+          <linearGradient id="wreath-grad-right" x1="100%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#06b6d4" />
+            <stop offset="50%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#8b5cf6" />
+          </linearGradient>
+        </defs>
+
+        {/* Central Trophy Cup */}
+        {/* Base */}
+        <path d="M 46 88 L 74 88 L 70 94 L 50 94 Z" fill="url(#emblem-trophy-grad)" />
+        <rect x="42" y="94" width="36" height="4" rx="2" fill="url(#emblem-trophy-grad)" opacity="0.9" />
+
+        {/* Stem */}
+        <path d="M 57 74 L 63 74 L 62 88 L 58 88 Z" fill="url(#emblem-trophy-grad)" />
+
+        {/* Cup Body */}
+        <path
+          d="M 45 42 L 75 42 C 75 62 67 74 60 74 C 53 74 45 62 45 42 Z"
+          fill="url(#emblem-trophy-grad)"
+        />
+
+        {/* Cup Rim */}
+        <ellipse cx="60" cy="42" rx="16" ry="3.5" fill="#c084fc" opacity="0.8" />
+        <ellipse cx="60" cy="42" rx="14" ry="2.5" fill="#1e1b4b" />
+
+        {/* Cup Handles */}
+        <path
+          d="M 45 46 C 36 46 36 60 47 62 M 45 50 C 40 50 40 57 47 58"
+          stroke="url(#emblem-trophy-grad)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M 75 46 C 84 46 84 60 73 62 M 75 50 C 80 50 80 57 73 58"
+          stroke="url(#emblem-trophy-grad)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+
+        {/* Star in Center of Cup */}
+        <path
+          d="M 60 51 L 61.5 55.5 L 66 55.5 L 62.5 58 L 64 62.5 L 60 60 L 56 62.5 L 57.5 58 L 54 55.5 L 58.5 55.5 Z"
+          fill="#ffffff"
+          opacity="0.9"
+        />
+
+        {/* Left Laurel Wreath Branch */}
+        <path
+          d="M 56 96 C 36 94 22 80 22 58 C 22 45 28 34 36 26"
+          stroke="url(#wreath-grad-left)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+        {/* Left Laurel Leaves */}
+        <path d="M 50 93 C 44 93 42 88 47 87 C 50 88 51 91 50 93 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 45 96 C 39 94 40 89 44 90 C 46 92 46 95 45 96 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 37 87 C 31 85 30 80 35 80 C 38 81 39 85 37 87 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 32 89 C 27 85 29 81 33 83 C 35 85 34 88 32 89 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 28 76 C 22 72 23 67 28 68 C 30 70 30 74 28 76 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 23 75 C 18 70 21 66 25 69 C 26 71 25 74 23 75 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 23 62 C 18 57 20 52 25 54 C 27 56 26 60 23 62 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 20 58 C 15 52 19 48 23 52 C 24 54 22 57 20 58 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 23 46 C 19 40 23 36 27 39 C 28 41 26 45 23 46 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 22 41 C 18 35 23 32 26 36 C 27 38 25 41 22 41 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 28 32 C 25 26 30 23 33 27 C 34 29 31 32 28 32 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 29 27 C 27 21 33 19 35 24 C 36 26 32 28 29 27 Z" fill="url(#wreath-grad-left)" />
+        <path d="M 36 23 C 35 17 41 17 42 22 C 41 24 38 25 36 23 Z" fill="url(#wreath-grad-left)" />
+
+        {/* Right Laurel Wreath Branch */}
+        <path
+          d="M 64 96 C 84 94 98 80 98 58 C 98 45 92 34 84 26"
+          stroke="url(#wreath-grad-right)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+        {/* Right Laurel Leaves */}
+        <path d="M 70 93 C 76 93 78 88 73 87 C 70 88 69 91 70 93 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 75 96 C 81 94 80 89 76 90 C 74 92 74 95 75 96 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 83 87 C 89 85 90 80 85 80 C 82 81 81 85 83 87 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 88 89 C 93 85 91 81 87 83 C 85 85 86 88 88 89 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 92 76 C 98 72 97 67 92 68 C 90 70 90 74 92 76 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 97 75 C 102 70 99 66 95 69 C 94 71 95 74 97 75 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 97 62 C 102 57 100 52 95 54 C 93 56 94 60 97 62 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 100 58 C 105 52 101 48 97 52 C 96 54 98 57 100 58 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 97 46 C 101 40 97 36 93 39 C 92 41 94 45 97 46 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 98 41 C 102 35 97 32 94 36 C 93 38 95 41 98 41 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 92 32 C 95 26 90 23 87 27 C 86 29 89 32 92 32 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 91 27 C 93 21 87 19 85 24 C 84 26 88 28 91 27 Z" fill="url(#wreath-grad-right)" />
+        <path d="M 84 23 C 85 17 79 17 78 22 C 79 24 82 25 84 23 Z" fill="url(#wreath-grad-right)" />
+      </svg>
+    </div>
+  );
+}
+
+// ── Bracket SVG Connector Lines (Crisp orthogonal tree lines) ───────────────
 function BracketConnector({ side }) {
   if (side === 'left') {
     return (
       <svg
-        className="w-6 sm:w-10 md:w-14 h-full shrink-0 self-stretch"
+        className="w-6 sm:w-10 md:w-12 h-full shrink-0 self-stretch"
         preserveAspectRatio="none"
         viewBox="0 0 100 100"
       >
         <path
           d="M 0,25 L 50,25 L 50,75 L 0,75 M 50,50 L 100,50"
           fill="none"
-          stroke="#ffffff"
-          strokeWidth="2.5"
+          stroke="rgba(56, 189, 248, 0.75)"
+          strokeWidth="1.75"
           strokeLinecap="round"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
@@ -146,15 +328,56 @@ function BracketConnector({ side }) {
 
   return (
     <svg
-      className="w-6 sm:w-10 md:w-14 h-full shrink-0 self-stretch"
+      className="w-6 sm:w-10 md:w-12 h-full shrink-0 self-stretch"
       preserveAspectRatio="none"
       viewBox="0 0 100 100"
     >
       <path
         d="M 100,25 L 50,25 L 50,75 L 100,75 M 50,50 L 0,50"
         fill="none"
-        stroke="#ffffff"
-        strokeWidth="2.5"
+        stroke="rgba(56, 189, 248, 0.75)"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+// ── Semi-Final to Grand Final Bridge Connector (Drop-down orthogonal line) ──
+function SemiFinalBridgeConnector({ side }) {
+  if (side === 'left') {
+    return (
+      <svg
+        className="w-8 sm:w-12 md:w-16 h-28 sm:h-36 md:h-40 shrink-0 self-center"
+        preserveAspectRatio="none"
+        viewBox="0 0 100 100"
+      >
+        <path
+          d="M 0,25 L 50,25 L 50,75 L 100,75"
+          fill="none"
+          stroke="rgba(56, 189, 248, 0.75)"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      className="w-8 sm:w-12 md:w-16 h-28 sm:h-36 md:h-40 shrink-0 self-center"
+      preserveAspectRatio="none"
+      viewBox="0 0 100 100"
+    >
+      <path
+        d="M 100,25 L 50,25 L 50,75 L 0,75"
+        fill="none"
+        stroke="rgba(56, 189, 248, 0.75)"
+        strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
@@ -164,10 +387,10 @@ function BracketConnector({ side }) {
 }
 
 // ── Recursive Left Tree (Left to Right) ──────────────────────────────────────
-function LeftBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) {
+function LeftBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds, baseRound = 1 }) {
   const match = fixturesMap[`${round}-${matchNo}`];
 
-  if (round === 1) {
+  if (round <= baseRound) {
     return (
       <div className="flex items-center my-auto">
         <MatchPairNode match={match} nameMap={nameMap} flashIds={flashIds} />
@@ -188,6 +411,7 @@ function LeftBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) {
           fixturesMap={fixturesMap}
           nameMap={nameMap}
           flashIds={flashIds}
+          baseRound={baseRound}
         />
         <LeftBracketBranch
           round={round - 1}
@@ -195,6 +419,7 @@ function LeftBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) {
           fixturesMap={fixturesMap}
           nameMap={nameMap}
           flashIds={flashIds}
+          baseRound={baseRound}
         />
       </div>
 
@@ -210,10 +435,10 @@ function LeftBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) {
 }
 
 // ── Recursive Right Tree (Right to Left) ─────────────────────────────────────
-function RightBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) {
+function RightBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds, baseRound = 1 }) {
   const match = fixturesMap[`${round}-${matchNo}`];
 
-  if (round === 1) {
+  if (round <= baseRound) {
     return (
       <div className="flex items-center my-auto">
         <MatchPairNode match={match} nameMap={nameMap} flashIds={flashIds} />
@@ -242,6 +467,7 @@ function RightBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) 
           fixturesMap={fixturesMap}
           nameMap={nameMap}
           flashIds={flashIds}
+          baseRound={baseRound}
         />
         <RightBracketBranch
           round={round - 1}
@@ -249,6 +475,7 @@ function RightBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) 
           fixturesMap={fixturesMap}
           nameMap={nameMap}
           flashIds={flashIds}
+          baseRound={baseRound}
         />
       </div>
     </div>
@@ -257,6 +484,10 @@ function RightBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds }) 
 
 // ── Bilateral Tournament Bracket (Exact layout of reference image) ────────────
 export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, selectedGame }) {
+  const isFreeFire = selectedGame === 'Free Fire';
+  const baseRound = isFreeFire ? 2 : 1;
+  const effectiveTotalRounds = isFreeFire ? 4 : totalRounds;
+
   const fixturesMap = useMemo(() => {
     const map = {};
     for (const f of fixtures) {
@@ -265,75 +496,107 @@ export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, sele
     return map;
   }, [fixtures]);
 
-  const finalMatch = fixturesMap[`${totalRounds}-1`];
+  const finalMatch = fixturesMap[`${effectiveTotalRounds}-1`];
   const grandChampionId = finalMatch?.winner;
   const grandChampionName = grandChampionId ? (nameMap?.[grandChampionId] || grandChampionId) : null;
 
-  if (totalRounds <= 1) {
+  // Round 0 Play-In matches if any (eFootball, Carrom)
+  const playInMatches = useMemo(
+    () => fixtures.filter((f) => f.round === 0).sort((a, b) => a.match_no - b.match_no),
+    [fixtures]
+  );
+
+  // Free Fire Round 1 Lobby Qualifier
+  const freeFireLobby = useMemo(
+    () => (isFreeFire ? fixtures.find((f) => f.round === 1) : null),
+    [fixtures, isFreeFire]
+  );
+
+  if (effectiveTotalRounds <= baseRound && !freeFireLobby) {
     return (
       <div className="relative overflow-hidden rounded-3xl bg-[#030614] border border-cyan-500/20 p-6 sm:p-12 shadow-2xl">
-        <div className="flex justify-center mb-6">
-          <div className="px-6 sm:px-10 py-2.5 rounded-2xl bg-gradient-to-r from-[#00d2ff] via-[#0088ff] to-[#0055ff] shadow-[0_0_30px_rgba(0,180,255,0.45)] border border-cyan-300/40">
-            <h3 className="text-sm sm:text-lg font-black font-orbitron tracking-widest text-white uppercase text-center">
-              TOURNAMENT BRACKET
-            </h3>
-          </div>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-3">
-          <Trophy className="w-16 h-16 text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]" />
+        <div className="flex flex-col items-center justify-center gap-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-black font-orbitron tracking-[0.25em] text-white uppercase text-center drop-shadow-[0_0_12px_rgba(0,229,255,0.4)]">
+            TOURNAMENT BRACKET
+          </h3>
+          <LaurelTrophyEmblem />
           <MatchPairNode match={finalMatch} nameMap={nameMap} flashIds={flashIds} isFinal />
+          <ChampionNode championId={grandChampionId} championName={grandChampionName} />
         </div>
       </div>
     );
   }
 
-  const semiFinalRound = totalRounds - 1;
+  const semiFinalRound = effectiveTotalRounds - 1;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-[#030614] border border-cyan-500/20 p-4 sm:p-8 shadow-[0_0_50px_rgba(0,180,216,0.15)]">
-      {/* Background Esports Facets (Geometric Polygonal Backdrop matching reference) */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-25" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="facet-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00b4d8" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#030614" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="facet-blue" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#0077b6" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#030614" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <polygon points="0,0 450,0 180,600 0,350" fill="url(#facet-cyan)" />
-        <polygon points="800,0 1200,0 1000,500 700,200" fill="url(#facet-blue)" />
-        <polygon points="0,650 350,750 150,1000 0,1000" fill="url(#facet-cyan)" />
-        <polygon points="1200,350 950,700 1200,900" fill="url(#facet-blue)" />
-      </svg>
+    <div className="relative overflow-hidden rounded-3xl bg-[#030614] border border-cyan-500/25 p-4 sm:p-8 shadow-[0_0_60px_rgba(0,180,216,0.15)]">
+      {/* Ambient Red/Orange glow in top-left (matching reference image) */}
+      <div className="absolute -top-32 -left-32 w-[450px] h-[450px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Ambient Esports Glow */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,229,255,0.03)_0%,transparent_50%,rgba(43,75,255,0.03)_100%)] pointer-events-none" />
+      {/* Ambient Electric Blue/Cyan glow in bottom-right (matching reference image) */}
+      <div className="absolute -bottom-32 -right-32 w-[450px] h-[450px] bg-cyan-500/15 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Top Pill Banner — Identical to user reference image */}
-      <div className="flex justify-center mb-6 sm:mb-8 relative z-10">
-        <div className="px-6 sm:px-12 py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-[#00d2ff] via-[#0088ff] to-[#0055ff] shadow-[0_0_35px_rgba(0,180,255,0.5)] border border-cyan-300/40 flex items-center gap-2.5">
-          <h3 className="text-sm sm:text-lg md:text-xl font-black font-orbitron tracking-widest text-white uppercase text-center drop-shadow-md">
-            TOURNAMENT BRACKET
-          </h3>
-          {selectedGame && (
-            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black/40 text-cyan-200 border border-cyan-400/30">
-              {selectedGame}
+      {/* Ambient Violet glow in center behind trophy */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-violet-600/15 rounded-full blur-[100px] pointer-events-none" />
+
+      {/* Subtle geometric dot grid in background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+
+      {/* Free Fire Stage 1 Solo Battle Royale Qualifier Lobby if present */}
+      {freeFireLobby && (
+        <div className="mb-8 relative z-10 p-4 sm:p-5 rounded-2xl bg-[#080d32]/90 border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-amber-400" />
+              Stage 1: Solo Battle Royale Qualifier ({freeFireLobby.players?.length || 0} Players • Top 8 Advance)
             </span>
-          )}
+            <span className="text-[10px] font-mono text-slate-400">
+              Custom Bermuda Room
+            </span>
+          </div>
+          <LobbyCard match={freeFireLobby} nameMap={nameMap} isFlash={flashIds?.has?.(freeFireLobby.id)} />
+          <div className="mt-3 text-center text-[11px] font-mono text-cyan-400">
+            ↓ Top 8 survivors advance to the 1v1 Single-Elimination Knockout Bracket below ↓
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Play-In matches if present (eFootball) */}
+      {playInMatches.length > 0 && (
+        <div className="mb-8 relative z-10 p-4 sm:p-5 rounded-2xl bg-[#080d32]/90 border border-cyan-500/30 shadow-[0_0_20px_rgba(0,229,255,0.1)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+              <Swords className="w-4 h-4 text-cyan-400" />
+              Play-In Round ({playInMatches.length} Matches • Winners advance to Round 1)
+            </span>
+            <span className="text-[10px] font-mono text-slate-400">
+              Field Trim to Power of 2
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {playInMatches.map((m) => (
+              <div
+                key={m.id || `0-${m.match_no}`}
+                className="p-3 rounded-xl bg-black/40 border border-white/10 flex flex-col items-center gap-2"
+              >
+                <div className="w-full flex items-center justify-between text-[10px] font-mono font-bold text-slate-400 border-b border-white/5 pb-1">
+                  <span>PLAY-IN #{m.match_no}</span>
+                  {m.winner && <span className="text-amber-400 font-bold">COMPLETED</span>}
+                </div>
+                <MatchPairNode match={m} nameMap={nameMap} flashIds={flashIds} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Mobile Scroll Hint */}
       <div className="block lg:hidden text-center text-[11px] font-mono text-cyan-400/80 mb-3">
         ⇄ Scroll horizontally to view full bracket
       </div>
 
-      {/* Bilateral Split Bracket Container */}
+      {/* Bilateral Split Bracket Container matching reference image */}
       <div
         className="overflow-x-auto pb-4 pt-2 -mx-2 px-2"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#00b4d8 #050a1f' }}
@@ -346,42 +609,46 @@ export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, sele
             fixturesMap={fixturesMap}
             nameMap={nameMap}
             flashIds={flashIds}
+            baseRound={baseRound}
           />
 
-          {/* Left Connector Line to Grand Final */}
-          <div className="w-6 sm:w-10 md:w-14 h-[2.5px] bg-white shrink-0 self-center" />
+          {/* Left Bridge Connector (drops down into Grand Final) */}
+          <SemiFinalBridgeConnector side="left" />
 
-          {/* Center Stage: Trophy & Grand Finals Match */}
-          <div className="flex flex-col items-center justify-center px-2 sm:px-4 shrink-0 self-center relative z-20">
-            {/* Golden Championship Trophy */}
-            <div className="flex flex-col items-center mb-2">
-              <div className="relative group">
-                <div className="absolute -inset-3 bg-amber-500/25 rounded-full blur-xl animate-pulse" />
-                <div className="relative p-2.5 sm:p-3 rounded-2xl bg-gradient-to-b from-amber-400/20 to-yellow-600/10 border border-amber-400/50 shadow-[0_0_30px_rgba(251,191,36,0.5)]">
-                  <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-amber-300 drop-shadow-[0_2px_12px_rgba(251,191,36,0.9)]" />
-                </div>
-              </div>
-              <span className="text-[10px] font-orbitron font-extrabold tracking-widest text-amber-300 uppercase block mt-1.5">
-                GRAND FINALS
-              </span>
-              {grandChampionName && (
-                <div className="mt-1 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/60 text-amber-200 text-[10px] font-mono font-bold animate-bounce">
-                  🏆 Champion: {grandChampionName}
-                </div>
+          {/* Center Stage: Title + Emblem + Grand Finals Match + Champion (Identical to image) */}
+          <div className="flex flex-col items-center justify-center px-2 sm:px-4 shrink-0 z-20">
+            {/* Centered Bracket Title */}
+            <div className="flex flex-col items-center mb-1 text-center">
+              <h3 className="text-sm sm:text-base md:text-lg font-black font-orbitron tracking-[0.25em] text-white uppercase drop-shadow-[0_0_12px_rgba(0,229,255,0.4)]">
+                TOURNAMENT BRACKET
+              </h3>
+              {selectedGame && (
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cyan-400 mt-0.5">
+                  {selectedGame}
+                </span>
               )}
             </div>
 
-            {/* Grand Finals Match Node */}
+            {/* Laurel Wreath & Trophy Emblem */}
+            <LaurelTrophyEmblem />
+
+            {/* Grand Finals Match Node (Stacked Pair of Pills) */}
             <MatchPairNode
               match={finalMatch}
               nameMap={nameMap}
               flashIds={flashIds}
               isFinal
             />
+
+            {/* Champion Node (Single Pill at Bottom) */}
+            <ChampionNode
+              championId={grandChampionId}
+              championName={grandChampionName}
+            />
           </div>
 
-          {/* Right Connector Line to Grand Final */}
-          <div className="w-6 sm:w-10 md:w-14 h-[2.5px] bg-white shrink-0 self-center" />
+          {/* Right Bridge Connector (drops down into Grand Final) */}
+          <SemiFinalBridgeConnector side="right" />
 
           {/* Right Bracket Branch (advances Right to Left) */}
           <RightBracketBranch
@@ -390,6 +657,7 @@ export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, sele
             fixturesMap={fixturesMap}
             nameMap={nameMap}
             flashIds={flashIds}
+            baseRound={baseRound}
           />
         </div>
       </div>
@@ -467,9 +735,53 @@ export function PublicFixtures() {
   };
 
   const hasFixtures = fixtures.length > 0;
-  const totalRounds = cfg.format === 'knockout'
+  const isKnockout = isKnockoutFormat(cfg?.format);
+  const totalRounds = isKnockout
     ? (hasFixtures ? Math.max(...fixtures.map((f) => f.round)) : 1)
     : 1;
+
+  const getFormatBadge = () => {
+    if (selectedGame === 'Free Fire') {
+      return (
+        <span className="flex items-center gap-1 text-amber-400">
+          <Flame className="w-3 h-3" /> Solo BR → 1v1 Knockout
+        </span>
+      );
+    }
+    if (selectedGame === 'BGMI') {
+      return (
+        <span className="flex items-center gap-1 text-cyan-400">
+          <Swords className="w-3 h-3" /> TDM 2v2 Knockout
+        </span>
+      );
+    }
+    if (selectedGame === 'Mini Militia') {
+      return (
+        <span className="flex items-center gap-1 text-emerald-400">
+          <Swords className="w-3 h-3" /> 2v2 Knockout
+        </span>
+      );
+    }
+    if (cfg?.hasPlayIn) {
+      return (
+        <span className="flex items-center gap-1 text-violet-400">
+          <Swords className="w-3 h-3" /> 1v1 Knockout (Play-In)
+        </span>
+      );
+    }
+    if (isKnockout) {
+      return (
+        <span className="flex items-center gap-1 text-violet-400">
+          <Swords className="w-3 h-3" /> Single Knockout
+        </span>
+      );
+    }
+    return (
+      <span className="flex items-center gap-1 text-emerald-400">
+        <Layers className="w-3 h-3" /> Lobbies of {cfg?.lobbySize || 8}
+      </span>
+    );
+  };
 
   return (
     <section id="fixtures" className="py-10 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -516,11 +828,7 @@ export function PublicFixtures() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
-            {cfg.format === 'knockout' ? (
-              <span className="flex items-center gap-1 text-violet-400"><Swords className="w-3 h-3" /> Knockout</span>
-            ) : (
-              <span className="flex items-center gap-1 text-emerald-400"><Layers className="w-3 h-3" /> Lobbies of {cfg.lobbySize}</span>
-            )}
+            {getFormatBadge()}
           </span>
           <LiveIndicator status={connectionStatus} />
         </div>
@@ -566,8 +874,8 @@ export function PublicFixtures() {
           </div>
         )}
 
-        {/* Knockout bracket */}
-        {!isLoading && hasFixtures && cfg.format === 'knockout' && (
+        {/* Knockout bracket (including Free Fire, BGMI, Mini Militia, eFootball, Carrom) */}
+        {!isLoading && hasFixtures && isKnockout && (
           <KnockoutBracket
             fixtures={fixtures}
             nameMap={nameMap}
@@ -578,7 +886,7 @@ export function PublicFixtures() {
         )}
 
         {/* Lobby grid */}
-        {!isLoading && hasFixtures && cfg.format === 'lobby' && (
+        {!isLoading && hasFixtures && !isKnockout && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {fixtures.map((m) => (
               <LobbyCard

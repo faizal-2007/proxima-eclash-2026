@@ -44,7 +44,15 @@ async function fetchFixturesForGame(supabase, game) {
 
   if (fixturesError) throw fixturesError;
 
-  const regIds = [...new Set((rows ?? []).flatMap((row) => row.players ?? []).filter(Boolean))];
+  const allPlayerEntries = (rows ?? []).flatMap((row) => row.players ?? []).filter(Boolean);
+  const regIds = [
+    ...new Set(
+      allPlayerEntries
+        .flatMap((entry) => entry.split(/\s*[\+\/]\s*/))
+        .map((s) => s.replace(/\s*\(Sub\)/i, '').trim())
+        .filter(Boolean)
+    ),
+  ];
   const nameMap = {};
 
   if (regIds.length > 0) {
@@ -195,7 +203,15 @@ export function useLiveFixtures(game) {
       );
       flash(row.id);
 
-      const regIds = [...new Set((row.players ?? []).filter(Boolean))];
+      const rowPlayerEntries = (row.players ?? []).filter(Boolean);
+      const regIds = [
+        ...new Set(
+          rowPlayerEntries
+            .flatMap((entry) => entry.split(/\s*[\+\/]\s*/))
+            .map((s) => s.replace(/\s*\(Sub\)/i, '').trim())
+            .filter(Boolean)
+        ),
+      ];
       if (regIds.length === 0 || !supabase) return;
 
       try {

@@ -50,55 +50,61 @@ export const GAMES_LIST = [
   {
     id: "Free Fire",
     name: "Free Fire",
-    mode: "Battle Royale",
+    mode: "Solo BR & 1v1 Knockout",
     platform: "Mobile Only",
-    badge: "Battle Royale",
+    badge: "Solo BR → 1v1",
     icon: "Flame",
     color: "#ff4655",
     gradient: "from-amber-500 to-rose-600",
     prize: "1st ₹1,000 • 2nd ₹500",
     winnerPrize: 1000,
     runnerUpPrize: 500,
-    description: "Drop onto the island, loot, strategize, and be the last squad standing in fast-paced 50-player survival combat.",
-    format: "Squad / Solo Qualifiers → Custom Room Grand Finals",
-    maxPlayers: 48,
+    description: "Stage 1: All 31 players drop into a Solo Battle Royale survival qualifier in Bermuda. Top 8 survivors advance to Stage 2: 1v1 single-elimination knockout bracket to crown the champion.",
+    format: "31-Player Solo BR (Top 8 Advance) → 1v1 Knockout (8 Matches Total)",
+    maxPlayers: 31,
+    sideSize: 1,
+    totalMatches: 8,
   },
   {
     id: "BGMI",
-    name: "BGMI",
-    mode: "Battle Royale",
+    name: "BGMI (TDM)",
+    mode: "2v2 TDM Knockout",
     platform: "Mobile Only",
-    badge: "Battle Royale",
+    badge: "2v2 TDM Clash",
     icon: "Crosshair",
     color: "#00e5ff",
     gradient: "from-cyan-500 to-blue-600",
     prize: "1st ₹1,000 • 2nd ₹500",
     winnerPrize: 1000,
     runnerUpPrize: 500,
-    description: "Tactical map awareness, weapon recoil mastery, and clutch team rotations across Erangel & Miramar.",
-    format: "Custom Room Heats → Erangel Grand Finale",
-    maxPlayers: 64,
+    description: "Tactical close-quarters Warehouse 2v2 Team Deathmatch. 15 registered players form 7 teams (6 teams of 2 + 1 trio team with rotating sub). 3 Quarter-final matches + 1 bye lead into Semi-finals & Grand Final.",
+    format: "2v2 TDM Knockout with Play-in (7 Teams • 6 Matches Total)",
+    maxPlayers: 15,
+    sideSize: 2,
+    totalMatches: 6,
   },
   {
     id: "Mini Militia",
     name: "Mini Militia",
-    mode: "Deathmatch (FFA)",
+    mode: "2v2 Knockout",
     platform: "Mobile Only",
-    badge: "Doodle Army FFA",
+    badge: "Doodle Army 2v2",
     icon: "Zap",
     color: "#10b981",
     gradient: "from-emerald-500 to-teal-600",
     prize: "1st ₹1,000 • 2nd ₹500",
     winnerPrize: 1000,
     runnerUpPrize: 500,
-    description: "Intense multiplayer 2D rocket battles. Out-fly and out-blast your rivals in close-quarter arena chaos.",
-    format: "6-Player FFA Knockouts → Top 6 Final Showdown",
-    maxPlayers: 36,
+    description: "Intense multiplayer 2D rocket combat. 33 registered players form 16 teams (15 pairs + 1 trio team with rotating tactical substitute) battling across 4 single-elimination knockout rounds.",
+    format: "16-Team 2v2 Knockout (15 Teams of 2 + 1 Trio • 15 Matches Total)",
+    maxPlayers: 33,
+    sideSize: 2,
+    totalMatches: 15,
   },
   {
     id: "eFootball",
     name: "eFootball",
-    mode: "Football Simulation (1v1)",
+    mode: "1v1 Knockout with Play-In",
     platform: "Mobile Only",
     badge: "1v1 Simulation",
     icon: "Trophy",
@@ -107,14 +113,16 @@ export const GAMES_LIST = [
     prize: "1st ₹500 • 2nd ₹250",
     winnerPrize: 500,
     runnerUpPrize: 250,
-    description: "Authentic mobile football showdown. Tactical dribbling, pinpoint passing, and clutch stoppage-time goals.",
-    format: "Group Stages → Round of 16 → Grand Final Match",
-    maxPlayers: 32,
+    description: "Authentic mobile football simulation showdown. 38 players battle through 6 preliminary play-in matches (12 players) and 26 byes into a full 32-player single-elimination bracket.",
+    format: "6 Play-In Matches → Round of 32 → Grand Final (37 Matches Total)",
+    maxPlayers: 38,
+    sideSize: 1,
+    totalMatches: 37,
   },
   {
     id: "Carrom",
     name: "Carrom",
-    mode: "1v1 Disc Pot Clash",
+    mode: "1v1 Single Elimination Knockout",
     platform: "Mobile / Disc Pool",
     badge: "Precision Strike",
     icon: "Target",
@@ -123,9 +131,11 @@ export const GAMES_LIST = [
     prize: "1st ₹500 • 2nd ₹250",
     winnerPrize: 500,
     runnerUpPrize: 250,
-    description: "Test your fingertip aim, rebound angles, and striker control. Cover the queen, pocket the carrom men, and dominate the board.",
-    format: "1v1 Single Elimination Knockouts → Best of 3 Grand Finale",
-    maxPlayers: 32,
+    description: "Test your fingertip aim, rebound angles, and striker control. 66 registered players launch directly into single-elimination knockout matches across 6 campus carrom boards heading straight toward the Grand Final.",
+    format: "1v1 Knockout Draw (Round 1 to Grand Final • 65 Matches Total)",
+    maxPlayers: 66,
+    sideSize: 1,
+    totalMatches: 65,
   },
 ];
 
@@ -162,41 +172,179 @@ export const TRACKS_CONFIG = {
 
 export const SCHEDULE_DATA = [
   {
-    phase: "Morning: Tournament Heats",
-    timeframe: "09:00 AM – 12:30 PM",
+    phase: "Phase 1: Verification & Kickoff",
+    timeframe: "09:00 AM – 09:45 AM",
     events: [
-      { time: "09:00 AM", track: "eclash", title: "Arena Doors Open & Player ID Verification", venue: "Balmatta Esports Arena Gate" },
-      { time: "09:30 AM", track: "eclash", title: "Tournament Kickoff & Fair Play Briefing", venue: "Auditorium Main Stage" },
-      { time: "09:30 AM – 11:30 AM", track: "eclash", title: "Free Fire & BGMI — Tournament Matches", venue: "Arena Sectors Alpha & Beta" },
-      { time: "11:30 AM – 12:30 PM", track: "eclash", title: "Mini Militia & eFootball — Tournament Matches", venue: "Play Zone Rooms 102 & 104" },
+      {
+        time: "09:00 AM – 09:30 AM",
+        track: "eclash",
+        title: "Arena Doors Open & Player ID Verification",
+        venue: "Balmatta Esports Arena Gate & Helpdesk",
+        desc: "All registered players verify their student IDs, receive digital player passes, and check in at their game stations."
+      },
+      {
+        time: "09:30 AM – 09:45 AM",
+        track: "eclash",
+        title: "Tournament Kickoff & Fair Play Rules Briefing",
+        venue: "Auditorium Main Stage",
+        desc: "Official opening address, referee introduction, device fair-play briefing, and bracket unveiling for all 5 games."
+      },
     ],
   },
   {
-    phase: "Lunch: Break",
-    timeframe: "12:30 PM – 01:30 PM",
+    phase: "Phase 2: Play-Ins & Opening Heats",
+    timeframe: "09:45 AM – 11:15 AM",
     events: [
-      { time: "12:30 PM – 01:30 PM", track: "eclash", type: "break", title: "Lunch Break", venue: "Resume tournament matches at 01:30 PM" },
+      {
+        time: "09:45 AM – 10:15 AM",
+        track: "eclash",
+        title: "eFootball Play-In Stage (6 Matches) & Carrom Opening Matches",
+        venue: "Play Zone Room 102 & Carrom Board Arena",
+        desc: "eFootball preliminary matches trim the field (12 players play for 6 slots in Round of 32). Carrom matches begin directly across campus boards."
+      },
+      {
+        time: "09:45 AM – 10:30 AM",
+        track: "eclash",
+        title: "Free Fire — Stage 1: 31-Player Solo Battle Royale Qualifier",
+        venue: "Arena Sector Alpha (Custom Bermuda Room)",
+        desc: "All 31 registered players drop into a single custom room. The Top 8 survivor tacticians automatically qualify for Stage 2 1v1 knockouts."
+      },
+      {
+        time: "10:15 AM – 11:15 AM",
+        track: "eclash",
+        title: "Carrom — Knockout Rounds (32 Matches across 6 Boards)",
+        venue: "Carrom Board Arena",
+        desc: "66 registered players compete in single-elimination heats across 6 parallel boards in fast-paced 1v1 potting action."
+      },
+      {
+        time: "10:15 AM – 11:15 AM",
+        track: "eclash",
+        title: "eFootball — Round of 32 (16 Matches across 4 Stations)",
+        venue: "Play Zone Room 102",
+        desc: "26 straight-through bye players + 6 play-in winners compete in 6-minute mobile simulation matches."
+      },
     ],
   },
   {
-    phase: "After Lunch: Tournament Matches",
-    timeframe: "01:30 PM – 02:30 PM",
+    phase: "Phase 3: Team Knockouts & Quarter-Finals",
+    timeframe: "11:15 AM – 12:45 PM",
     events: [
-      { time: "01:30 PM – 02:30 PM", track: "eclash", title: "Carrom, Free Fire & BGMI — Tournament Matches", venue: "Tournament game stations" },
+      {
+        time: "11:15 AM – 12:00 PM",
+        track: "eclash",
+        title: "Free Fire — Quarter-Finals (4 x 1v1 Knockout Matches)",
+        venue: "Arena Sector Alpha",
+        desc: "Top 8 survivors from Stage 1 face off in direct 1v1 Clash Squad quarter-final duels to determine the semi-finalists."
+      },
+      {
+        time: "11:15 AM – 12:00 PM",
+        track: "eclash",
+        title: "BGMI (TDM) — Quarter-Finals (3 Matches • 1 Team Bye)",
+        venue: "Arena Sector Beta",
+        desc: "7 teams (6 pairs + 1 trio team with rotating sub) battle in 2v2 Warehouse TDM. 3 winners + 1 bye advance to semi-finals."
+      },
+      {
+        time: "11:15 AM – 12:15 PM",
+        track: "eclash",
+        title: "Mini Militia — Round of 16 (8 Matches • 16 Teams)",
+        venue: "Play Zone Room 104",
+        desc: "16 teams (15 pairs + 1 trio team with rotating sub) clash in high-speed 2v2 arena deathmatches."
+      },
+      {
+        time: "12:00 PM – 12:45 PM",
+        track: "eclash",
+        title: "Carrom & eFootball — Mid-Rounds (Carrom R32: 16 Matches • eFootball R16: 8 Matches)",
+        venue: "Carrom Board Arena & Room 102",
+        desc: "Intense mid-bracket eliminations as the field narrows down towards the quarter-final stages."
+      },
+      {
+        time: "12:15 PM – 12:45 PM",
+        track: "eclash",
+        title: "Mini Militia — Quarter-Finals (4 Matches • 8 Teams)",
+        venue: "Play Zone Room 104",
+        desc: "Top 8 teams fight for the four coveted semi-final spots in Catacombs and Outpost."
+      },
     ],
   },
   {
-    phase: "Finals: Championship Matches",
-    timeframe: "02:30 PM – 03:00 PM",
+    phase: "Phase 4: Lunch & Arena Recharge",
+    timeframe: "12:45 PM – 01:30 PM",
     events: [
-      { time: "02:30 PM – 03:00 PM", track: "eclash", title: "Final matches for all five games", venue: "Tournament game stations" },
+      {
+        time: "12:45 PM – 01:30 PM",
+        track: "eclash",
+        type: "break",
+        title: "Lunch Break & Device Re-charging Window",
+        venue: "Campus Dining Hall & Player Lounge",
+        desc: "Mandatory rest for players and volunteers. Arena charging stations open. Afternoon matches resume promptly at 01:30 PM."
+      },
     ],
   },
   {
-    phase: "Prize Distribution",
+    phase: "Phase 5: Semi-Finals & High-Stakes Knockouts",
+    timeframe: "01:30 PM – 02:15 PM",
+    events: [
+      {
+        time: "01:30 PM – 02:15 PM",
+        track: "eclash",
+        title: "Carrom — Round of 16 (8 Matches) & Quarter-Finals (4 Matches)",
+        venue: "Carrom Board Arena",
+        desc: "Precision potting showdowns as the top tacticians battle for the final 4 semi-final slots."
+      },
+      {
+        time: "01:30 PM – 02:00 PM",
+        track: "eclash",
+        title: "eFootball — Quarter-Finals (4 Matches) & Semi-Finals (2 Matches)",
+        venue: "Play Zone Room 102",
+        desc: "High-octane football action deciding the two Grand Final contenders."
+      },
+      {
+        time: "01:30 PM – 02:00 PM",
+        track: "eclash",
+        title: "Free Fire & BGMI (TDM) — Semi-Finals (2 Matches each)",
+        venue: "Arena Sectors Alpha & Beta",
+        desc: "Free Fire: Top 4 1v1 contenders clash for championship ticket. BGMI: Top 4 2v2 squads clash in semi-final TDM."
+      },
+      {
+        time: "01:45 PM – 02:15 PM",
+        track: "eclash",
+        title: "Mini Militia — Semi-Finals (2 Matches • 4 Teams)",
+        venue: "Play Zone Room 104",
+        desc: "The final 4 duos compete in intense 2v2 shootouts to reach the Grand Final."
+      },
+    ],
+  },
+  {
+    phase: "Phase 6: Grand Finals Championship Stage",
+    timeframe: "02:15 PM – 03:00 PM",
+    events: [
+      {
+        time: "02:15 PM – 02:35 PM",
+        track: "eclash",
+        title: "Carrom — Semi-Finals (2 Matches) & Grand Final (1 Match)",
+        venue: "Main Stage Feature Board",
+        desc: "Best of 3 boards championship match to crown the Carrom Champion."
+      },
+      {
+        time: "02:15 PM – 03:00 PM",
+        track: "eclash",
+        title: "Grand Finals Showcase — All 5 Games (Auditorium Main Screen)",
+        venue: "Auditorium Main Stage & Live Screen",
+        desc: "Showcase finals streamed on the main auditorium stage: Free Fire 1v1 Final (02:15 PM), Mini Militia 2v2 Final (02:25 PM), BGMI 2v2 TDM Final (02:35 PM), eFootball 1v1 Final (02:45 PM), and Carrom Final (02:50 PM)."
+      },
+    ],
+  },
+  {
+    phase: "Phase 7: Championship Trophy & Prize Distribution",
     timeframe: "03:00 PM – 03:45 PM",
     events: [
-      { time: "03:00 PM – 03:45 PM", track: "eclash", title: "Championship Trophy & Prize Distribution", venue: "Auditorium Main Hall" },
+      {
+        time: "03:00 PM – 03:45 PM",
+        track: "eclash",
+        title: "Championship Trophy & Cash Prize Distribution Ceremony",
+        venue: "Auditorium Main Hall",
+        desc: "Felicitation by University dignitaries. Awarding ₹7,000 in total cash prizes, institutional champion trophies, MVP medals, and verified certificates to all winners."
+      },
     ],
   },
 ];
@@ -207,8 +355,16 @@ export const FAQ_DATA = [
     a: "All bonafide students of Yenepoya (Deemed to be University) from 1st and 2nd Year are eligible to participate using their verified Campus ID (e.g., 11111).",
   },
   {
-    q: "Why do I need a @yenepoya.edu.in email to register?",
-    a: "To guarantee fair collegiate play and prevent outside registrations, your campus email prefix must match your official Yenepoya Campus ID (e.g., 11111@yenepoya.edu.in).",
+    q: "How do 2v2 team formats work in Mini Militia & BGMI (TDM)?",
+    a: "Individual players are paired into 2v2 teams. If the total registered player count is odd, the extra player becomes a rotating tactical substitute (trio team) with fixed rotation before Round 1, ensuring every registered student participates!",
+  },
+  {
+    q: "What is the Play-In stage in eFootball?",
+    a: "Play-In matches are preliminary knockout games (Round 0) in eFootball that trim the registered field (38 players) down to a clean 32-player bracket. 12 players battle in 6 morning play-in matches, and the 6 winners join 26 straight-through players in Round 1 (Round of 32). In Carrom, matches start directly without a play-in round.",
+  },
+  {
+    q: "How does the Free Fire tournament structure work?",
+    a: "Free Fire features a 2-stage format: Stage 1 is a 31-player Solo Battle Royale custom room where the Top 8 survivors advance. Stage 2 is an 8-player 1v1 single-elimination knockout bracket (Quarter-finals → Semi-finals → Grand Final) on the main auditorium stage.",
   },
   {
     q: "What devices and platforms are allowed?",
@@ -228,6 +384,6 @@ export const FAQ_DATA = [
   },
   {
     q: "Where and when does the tournament take place?",
-    a: "The tournament takes place on Monday, October 26, 2026 at Yenepoya Complex, Balmatta, Mangaluru, Karnataka 575002. Doors open for check-in at 09:00 AM sharp.",
+    a: "The tournament takes place on Monday, October 26, 2026 at Yenepoya Complex, Balmatta, Mangaluru, Karnataka 575002. Doors open for check-in at 09:00 AM sharp, and the Grand Prize Distribution concludes at 03:45 PM.",
   },
 ];
