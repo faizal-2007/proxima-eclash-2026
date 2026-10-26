@@ -165,10 +165,6 @@ export function roundName(round, totalRounds, game) {
 
   // Mini Militia: 16-team single elimination (4 rounds)
   if (game === 'Mini Militia') {
-    if (round === 1) return 'Quarter-finals';
-    if (round === 2) return 'Semi-finals';
-    if (round === 3) return 'Grand Final';
-    // If somehow more rounds exist
     const fromFinal = totalRounds - round;
     if (fromFinal === 0) return 'Grand Final';
     if (fromFinal === 1) return 'Semi-finals';
@@ -383,12 +379,19 @@ export function generatePlayInKnockout(game, sides, explicitTargetField = null) 
  * Squad IDs are composite strings: "ECL-001 + ECL-002 + ECL-003 + ECL-004"
  */
 export function generateFreeFireSquadFixtures(players) {
-  const squadSize = 4;
   const squadCount = 8;
-  const squads = pairTeams(players, squadSize);
+  const shuffled = shuffle(players);
+  const squads = Array.from({ length: squadCount }, () => []);
 
-  // Use first 8 squads (in case there are extras due to player count)
-  const activeSquads = squads.slice(0, squadCount);
+  // Distribute players round-robin across all 8 squads (e.g. 31 players -> 7 squads of 4 + 1 squad of 3)
+  shuffled.forEach((player, idx) => {
+    squads[idx % squadCount].push(player);
+  });
+
+  // Convert each squad to composite string: "ECL-001 + ECL-002 + ECL-003 + ECL-004"
+  const activeSquads = squads
+    .filter((sq) => sq.length > 0)
+    .map((sq) => sq.join(' + '));
 
   // Shuffle squad matchups
   const shuffledSquads = shuffle(activeSquads);

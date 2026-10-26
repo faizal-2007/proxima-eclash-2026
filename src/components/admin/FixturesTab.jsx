@@ -728,6 +728,11 @@ function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, to
   const roundNum = match.round;
   const totalRds = totalRounds;
 
+  const isTeamMatch =
+    match.game === 'Free Fire' ||
+    match.game === 'Mini Militia' ||
+    match.players.some((p) => p && p.includes('+'));
+
   const save = useCallback(async (patch) => {
     setSaving(true);
     try {
@@ -818,21 +823,69 @@ function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, to
     }
   };
 
+  const handleSquadMemberChange = async (slotIdx, memberIdx, newPlayerId) => {
+    const currentTeam = match.players[slotIdx];
+    if (!currentTeam) return;
+    const parts = currentTeam.split('+').map((p) => p.trim());
+    if (parts[memberIdx] === newPlayerId) return;
+    parts[memberIdx] = newPlayerId;
+    const newTeamStr = parts.join(' + ');
+
+    const newPlayers = [...match.players];
+    newPlayers[slotIdx] = newTeamStr;
+
+    const newPlayerNames = buildPlayerNames(registrations, newPlayers);
+    const updatedWinner = match.winner === currentTeam ? newTeamStr : match.winner;
+    const updatedWinnerName = updatedWinner ? resolvePlayerName(registrations, updatedWinner) : null;
+
+    const updatedMatches = allMatches.map((m) =>
+      m.id === match.id
+        ? {
+            ...m,
+            players: newPlayers,
+            player_names: newPlayerNames,
+            winner: updatedWinner,
+            winner_name: updatedWinnerName,
+          }
+        : m
+    );
+    onUpdate(null, updatedMatches);
+
+    await fetch('/api/admin/fixtures', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        id: match.id,
+        players: newPlayers,
+        player_names: newPlayerNames,
+        winner: updatedWinner,
+        winner_name: updatedWinnerName,
+      }),
+    });
+  };
+
   return (
     <div
-      className={`rounded-xl border p-3 sm:p-4 space-y-3 transition-all ${
+      className={`rounded-2xl border p-3.5 sm:p-4 space-y-3 transition-all shadow-lg ${
         isLocked
-          ? 'border-amber-500/50 bg-amber-950/20'
-          : 'border-cyan-500/20 bg-[#080d32]'
+          ? 'border-amber-500/50 bg-amber-950/20 shadow-amber-950/20'
+          : 'border-cyan-500/20 bg-[#080d32] shadow-black/40'
       } ${saving ? 'opacity-70' : ''}`}
     >
       {/* Header row */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-          {isKnockout
-            ? `${roundName(roundNum, totalRds, match.game)} — Match ${match.match_no}`
-            : `Lobby ${match.match_no}`}
-        </span>
+      <div className="flex items-center justify-between gap-2 flex-wrap pb-1 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-400">
+            {isKnockout
+              ? `${roundName(roundNum, totalRds, match.game)} — Match ${match.match_no}`
+              : `Lobby ${match.match_no}`}
+          </span>
+          {isTeamMatch && (
+            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-white/5 text-slate-400 border border-white/10">
+              {match.game === 'Free Fire' ? 'Squad v Squad (4v4)' : 'Team v Team (2v2)'}
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           {saving && <RefreshCw className="w-3 h-3 animate-spin text-cyan-400" />}
@@ -852,61 +905,202 @@ function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, to
         </div>
       </div>
 
-      {/* Players */}
-      <div className="space-y-1.5">
-        {match.players.map((regId, idx) => {
-          const isBye = !regId;
-          const isWinner = match.winner === regId && regId;
-          return (
-            <div key={idx} className="flex items-center gap-2">
-              {/* Slot label */}
-              <span className="text-[10px] font-mono text-slate-500 w-4 shrink-0">
-                {isKnockout ? (idx === 0 ? 'A' : 'B') : `P${idx + 1}`}
-              </span>
+      {/* Players / Squads */}
+      {isTeamMatch ? (
+        <div className="space-y-2.5">
+          {[0, 1].map((slotIdx) => {
+            const teamStr = match.players?.[slotIdx] || '';
+            const isWinner = match.winner === teamStr && Boolean(teamStr);
+            const isBye = !teamStr && (match.round === 1 || match.round === 0);
+            const isAwaiting = !teamStr && match.round > 1;
+            const memberIds = teamStr
+              ? teamStr
+                  .split('+')
+                  .map((p) => p.replace(/\s*\(Sub\)/i, '').trim())
+                  .filter(Boolean)
+              : [];
 
-              {/* Dropdown to change player */}
-              <div className="relative flex-1">
-                <select
-                  disabled={isLocked || isBye}
-                  value={regId || ''}
-                  onChange={(e) => handlePlayerChange(idx, e.target.value)}
-                  className="w-full appearance-none pl-2 pr-6 py-1.5 rounded-lg bg-[#050918] border border-white/10 text-xs text-white focus:border-cyan-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isBye && <option value="">— bye —</option>}
-                  {gamePlayers.map((pid) => {
-                    const r = registrations.find((x) => x.registrationId === pid);
-                    return (
-                      <option key={pid} value={pid}>
-                        {r ? `${r.fullName} (${r.campusId})` : pid}
-                      </option>
-                    );
-                  })}
-                </select>
-                {!isLocked && !isBye && (
-                  <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            const isFreeFire = match.game === 'Free Fire';
+            const teamLabel = isFreeFire
+              ? slotIdx === 0
+                ? 'Squad 1 (Team A)'
+                : 'Squad 2 (Team B)'
+              : slotIdx === 0
+              ? 'Team 1 (Side A)'
+              : 'Team 2 (Side B)';
+
+            return (
+              <React.Fragment key={slotIdx}>
+                {slotIdx === 1 && (
+                  <div className="flex items-center gap-2 py-0.5">
+                    <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent flex-1" />
+                    <span className="text-[10px] font-orbitron font-extrabold text-cyan-400/90 px-2.5 py-0.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 shadow-inner">
+                      VS
+                    </span>
+                    <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent flex-1" />
+                  </div>
                 )}
-              </div>
 
-              {/* Winner button (knockout only, not byes) */}
-              {isKnockout && !isBye && (
-                <button
-                  type="button"
-                  onClick={() => handleWinner(regId)}
-                  disabled={isLocked}
-                  title={isWinner ? 'Unmark winner' : 'Mark as winner'}
-                  className={`p-1.5 rounded-lg border text-xs transition-all shrink-0 ${
+                <div
+                  className={`rounded-xl border p-2.5 sm:p-3 space-y-2 transition-all ${
                     isWinner
-                      ? 'bg-amber-500/30 border-amber-400/60 text-amber-300'
-                      : 'bg-white/5 border-white/10 text-slate-500 hover:text-amber-300 hover:border-amber-400/40'
+                      ? 'border-amber-400/80 bg-gradient-to-br from-amber-500/15 to-yellow-600/10 shadow-[0_0_20px_rgba(251,191,36,0.2)] ring-1 ring-amber-400/50'
+                      : 'border-white/10 bg-[#050918]/80 hover:border-white/20'
                   }`}
                 >
-                  <Trophy className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                  {/* Team Header */}
+                  <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/5">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                          slotIdx === 0
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                            : 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
+                        }`}
+                      >
+                        {teamLabel}
+                      </span>
+                      {memberIds.length > 0 && (
+                        <span className="text-[10px] font-mono text-slate-400">
+                          ({memberIds.length} {isFreeFire ? 'Squad Members' : 'Players'})
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Winner Button */}
+                    {!isBye && !isAwaiting && (
+                      <button
+                        type="button"
+                        onClick={() => handleWinner(teamStr)}
+                        disabled={isLocked}
+                        title={isWinner ? 'Unmark as winner' : 'Mark squad as winner'}
+                        className={`px-2.5 py-1 rounded-lg border text-[11px] font-orbitron font-bold transition-all flex items-center gap-1.5 ${
+                          isWinner
+                            ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 border-amber-300 text-black shadow-[0_0_15px_rgba(251,191,36,0.5)] scale-105'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-amber-300 hover:border-amber-400/50'
+                        }`}
+                      >
+                        <Trophy className={`w-3.5 h-3.5 ${isWinner ? 'text-black fill-black' : ''}`} />
+                        <span>{isWinner ? 'WINNER' : 'Mark Winner'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Team Members List */}
+                  {isBye ? (
+                    <div className="py-2 text-center text-xs font-mono text-slate-500 italic">
+                      — BYE —
+                    </div>
+                  ) : isAwaiting ? (
+                    <div className="py-2 text-center text-xs font-mono text-slate-500">
+                      Awaiting Winner from Round {roundNum - 1}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                      {memberIds.map((mId, mIdx) => {
+                        const reg = registrations.find((r) => r.registrationId === mId);
+                        const fullName = reg ? reg.fullName : mId;
+                        const campusId = reg?.campusId || '';
+
+                        return (
+                          <div
+                            key={mIdx}
+                            className="flex items-center gap-1.5 p-1 rounded-lg bg-white/[0.03] border border-white/5 hover:border-cyan-500/30 transition-colors"
+                          >
+                            <span className="w-5 h-5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0">
+                              {mIdx + 1}
+                            </span>
+                            <div className="relative flex-1 min-w-0">
+                              <select
+                                disabled={isLocked}
+                                value={mId}
+                                onChange={(e) => handleSquadMemberChange(slotIdx, mIdx, e.target.value)}
+                                className="w-full appearance-none pl-2 pr-6 py-1 rounded-md bg-[#020512] border border-white/10 hover:border-cyan-500/50 text-xs font-semibold text-white focus:border-cyan-400 focus:outline-none disabled:opacity-90 disabled:cursor-not-allowed truncate"
+                              >
+                                {!gamePlayers.includes(mId) && (
+                                  <option value={mId}>
+                                    {fullName} {campusId ? `(${campusId})` : ''}
+                                  </option>
+                                )}
+                                {gamePlayers.map((pid) => {
+                                  const r = registrations.find((x) => x.registrationId === pid);
+                                  return (
+                                    <option key={pid} value={pid}>
+                                      {r ? `${r.fullName} (${r.campusId})` : pid}
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                              {!isLocked && (
+                                <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {match.players.map((regId, idx) => {
+            const isBye = !regId;
+            const isWinner = match.winner === regId && regId;
+            return (
+              <div key={idx} className="flex items-center gap-2">
+                {/* Slot label */}
+                <span className="text-[10px] font-mono text-slate-500 w-4 shrink-0">
+                  {isKnockout ? (idx === 0 ? 'A' : 'B') : `P${idx + 1}`}
+                </span>
+
+                {/* Dropdown to change player */}
+                <div className="relative flex-1">
+                  <select
+                    disabled={isLocked || isBye}
+                    value={regId || ''}
+                    onChange={(e) => handlePlayerChange(idx, e.target.value)}
+                    className="w-full appearance-none pl-2 pr-6 py-1.5 rounded-lg bg-[#050918] border border-white/10 text-xs text-white focus:border-cyan-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isBye && <option value="">— bye —</option>}
+                    {gamePlayers.map((pid) => {
+                      const r = registrations.find((x) => x.registrationId === pid);
+                      return (
+                        <option key={pid} value={pid}>
+                          {r ? `${r.fullName} (${r.campusId})` : pid}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {!isLocked && !isBye && (
+                    <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  )}
+                </div>
+
+                {/* Winner button (knockout only, not byes) */}
+                {isKnockout && !isBye && (
+                  <button
+                    type="button"
+                    onClick={() => handleWinner(regId)}
+                    disabled={isLocked}
+                    title={isWinner ? 'Unmark winner' : 'Mark as winner'}
+                    className={`p-1.5 rounded-lg border text-xs transition-all shrink-0 ${
+                      isWinner
+                        ? 'bg-amber-500/30 border-amber-400/60 text-amber-300'
+                        : 'bg-white/5 border-white/10 text-slate-500 hover:text-amber-300 hover:border-amber-400/40'
+                    }`}
+                  >
+                    <Trophy className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -81,25 +81,32 @@ function PlayerChip({ regId, nameMap, isWinner, isFlash, emptyLabel = 'Bye' }) {
 function BracketPill({ regId, nameMap, isWinner, isFlash, emptyLabel = 'BYE' }) {
   const isBye = !regId;
   let displayName = emptyLabel;
+  let tooltip = '';
   if (!isBye) {
     if (regId.includes('+')) {
-      displayName = regId
+      const parts = regId
         .split('+')
         .map((part) => {
           const isSub = part.toLowerCase().includes('(sub)');
           const id = part.replace(/\s*\(Sub\)/i, '').trim();
           const name = nameMap?.[id] || id;
           return isSub ? `${name} (Sub)` : name;
-        })
-        .join(' & ');
+        });
+      tooltip = parts.join(' • ');
+      if (parts.length > 2) {
+        displayName = `${parts[0]} +${parts.length - 1}`;
+      } else {
+        displayName = parts.join(' & ');
+      }
     } else {
       displayName = nameMap?.[regId] || regId;
+      tooltip = displayName;
     }
   }
 
   return (
     <div
-      title={displayName}
+      title={tooltip || displayName}
       className={`group/pill relative w-36 sm:w-44 md:w-48 h-7 sm:h-8 rounded-lg flex items-center justify-between px-2.5 sm:px-3 transition-all duration-200 select-none ${
         isBye
           ? 'bg-[#06091e]/75 border border-white/10 text-slate-500 shadow-inner'
@@ -485,8 +492,8 @@ function RightBracketBranch({ round, matchNo, fixturesMap, nameMap, flashIds, ba
 // ── Bilateral Tournament Bracket (Exact layout of reference image) ────────────
 export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, selectedGame }) {
   const isFreeFire = selectedGame === 'Free Fire';
-  const baseRound = isFreeFire ? 2 : 1;
-  const effectiveTotalRounds = isFreeFire ? 4 : totalRounds;
+  const baseRound = 1;
+  const effectiveTotalRounds = totalRounds || (isFreeFire ? 3 : 1);
 
   const fixturesMap = useMemo(() => {
     const map = {};
@@ -506,13 +513,7 @@ export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, sele
     [fixtures]
   );
 
-  // Free Fire Round 1 Lobby Qualifier
-  const freeFireLobby = useMemo(
-    () => (isFreeFire ? fixtures.find((f) => f.round === 1) : null),
-    [fixtures, isFreeFire]
-  );
-
-  if (effectiveTotalRounds <= baseRound && !freeFireLobby) {
+  if (effectiveTotalRounds <= baseRound) {
     return (
       <div className="relative overflow-hidden rounded-3xl bg-[#030614] border border-cyan-500/20 p-6 sm:p-12 shadow-2xl">
         <div className="flex flex-col items-center justify-center gap-4">
@@ -542,25 +543,6 @@ export function KnockoutBracket({ fixtures, nameMap, flashIds, totalRounds, sele
 
       {/* Subtle geometric dot grid in background */}
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
-
-      {/* Free Fire Stage 1 Solo Battle Royale Qualifier Lobby if present */}
-      {freeFireLobby && (
-        <div className="mb-8 relative z-10 p-4 sm:p-5 rounded-2xl bg-[#080d32]/90 border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-amber-400" />
-              Stage 1: Solo Battle Royale Qualifier ({freeFireLobby.players?.length || 0} Players • Top 8 Advance)
-            </span>
-            <span className="text-[10px] font-mono text-slate-400">
-              Custom Bermuda Room
-            </span>
-          </div>
-          <LobbyCard match={freeFireLobby} nameMap={nameMap} isFlash={flashIds?.has?.(freeFireLobby.id)} />
-          <div className="mt-3 text-center text-[11px] font-mono text-cyan-400">
-            ↓ Top 8 survivors advance to the 1v1 Single-Elimination Knockout Bracket below ↓
-          </div>
-        </div>
-      )}
 
       {/* Play-In matches if present (eFootball) */}
       {playInMatches.length > 0 && (
