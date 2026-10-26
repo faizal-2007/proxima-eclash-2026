@@ -21,11 +21,11 @@ export const GAME_FORMAT = {
     lobbySize: null,
   },
   'Carrom': {
-    format: 'knockout',
+    format: 'knockout_playin',
     label: 'Carrom',
     sideSize: 1,
     teamMode: false,
-    hasPlayIn: false,
+    hasPlayIn: true,
     lobbySize: null,
   },
   'Free Fire': {
@@ -151,6 +151,25 @@ export function roundName(round, totalRounds, game) {
     if (round === 2) return 'Quarter-final';
     if (round === 3) return 'Semi-final';
     if (round === 4) return 'Grand Final';
+  }
+
+  if (game === 'Carrom') {
+    if (round === 0) return '1/64 finals';
+    if (round === 1) return '1/32 finals';
+    if (round === 2) return '1/16 finals';
+    if (round === 3) return '1/8 finals';
+    if (round === 4) return 'Quarter-finals';
+    if (round === 5) return 'Semi-finals';
+    if (round === 6) return 'Grand Final';
+  }
+
+  if (game === 'eFootball') {
+    if (round === 0) return 'Preliminary Round';
+    if (round === 1) return 'Round of 32';
+    if (round === 2) return 'Round of 16';
+    if (round === 3) return 'Quarter-finals';
+    if (round === 4) return 'Semi-finals';
+    if (round === 5) return 'Grand Final';
   }
 
   if (round === 0) return 'Play-In Round';
@@ -553,8 +572,8 @@ export function generateFixtures(game, players) {
   }
 
   if (normalizedGame === 'Carrom') {
-    // 1v1 single elimination knockout starting directly at Round 1 (no play-in round)
-    return generateKnockout(normalizedGame, players);
+    // 1v1 with play-in trimming to 64 (Round 0 has 1/64 finals, Round 1 has 1/32 finals)
+    return generatePlayInKnockout(normalizedGame, players, 64);
   }
 
   if (cfg.format === 'knockout') {
@@ -650,7 +669,51 @@ export function advanceWinner(matches, round, match_no, winner) {
     return updated;
   }
 
-  // Case 2: Round 0 Play-in matches advancing into Round 1
+  // Case 2: eFootball Round 0 Play-in matches advancing into Round 1
+  if (cur.game === 'eFootball' && round === 0) {
+    const efootballPrelimTargets = {
+      1: { match_no: 1, slot: 1 },
+      2: { match_no: 6, slot: 0 },
+      3: { match_no: 8, slot: 0 },
+      4: { match_no: 10, slot: 0 },
+      5: { match_no: 12, slot: 0 },
+      6: { match_no: 16, slot: 0 },
+    };
+    const target = efootballPrelimTargets[match_no];
+    if (target) {
+      const next = updated.find((m) => m.round === 1 && m.match_no === target.match_no);
+      if (next) {
+        if (!winner && prevWinner && next.players[target.slot] === prevWinner) {
+          next.players[target.slot] = '';
+        } else if (winner) {
+          next.players[target.slot] = winner;
+        }
+      }
+    }
+    return updated;
+  }
+
+  // Case 3: Carrom Round 0 (1/64 finals) advancing into Round 1 (1/32 finals)
+  if (cur.game === 'Carrom' && round === 0) {
+    const carromPrelimTargets = {
+      1: { match_no: 1, slot: 1 },
+      2: { match_no: 17, slot: 1 },
+    };
+    const target = carromPrelimTargets[match_no];
+    if (target) {
+      const next = updated.find((m) => m.round === 1 && m.match_no === target.match_no);
+      if (next) {
+        if (!winner && prevWinner && next.players[target.slot] === prevWinner) {
+          next.players[target.slot] = '';
+        } else if (winner) {
+          next.players[target.slot] = winner;
+        }
+      }
+    }
+    return updated;
+  }
+
+  // Case 4: Generic Round 0 Play-in fallback
   if (round === 0) {
     const next = updated.find((m) => m.round === 1 && m.match_no === match_no);
     if (next) {
@@ -663,12 +726,12 @@ export function advanceWinner(matches, round, match_no, winner) {
     return updated;
   }
 
-  // Case 3: Free Fire Round 1 is the lobby qualifier
+  // Case 5: Free Fire Round 1 is the lobby qualifier
   if (cur.game === 'Free Fire' && round === 1) {
     return updated;
   }
 
-  // Case 4: Standard knockout advancement (round -> round + 1)
+  // Case 6: Standard knockout advancement (round -> round + 1)
   const nextMatchNo = Math.ceil(match_no / 2);
   const slot = match_no % 2 === 1 ? 0 : 1;
   const next = updated.find((m) => m.round === round + 1 && m.match_no === nextMatchNo);
@@ -725,6 +788,7 @@ export function getTotalRounds(playerCount, game) {
     return Math.log2(nextPow2(teamsCount));
   }
   if (game === 'eFootball') return 5; // Target 32 -> 5 knockout rounds (Round 1 to 5) + Round 0 Play-in
+  if (game === 'Carrom') return 6; // Target 64 -> 6 knockout rounds (Round 1 to 6) + Round 0 Play-in
 
   return Math.log2(nextPow2(playerCount));
 }

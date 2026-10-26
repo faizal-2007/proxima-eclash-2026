@@ -111,21 +111,30 @@ assert('Round 2 has 2 Semi-final matches', bgmiR2.length === 2);
 assert('Round 2 has 1 bye team placed straight through', bgmiR2.some(m => Boolean(m.players[1])));
 assert('Round 3 has 1 Grand Final match', bgmiR3.length === 1);
 
-// ── 6. Carrom 1v1 Knockout without Play-In ─────────────────────────────────────
-console.log('\n6. Carrom (66 players -> standard knockout starting directly at Round 1)');
+// ── 6. Carrom 1v1 Knockout with Play-In (1/64 Finals) ─────────────────────────
+console.log('\n6. Carrom (66 players -> 2 play-in matches in 1/64 finals + 63 knockout = 65 matches)');
 const carromPlayers = Array.from({ length: 66 }, (_, i) => `CARROM_${i + 1}`);
 const carromFixtures = generateFixtures('Carrom', carromPlayers);
 const carromPlayIns = carromFixtures.filter(m => m.round === 0);
-assert('Carrom has NO play-in matches (round 0 === 0)', carromPlayIns.length === 0);
+assert('Carrom has 2 play-in matches in Round 0 (1/64 finals)', carromPlayIns.length === 2);
 const carromR1 = carromFixtures.filter(m => m.round === 1);
-assert('Carrom starts directly in Round 1 with 64 bracket matches', carromR1.length === 64);
-const carromRealM = carromR1.filter(m => Boolean(m.players[0]) && Boolean(m.players[1]));
-assert('Round 1 has 2 real matches played', carromRealM.length === 2);
-const carromByes = carromR1.filter(m => Boolean(m.players[0]) && !m.players[1]);
-assert('Round 1 has 62 byes cleanly auto-advanced', carromByes.length === 62);
+assert('Carrom Round 1 has 32 matches (1/32 finals)', carromR1.length === 32);
 const carromR2 = carromFixtures.filter(m => m.round === 2);
-assert('Round 2 has 32 matches', carromR2.length === 32);
-assert('Total Carrom rounds is 7', getTotalRounds(66, 'Carrom') === 7);
+assert('Round 2 has 16 matches (1/16 finals)', carromR2.length === 16);
+const carromR3 = carromFixtures.filter(m => m.round === 3);
+assert('Round 3 has 8 matches (1/8 finals)', carromR3.length === 8);
+const carromR4 = carromFixtures.filter(m => m.round === 4);
+assert('Round 4 has 4 matches (Quarter-finals)', carromR4.length === 4);
+const carromR5 = carromFixtures.filter(m => m.round === 5);
+assert('Round 5 has 2 matches (Semi-finals)', carromR5.length === 2);
+const carromR6 = carromFixtures.filter(m => m.round === 6);
+assert('Round 6 has 1 match (Grand Final)', carromR6.length === 1);
+assert('Total Carrom rounds is 6', getTotalRounds(66, 'Carrom') === 6);
+
+// Test Carrom play-in advancement
+const afterCarromPlayIn = advanceWinner(carromFixtures, 0, 1, 'CARROM_W1');
+const carromTargetR1 = afterCarromPlayIn.find(m => m.round === 1 && m.match_no === 1);
+assert('Play-in winner 1 advances to Round 1 Match 1 slot 1', carromTargetR1.players[1] === 'CARROM_W1');
 
 // ── 7. GAME FORMAT & FIXTURES VERIFICATION ────────────────────────────────────
 console.log('\n7. Tournament Formats & Match Generation Verification');
@@ -133,7 +142,7 @@ assert('Free Fire has 8 matches (1 solo BR + 7 knockout)', ffFixtures.length ===
 assert('Mini Militia has 15 matches (2v2 knockout)', mmFixtures.length === 15);
 assert('eFootball has 37 matches (6 play-in + 31 knockout)', efFixtures.length === 37);
 assert('BGMI (TDM) has 6 matches (3 QF + 2 SF + 1 Final)', bgmiFixtures.length === 6);
-assert('Carrom has 127 bracket matches (65 actual played matches)', carromFixtures.length === 127);
+assert('Carrom has exactly 65 matches', carromFixtures.length === 65);
 
 // ── 8. Team Name Resolution ────────────────────────────────────────────────
 console.log('\n8. Team & Player Name Resolution');

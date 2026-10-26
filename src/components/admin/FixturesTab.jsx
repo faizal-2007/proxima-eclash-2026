@@ -785,20 +785,24 @@ function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, to
 
     // Persist next-round slot if knockout
     if (isKnockout && match.round < totalRds) {
-      const nextMatchNo = Math.ceil(match.match_no / 2);
-      const nextMatch = updated.find((m) => m.round === match.round + 1 && m.match_no === nextMatchNo);
-      if (nextMatch?.id) {
-        // Build player_names for the next match from current registrations
-        const nextPlayerNames = buildPlayerNames(registrations, nextMatch.players);
-        await fetch('/api/admin/fixtures', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            id: nextMatch.id,
-            players: nextMatch.players,
-            player_names: nextPlayerNames,
-          }),
-        });
+      const affectedNext = updated.filter((m) => {
+        if (m.id === match.id) return false;
+        const orig = allMatches.find((o) => o.id === m.id);
+        return orig && JSON.stringify(orig.players) !== JSON.stringify(m.players);
+      });
+      for (const nextMatch of affectedNext) {
+        if (nextMatch?.id) {
+          const nextPlayerNames = buildPlayerNames(registrations, nextMatch.players);
+          await fetch('/api/admin/fixtures', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              id: nextMatch.id,
+              players: nextMatch.players,
+              player_names: nextPlayerNames,
+            }),
+          });
+        }
       }
     }
   };
