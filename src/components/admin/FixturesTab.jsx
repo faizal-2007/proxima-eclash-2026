@@ -720,10 +720,10 @@ function FreeFireTop8Modal({
 
 // ── MatchCard — one row per match ─────────────────────────────────────────────
 
-function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, totalRounds, token, onOpenTop8 }) {
+function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, totalRounds, token }) {
   const [saving, setSaving] = useState(false);
 
-  const isKnockout = match.format === 'knockout';
+  const isKnockout = isKnockoutFormat(match.format);
   const isLocked = match.locked;
   const roundNum = match.round;
   const totalRds = totalRounds;
@@ -749,21 +749,6 @@ function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, to
   const handleToggleLock = async () => {
     await save({ locked: !isLocked });
   };
-
-  // Special card layout for Free Fire Round 1 Battle Royale Lobby
-  if (match.game === 'Free Fire' && match.round === 1) {
-    return (
-      <FreeFireRound1Card
-        match={match}
-        allMatches={allMatches}
-        registrations={registrations}
-        onOpenModal={onOpenTop8}
-        isLocked={isLocked}
-        onToggleLock={handleToggleLock}
-        saving={saving}
-      />
-    );
-  }
 
   const handleWinner = async (regId) => {
     const newWinner = match.winner === regId ? null : regId;
@@ -845,7 +830,7 @@ function MatchCard({ match, allMatches, registrations, gamePlayers, onUpdate, to
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
           {isKnockout
-            ? `${roundName(roundNum, totalRds)} — Match ${match.match_no}`
+            ? `${roundName(roundNum, totalRds, match.game)} — Match ${match.match_no}`
             : `Lobby ${match.match_no}`}
         </span>
 
@@ -1294,7 +1279,7 @@ export function FixturesTab({ token, registrations }) {
         // Detect bye matches (knockout with one real player)
         let status = 'scheduled';
         let winnerName = null;
-        if (f.format === 'knockout' && activePlayers.length === 1 && players.length === 2) {
+        if (isKnockoutFormat(f.format) && activePlayers.length === 1 && players.length === 2) {
           status = 'bye';
           winnerName = resolvePlayerName(registrations, f.winner);
         } else if (f.winner) {
@@ -1490,8 +1475,10 @@ export function FixturesTab({ token, registrations }) {
               <Layers className="w-3.5 h-3.5 text-emerald-400" />
             )}
             <span className={isKnockoutFormat(cfg.format) ? 'text-violet-300' : 'text-emerald-300'}>
-              {cfg.format === 'team_knockout'
-                ? '2v2 Knockout (Teams with Rotating Subs)'
+              {cfg.format === 'squad_knockout'
+                ? 'Squad Knockout (8 Squads of 4)'
+                : cfg.format === 'team_knockout'
+                ? '2v2 Team Knockout (16 Teams)'
                 : cfg.format === 'team_knockout_playin'
                 ? '2v2 TDM Knockout with Play-in'
                 : cfg.format === 'br_to_knockout'
@@ -1537,20 +1524,6 @@ export function FixturesTab({ token, registrations }) {
               <Trophy className="w-3 h-3" />
               Bracket View
             </button>
-            {selectedGame === 'Free Fire' && (
-              <button
-                type="button"
-                onClick={() => setViewMode('results')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold font-orbitron transition-all flex items-center gap-1 ${
-                  viewMode === 'results'
-                    ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md'
-                    : 'text-orange-400 hover:text-orange-300'
-                }`}
-              >
-                <Flame className="w-3 h-3 text-orange-400" />
-                BR Results
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -1593,9 +1566,7 @@ export function FixturesTab({ token, registrations }) {
 
       {/* ── Rounds / Lobbies or Bracket View or Match Results View ── */}
       {!isLoading && hasExisting && (
-        viewMode === 'results' && selectedGame === 'Free Fire' ? (
-          <MatchResultEntry token={token} registrations={registrations} />
-        ) : viewMode === 'bracket' && isKnockoutFormat(cfg.format) ? (
+        viewMode === 'bracket' && isKnockoutFormat(cfg.format) ? (
           <KnockoutBracket
             fixtures={matches}
             nameMap={nameMap}

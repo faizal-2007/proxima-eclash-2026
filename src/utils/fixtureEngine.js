@@ -4,8 +4,8 @@
  * Supports:
  * - 1v1 Single Elimination Knockout
  * - 1v1 Knockout with Play-In Stage (eFootball, Carrom)
- * - 2v2 Knockout with Trio Rotating Substitutes (Mini Militia, BGMI TDM)
- * - Free Fire Hybrid: Solo Battle Royale Qualifier (31 players -> Top 8) -> 1v1 Knockout
+ * - 2v2 Team Knockout (Mini Militia: 32 players → 16 teams of 2 → single elimination)
+ * - Free Fire Squad Tournament: players grouped into squads of 4 (8 squads total) → QF → SF → Final
  * - Dynamic power-of-2 play-in sizing and automatic advancement
  * No Supabase calls, no React — importable anywhere.
  */
@@ -29,10 +29,11 @@ export const GAME_FORMAT = {
     lobbySize: null,
   },
   'Free Fire': {
-    format: 'knockout',
+    format: 'squad_knockout',
     label: 'Free Fire',
-    sideSize: 1,
-    teamMode: false,
+    sideSize: 4,          // 4 players per squad
+    squadCount: 8,         // 8 squads total
+    teamMode: true,
     hasPlayIn: false,
     lobbySize: null,
   },
@@ -55,7 +56,8 @@ export const GAME_FORMAT = {
   'Mini Militia': {
     format: 'team_knockout',
     label: 'Mini Militia',
-    sideSize: 2,
+    sideSize: 2,           // 2 players per team
+    teamCount: 16,         // 32 players → 16 teams
     teamMode: true,
     hasPlayIn: false,
     lobbySize: null,
@@ -70,7 +72,8 @@ export function isKnockoutFormat(format) {
     format === 'knockout_playin' ||
     format === 'team_knockout' ||
     format === 'team_knockout_playin' ||
-    format === 'br_to_knockout'
+    format === 'br_to_knockout' ||
+    format === 'squad_knockout'
   );
 }
 
@@ -146,12 +149,11 @@ export function pairTeams(players, sideSize = 2) {
  * @param {string} [game]
  */
 export function roundName(round, totalRounds, game) {
+  // Free Fire: 8-squad single elimination (3 rounds)
   if (game === 'Free Fire') {
-    if (round === 1) return 'Round of 32';
-    if (round === 2) return 'Round of 16';
-    if (round === 3) return 'Quarter-finals';
-    if (round === 4) return 'Semi-finals';
-    if (round === 5) return 'Grand Final';
+    if (round === 1) return 'Quarter-finals';
+    if (round === 2) return 'Semi-finals';
+    if (round === 3) return 'Grand Final';
   }
 
   if (game === 'BGMI' || game === 'BGMI (TDM)') {
@@ -159,6 +161,20 @@ export function roundName(round, totalRounds, game) {
     if (round === 2) return 'Quarter-finals';
     if (round === 3) return 'Semi-finals';
     if (round === 4) return 'Grand Final';
+  }
+
+  // Mini Militia: 16-team single elimination (4 rounds)
+  if (game === 'Mini Militia') {
+    if (round === 1) return 'Quarter-finals';
+    if (round === 2) return 'Semi-finals';
+    if (round === 3) return 'Grand Final';
+    // If somehow more rounds exist
+    const fromFinal = totalRounds - round;
+    if (fromFinal === 0) return 'Grand Final';
+    if (fromFinal === 1) return 'Semi-finals';
+    if (fromFinal === 2) return 'Quarter-finals';
+    if (fromFinal === 3) return 'Round of 16';
+    return `Round ${round}`;
   }
 
   if (game === 'Carrom') {
@@ -359,70 +375,46 @@ export function generatePlayInKnockout(game, sides, explicitTargetField = null) 
 }
 
 /**
- * Free Fire 1v1 knockout generator:
- * - 31 players bracket of 32:
- * - Round 1: Round of 32 (15 matches, 30 players)
- * - Round 2: Round of 16 (8 matches: Match 1 slot 0 has the 1 bye player)
- * - Round 3: Quarter-finals (4 matches)
- * - Round 4: Semi-finals (2 matches)
- * - Round 5: Grand Final (1 match)
- * Total: 15 + 8 + 4 + 2 + 1 = 30 matches.
+ * Free Fire Squad Tournament generator.
+ * Groups players into squads of 4 (8 squads total).
+ * 8 squads → Quarter-finals (Round 1) → Semi-finals (Round 2) → Grand Final (Round 3).
+ * Total: 4 + 2 + 1 = 7 squad matches.
+ *
+ * Squad IDs are composite strings: "ECL-001 + ECL-002 + ECL-003 + ECL-004"
  */
-export function generateFreeFireFixtures(players) {
-  const shuffled = shuffle(players);
-  const byePlayer = shuffled[0] || '';
-  const r1Players = shuffled.slice(1);
+export function generateFreeFireSquadFixtures(players) {
+  const squadSize = 4;
+  const squadCount = 8;
+  const squads = pairTeams(players, squadSize);
+
+  // Use first 8 squads (in case there are extras due to player count)
+  const activeSquads = squads.slice(0, squadCount);
+
+  // Shuffle squad matchups
+  const shuffledSquads = shuffle(activeSquads);
 
   const matches = [];
 
-  // Round 1 (Round of 32): 15 matches
-  for (let m = 1; m <= 15; m++) {
-    matches.push({
-      game: 'Free Fire',
-      format: 'knockout',
-      round: 1,
-      match_no: m,
-      players: [r1Players[(m - 1) * 2] || '', r1Players[(m - 1) * 2 + 1] || ''],
-      winner: null,
-      locked: false,
-      status: 'scheduled',
-    });
-  }
-
-  // Round 2 (Round of 16): 8 matches (Match 1 slot 0 is the bye player)
-  for (let m = 1; m <= 8; m++) {
-    matches.push({
-      game: 'Free Fire',
-      format: 'knockout',
-      round: 2,
-      match_no: m,
-      players: [m === 1 ? byePlayer : '', ''],
-      winner: null,
-      locked: false,
-      status: 'scheduled',
-    });
-  }
-
-  // Round 3 (Quarter-finals): 4 matches
+  // Round 1 (Quarter-finals): 4 squad matches
   for (let m = 1; m <= 4; m++) {
     matches.push({
       game: 'Free Fire',
-      format: 'knockout',
-      round: 3,
+      format: 'squad_knockout',
+      round: 1,
       match_no: m,
-      players: ['', ''],
+      players: [shuffledSquads[(m - 1) * 2] || '', shuffledSquads[(m - 1) * 2 + 1] || ''],
       winner: null,
       locked: false,
       status: 'scheduled',
     });
   }
 
-  // Round 4 (Semi-finals): 2 matches
+  // Round 2 (Semi-finals): 2 squad matches
   for (let m = 1; m <= 2; m++) {
     matches.push({
       game: 'Free Fire',
-      format: 'knockout',
-      round: 4,
+      format: 'squad_knockout',
+      round: 2,
       match_no: m,
       players: ['', ''],
       winner: null,
@@ -431,11 +423,11 @@ export function generateFreeFireFixtures(players) {
     });
   }
 
-  // Round 5 (Grand Final): 1 match
+  // Round 3 (Grand Final): 1 squad match
   matches.push({
     game: 'Free Fire',
-    format: 'knockout',
-    round: 5,
+    format: 'squad_knockout',
+    round: 3,
     match_no: 1,
     players: ['', ''],
     winner: null,
@@ -515,7 +507,8 @@ export function generateFixtures(game, players) {
   if (!cfg) throw new Error(`Unknown game: ${game}`);
 
   if (normalizedGame === 'Free Fire') {
-    return generateFreeFireFixtures(players);
+    // Squad tournament: group players into squads of 4, 8 squads total
+    return generateFreeFireSquadFixtures(players);
   }
 
   if (normalizedGame === 'BGMI') {
@@ -523,6 +516,7 @@ export function generateFixtures(game, players) {
   }
 
   if (normalizedGame === 'Mini Militia') {
+    // 32 players → 16 teams of 2 → 16-team single elimination
     const teams = pairTeams(players, 2);
     return generateKnockout(normalizedGame, teams);
   }
@@ -669,29 +663,8 @@ export function advanceWinner(matches, round, match_no, winner) {
     return updated;
   }
 
-  // Case 5: Free Fire Round 1 (Round of 32 -> Round of 16)
-  if (cur.game === 'Free Fire' && round === 1) {
-    let nextMatchNo;
-    let slot;
-    if (match_no === 1) {
-      nextMatchNo = 1;
-      slot = 1; // Slot 0 is Rakshya .k (the bye player)
-    } else {
-      nextMatchNo = Math.floor(match_no / 2) + 1;
-      slot = match_no % 2 === 0 ? 0 : 1;
-    }
-    const next = updated.find((m) => m.round === 2 && m.match_no === nextMatchNo);
-    if (next) {
-      if (!winner && prevWinner && next.players[slot] === prevWinner) {
-        next.players[slot] = '';
-      } else if (winner) {
-        next.players[slot] = winner;
-      }
-    }
-    return updated;
-  }
-
-  // Case 6: Standard knockout advancement (round -> round + 1)
+  // Case 5: Standard knockout advancement for squad/team brackets (round -> round + 1)
+  // Free Fire squad knockout (QF->SF->Final) and Mini Militia team knockout both use this path.
   const nextMatchNo = Math.ceil(match_no / 2);
   const slot = match_no % 2 === 1 ? 0 : 1;
   const next = updated.find((m) => m.round === round + 1 && m.match_no === nextMatchNo);
@@ -741,9 +714,10 @@ export function swapPlayers(matches, playerId, targetRound, targetMatchNo, targe
  * Get total rounds for a given game and player/side count.
  */
 export function getTotalRounds(playerCount, game) {
-  if (game === 'Free Fire') return 5; // Round 1 (R32) + Round 2 (R16) + Round 3 (QF) + Round 4 (SF) + Round 5 (Final)
+  if (game === 'Free Fire') return 3; // QF (Round 1) + SF (Round 2) + Final (Round 3) — 8 squads
   if (game === 'BGMI' || game === 'BGMI (TDM)') return 4; // Round 1 (R16) + Round 2 (QF) + Round 3 (SF) + Round 4 (Final)
   if (game === 'Mini Militia') {
+    // 32 players → 16 teams → log2(16) = 4 rounds
     const teamsCount = Math.floor(playerCount / 2);
     return Math.log2(nextPow2(teamsCount));
   }

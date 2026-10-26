@@ -744,21 +744,21 @@ export function PublicFixtures() {
     if (selectedGame === 'Free Fire') {
       return (
         <span className="flex items-center gap-1 text-amber-400">
-          <Flame className="w-3 h-3" /> Solo BR → 1v1 Knockout
+          <Flame className="w-3 h-3" /> Squad Knockout (8 Squads)
         </span>
       );
     }
     if (selectedGame === 'BGMI') {
       return (
         <span className="flex items-center gap-1 text-cyan-400">
-          <Swords className="w-3 h-3" /> TDM 2v2 Knockout
+          <Swords className="w-3 h-3" /> 1v1 Knockout
         </span>
       );
     }
     if (selectedGame === 'Mini Militia') {
       return (
         <span className="flex items-center gap-1 text-emerald-400">
-          <Swords className="w-3 h-3" /> 2v2 Knockout
+          <Swords className="w-3 h-3" /> 2v2 Team Knockout (16 Teams)
         </span>
       );
     }
