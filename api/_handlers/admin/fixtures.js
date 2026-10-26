@@ -118,7 +118,7 @@ export default async function handler(req, res) {
 
     const rows = fixtures.map((f) => ({
       game: f.game,
-      format: f.format,
+      format: f.format === 'lobby' ? 'lobby' : 'knockout',
       round: f.round,
       match_no: f.match_no,
       players: f.players ?? [],

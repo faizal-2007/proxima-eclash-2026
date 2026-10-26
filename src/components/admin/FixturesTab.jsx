@@ -1475,9 +1475,9 @@ export function FixturesTab({ token, registrations }) {
               <Layers className="w-3.5 h-3.5 text-emerald-400" />
             )}
             <span className={isKnockoutFormat(cfg.format) ? 'text-violet-300' : 'text-emerald-300'}>
-              {cfg.format === 'squad_knockout'
+              {selectedGame === 'Free Fire'
                 ? 'Squad Knockout (8 Squads of 4)'
-                : cfg.format === 'team_knockout'
+                : selectedGame === 'Mini Militia' || cfg.teamMode
                 ? '2v2 Team Knockout (16 Teams)'
                 : cfg.format === 'team_knockout_playin'
                 ? '2v2 TDM Knockout with Play-in'

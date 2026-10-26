@@ -29,7 +29,7 @@ export const GAME_FORMAT = {
     lobbySize: null,
   },
   'Free Fire': {
-    format: 'squad_knockout',
+    format: 'knockout',
     label: 'Free Fire',
     sideSize: 4,          // 4 players per squad
     squadCount: 8,         // 8 squads total
@@ -399,7 +399,7 @@ export function generateFreeFireSquadFixtures(players) {
   for (let m = 1; m <= 4; m++) {
     matches.push({
       game: 'Free Fire',
-      format: 'squad_knockout',
+      format: 'knockout',
       round: 1,
       match_no: m,
       players: [shuffledSquads[(m - 1) * 2] || '', shuffledSquads[(m - 1) * 2 + 1] || ''],
@@ -413,7 +413,7 @@ export function generateFreeFireSquadFixtures(players) {
   for (let m = 1; m <= 2; m++) {
     matches.push({
       game: 'Free Fire',
-      format: 'squad_knockout',
+      format: 'knockout',
       round: 2,
       match_no: m,
       players: ['', ''],
@@ -426,7 +426,7 @@ export function generateFreeFireSquadFixtures(players) {
   // Round 3 (Grand Final): 1 squad match
   matches.push({
     game: 'Free Fire',
-    format: 'squad_knockout',
+    format: 'knockout',
     round: 3,
     match_no: 1,
     players: ['', ''],
