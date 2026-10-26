@@ -16,6 +16,8 @@ import {
   UploadCloud,
   X,
   Banknote,
+  Ban,
+  Trophy,
 } from 'lucide-react';
 import {
   TRACKS_CONFIG,
@@ -23,6 +25,10 @@ import {
   EMAIL_CONFIG,
   EVENT_METADATA,
   PAYMENT_CONFIG,
+  IS_REGISTRATION_CLOSED,
+  isRegistrationClosed,
+  REGISTRATION_BUTTON_TEXT,
+  REGISTRATION_STATUS_BADGE,
 } from '../config/eventConfig';
 import { RegistrationSteps } from '../components/RegistrationSteps';
 import { TicketRecoveryForm } from '../components/TicketRecoveryForm';
@@ -429,6 +435,94 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
     cu: 'INR',
     tn: `PROXIMA ${formData.campusId.trim()}`,
   }).toString()}`;
+
+  if (IS_REGISTRATION_CLOSED || isRegistrationClosed()) {
+    return (
+      <div className="min-h-screen py-10 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto flex flex-col justify-center items-center bg-[#040618] text-slate-100 relative">
+        {/* Background ambient glow */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 left-10 w-96 h-96 rounded-full bg-red-600/10 blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-[#7c3aed]/10 blur-3xl" />
+        </div>
+
+        {/* Back to Home Button */}
+        <button
+          onClick={onBack}
+          className="self-start mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors cursor-pointer relative z-10"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Tournament Arena</span>
+        </button>
+
+        {/* Closed Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="w-full rounded-2xl sm:rounded-3xl p-6 sm:p-10 border border-red-500/40 bg-gradient-to-b from-[#0f1738] via-[#090e29] to-[#06091d] shadow-[0_0_50px_rgba(239,68,68,0.25)] text-center relative overflow-hidden z-10"
+        >
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-950/70 border border-red-500/50 text-xs sm:text-sm font-mono font-bold tracking-wider text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.35)] mb-6">
+            <span>{REGISTRATION_STATUS_BADGE}</span>
+          </div>
+
+          {/* Icon */}
+          <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 shadow-[0_0_25px_rgba(239,68,68,0.3)] mb-4">
+            <Ban className="w-10 h-10 sm:w-12 sm:h-12" />
+          </div>
+
+          {/* Title */}
+          <h1 className="text-2xl sm:text-3xl font-black font-orbitron tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-red-100 to-red-400 mb-4">
+            🚫 REGISTRATIONS CLOSED
+          </h1>
+
+          {/* Exact Message */}
+          <div className="space-y-4 text-slate-300 text-sm sm:text-base font-rajdhani max-w-xl mx-auto leading-relaxed">
+            <p className="font-semibold text-slate-200">
+              Registrations for Proxima E-Clash 2026 are now officially closed, as the event has begun.
+            </p>
+
+            <p className="text-slate-400 text-xs sm:text-sm">
+              Thank you for your interest and support! Stay tuned for future events and updates.
+            </p>
+
+            <div className="p-3.5 rounded-xl bg-black/40 border border-red-500/20 text-amber-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+              <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>🏆 The registrations are no longer accepting new entries.</span>
+            </div>
+
+            <p className="text-xs sm:text-sm font-mono font-bold text-cyan-300 pt-2">
+              — Team Proxima E-Clash 2026
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <button
+              disabled
+              className="w-full sm:w-auto py-3.5 px-6 rounded-xl font-orbitron font-bold text-xs uppercase tracking-wider bg-red-950/60 border border-red-500/40 text-red-300 opacity-80 cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <Ban className="w-4 h-4 text-red-400" />
+              <span>{REGISTRATION_BUTTON_TEXT}</span>
+            </button>
+
+            <button
+              onClick={onBack}
+              className="w-full sm:w-auto py-3.5 px-6 rounded-xl font-rajdhani font-bold text-xs uppercase tracking-wider bg-white/10 hover:bg-white/15 border border-white/20 text-white transition-all cursor-pointer"
+            >
+              Return to Tournament Hub
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Existing ticket recovery is still available for already registered players */}
+        <div className="mt-8 w-full max-w-xl relative z-10">
+          <TicketRecoveryForm />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-5 sm:py-10 px-3 sm:px-6 lg:px-8 relative overflow-hidden flex flex-col justify-center bg-[#040618] text-slate-100">

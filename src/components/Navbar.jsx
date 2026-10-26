@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Menu, X, Gamepad2, ShieldCheck, Sparkles, Trophy, QrCode } from 'lucide-react';
-import { EVENT_METADATA } from '../config/eventConfig';
+import { Menu, X, Gamepad2, ShieldCheck, Sparkles, Trophy, QrCode, Ban } from 'lucide-react';
+import { EVENT_METADATA, REGISTRATION_BUTTON_TEXT } from '../config/eventConfig';
 
 export const Navbar = ({ onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -80,10 +80,10 @@ export const Navbar = ({ onNavigate }) => {
         <div className="hidden sm:flex items-center gap-3">
           <button
             onClick={() => handleLinkClick('#register-eclash')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-orbitron font-bold tracking-wider uppercase bg-gradient-to-r from-[#00e5ff] to-[#2b4bff] text-[#070b2a] shadow-neon-blue hover:brightness-110 active:scale-95 transition-all duration-200 cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-orbitron font-bold tracking-wider uppercase bg-red-950/80 hover:bg-red-900/90 text-red-200 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:brightness-110 active:scale-95 transition-all duration-200 cursor-pointer"
           >
-            <Gamepad2 className="w-4 h-4" />
-            Register Now
+            <Ban className="w-3.5 h-3.5 text-red-400" />
+            {REGISTRATION_BUTTON_TEXT}
           </button>
           <button
             onClick={() => handleLinkClick('#volunteer/login')}
@@ -106,10 +106,10 @@ export const Navbar = ({ onNavigate }) => {
         <div className="flex sm:hidden items-center gap-1.5 shrink-0">
           <button
             onClick={() => handleLinkClick('#register-eclash')}
-            className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-[10px] font-orbitron font-bold tracking-wide uppercase bg-gradient-to-r from-[#00e5ff] to-[#2b4bff] text-[#070b2a] shadow-neon-blue active:scale-95 transition-all duration-200"
+            className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-[9px] min-[360px]:text-[10px] font-orbitron font-bold tracking-tight uppercase bg-red-950/80 text-red-200 border border-red-500/50 active:scale-95 transition-all duration-200"
           >
-            <Gamepad2 className="w-3.5 h-3.5" />
-            Register
+            <Ban className="w-3 h-3 text-red-400 shrink-0" />
+            <span className="truncate">{REGISTRATION_BUTTON_TEXT}</span>
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -126,10 +126,10 @@ export const Navbar = ({ onNavigate }) => {
         <div className="sm:hidden bg-[#070b2a]/98 backdrop-blur-2xl border-b border-cyan-500/30 px-4 pt-3 pb-6 space-y-3">
           <button
             onClick={() => handleLinkClick('#register-eclash')}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-orbitron font-bold tracking-wider uppercase bg-gradient-to-r from-[#00e5ff] to-[#2b4bff] text-[#070b2a] shadow-neon-blue cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-orbitron font-bold tracking-wider uppercase bg-red-950/90 text-red-200 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] cursor-pointer"
           >
-            <Gamepad2 className="w-4 h-4" />
-            Register for Tournament 🎮
+            <Ban className="w-4 h-4 text-red-400" />
+            {REGISTRATION_BUTTON_TEXT}
           </button>
 
           <button

@@ -11,8 +11,9 @@ import {
   Phone,
   Zap,
   Target,
+  Ban,
 } from 'lucide-react';
-import { EVENT_METADATA, GAMES_LIST, SCHEDULE_DATA, FAQ_DATA } from '../config/eventConfig';
+import { EVENT_METADATA, GAMES_LIST, SCHEDULE_DATA, FAQ_DATA, REGISTRATION_BUTTON_TEXT, REGISTRATION_STATUS_BADGE } from '../config/eventConfig';
 import { PublicFixtures } from './PublicFixtures.jsx';
 
 export const LandingSections = ({ onSelectTrack }) => {
@@ -134,10 +135,10 @@ export const LandingSections = ({ onSelectTrack }) => {
 
               <button
                 onClick={() => onSelectTrack('eclash')}
-                className="w-full py-3 px-3 sm:py-3.5 sm:px-6 rounded-xl font-orbitron font-bold text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider bg-gradient-to-r from-[#00e5ff] to-[#2b4bff] text-[#070b2a] shadow-neon-blue hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 px-3 sm:py-3.5 sm:px-6 rounded-xl font-orbitron font-bold text-[10px] sm:text-xs uppercase tracking-wide sm:tracking-wider bg-red-950/80 hover:bg-red-900/90 text-red-200 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Gamepad2 className="w-4 h-4" />
-                Register for {game.name} →
+                <Ban className="w-4 h-4 text-red-400" />
+                {REGISTRATION_BUTTON_TEXT}
               </button>
             </div>
           ))}
@@ -305,13 +306,16 @@ export const LandingSections = ({ onSelectTrack }) => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-end">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-red-950/80 border border-red-500/60 text-xs font-mono font-bold tracking-wider text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                <span>{REGISTRATION_STATUS_BADGE}</span>
+              </div>
               <button
                 onClick={() => onSelectTrack('eclash')}
-                className="w-full sm:w-auto py-4 px-6 rounded-xl font-orbitron font-extrabold text-xs uppercase bg-gradient-to-r from-[#00e5ff] to-[#2b4bff] text-[#070b2a] shadow-neon-blue hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto py-4 px-6 rounded-xl font-orbitron font-extrabold text-xs uppercase bg-red-950/90 text-red-200 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Gamepad2 className="w-4 h-4" />
-                Register for E-Clash 🎮
+                <Ban className="w-4 h-4 text-red-400" />
+                {REGISTRATION_BUTTON_TEXT}
               </button>
             </div>
           </div>

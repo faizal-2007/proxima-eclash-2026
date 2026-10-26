@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Gamepad2, Clock, Sparkles, ChevronRight, Trophy, Shield, MapPin, Calendar } from 'lucide-react';
-import { EVENT_METADATA, GAMES_LIST } from '../config/eventConfig';
+import { Gamepad2, Clock, Sparkles, ChevronRight, Trophy, Shield, MapPin, Calendar, Ban } from 'lucide-react';
+import { EVENT_METADATA, GAMES_LIST, REGISTRATION_BUTTON_TEXT, REGISTRATION_STATUS_BADGE } from '../config/eventConfig';
 import {
   LayerBackground,
   LayerGamingScene,
@@ -187,9 +187,14 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="space-y-2 max-w-4xl"
         >
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[9px] sm:text-xs font-mono font-bold tracking-wide sm:tracking-widest uppercase text-[#00e5ff]">
-            <Gamepad2 className="w-3.5 h-3.5" />
-            OFFICIAL COLLEGIATE ESPORTS TOURNAMENT
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/80 border border-red-500/60 text-[10px] sm:text-xs font-mono font-bold tracking-wider text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.4)] animate-pulse">
+              <span>{REGISTRATION_STATUS_BADGE}</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[9px] sm:text-xs font-mono font-bold tracking-wide sm:tracking-widest uppercase text-[#00e5ff]">
+              <Gamepad2 className="w-3.5 h-3.5" />
+              OFFICIAL COLLEGIATE ESPORTS TOURNAMENT
+            </div>
           </div>
 
           <h1 className="font-orbitron font-black text-3xl min-[360px]:text-4xl sm:text-6xl md:text-7xl tracking-wide sm:tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-[#00e5ff] drop-shadow-[0_0_35px_rgba(0,229,255,0.7)]">
@@ -282,10 +287,10 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
         >
           <button
             onClick={() => onSelectTrack('eclash')}
-            className="w-full py-3 sm:py-4 px-6 sm:px-8 rounded-xl font-orbitron font-extrabold text-xs sm:text-base tracking-wide sm:tracking-wider uppercase flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-[#00e5ff] via-[#2b4bff] to-[#7c3aed] text-white shadow-[0_0_30px_rgba(0,229,255,0.6)] hover:brightness-110 active:scale-[0.98] transition-all group"
+            className="w-full py-3 sm:py-4 px-6 sm:px-8 rounded-xl font-orbitron font-extrabold text-xs sm:text-base tracking-wide sm:tracking-wider uppercase flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-red-600/90 via-rose-700/90 to-red-900/90 border border-red-500/50 text-white shadow-[0_0_30px_rgba(239,68,68,0.5)] hover:brightness-110 active:scale-[0.98] transition-all group cursor-pointer"
           >
-            <Gamepad2 className="w-5 h-5 text-cyan-200 group-hover:rotate-12 transition-transform" />
-            <span>Register Now 🎮</span>
+            <Ban className="w-5 h-5 text-red-200 group-hover:rotate-12 transition-transform" />
+            <span>{REGISTRATION_BUTTON_TEXT}</span>
             <ChevronRight className="w-4 h-4 stroke-[3] group-hover:translate-x-1.5 transition-transform" />
           </button>
 
@@ -320,7 +325,7 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
               transition={{ duration: 0.5, delay: 0.45 + idx * 0.1 }}
               whileHover={{ y: -6, transition: { duration: 0.2 } }}
               onClick={() => onSelectTrack('eclash')}
-              className="cursor-pointer group min-w-0 p-2.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[#070b2a]/90 border border-cyan-500/25 hover:border-[#00e5ff] backdrop-blur-xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(0,229,255,0.35)] transition-all flex flex-col justify-between space-y-2 sm:space-y-4"
+              className="cursor-pointer group min-w-0 p-2.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[#070b2a]/90 border border-cyan-500/25 hover:border-red-500/60 backdrop-blur-xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all flex flex-col justify-between space-y-2 sm:space-y-4"
             >
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-2 sm:mb-3">
@@ -329,7 +334,7 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
                   </span>
                 </div>
 
-                <h3 className="font-orbitron font-extrabold text-sm sm:text-xl text-white group-hover:text-[#00e5ff] transition-colors flex items-center gap-2">
+                <h3 className="font-orbitron font-extrabold text-sm sm:text-xl text-white group-hover:text-red-300 transition-colors flex items-center gap-2">
                   {game.name}
                 </h3>
 
@@ -342,8 +347,8 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
                 <span className="text-[8px] sm:text-[10px] font-mono text-slate-400 truncate">
                   {game.platform}
                 </span>
-                <span className="text-[9px] sm:text-xs font-rajdhani font-bold text-[#00e5ff] flex items-center gap-0.5 group-hover:translate-x-1 transition-transform shrink-0">
-                  Register <ChevronRight className="w-3.5 h-3.5" />
+                <span className="text-[9px] sm:text-xs font-rajdhani font-bold text-red-400 flex items-center gap-0.5 group-hover:translate-x-1 transition-transform shrink-0">
+                  {REGISTRATION_BUTTON_TEXT} <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </motion.div>

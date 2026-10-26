@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { del, put } from '@vercel/blob';
-import { ALLOW_MULTIPLE_GAMES, EMAIL_CONFIG, PAYMENT_CONFIG } from '../../../src/config/eventConfig.js';
+import { ALLOW_MULTIPLE_GAMES, EMAIL_CONFIG, PAYMENT_CONFIG, IS_REGISTRATION_CLOSED, isRegistrationClosed } from '../../../src/config/eventConfig.js';
 import {
   appendPaymentAuditEvent,
   appendPaymentRegistration,
@@ -43,6 +43,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST, OPTIONS');
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
+  }
+
+  if (IS_REGISTRATION_CLOSED || isRegistrationClosed()) {
+    return res.status(403).json({
+      error: 'Registrations for Proxima E-Clash 2026 are now officially closed, as the event has begun.',
+    });
   }
 
   const ipRate = checkRateLimit({

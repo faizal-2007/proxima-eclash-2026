@@ -39,6 +39,26 @@ export const PAYMENT_CONFIG = {
   QR_IMAGE_PATH: "/payment/upi-qr.jpeg",
 };
 
+export const REGISTRATION_CUTOFF = "2026-10-26T09:00:00+05:30";
+export const IS_REGISTRATION_CLOSED = true;
+
+export const isRegistrationClosed = () => {
+  return true;
+};
+
+export const REGISTRATIONS_CLOSED_MESSAGE = `🚫 REGISTRATIONS CLOSED
+
+Registrations for Proxima E-Clash 2026 are now officially closed, as the event has begun.
+
+Thank you for your interest and support! Stay tuned for future events and updates.
+
+🏆 The registrations are no longer accepting new entries.
+
+— Team Proxima E-Clash 2026`;
+
+export const REGISTRATION_BUTTON_TEXT = "REGISTRATIONS CLOSED";
+export const REGISTRATION_STATUS_BADGE = "🔴 REGISTRATION CLOSED";
+
 export const ALLOW_MULTIPLE_GAMES = false;
 
 export const YEARS_OPTIONS = [

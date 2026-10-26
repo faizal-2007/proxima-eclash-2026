@@ -4,6 +4,7 @@ import { SplitHero } from './components/SplitHero';
 import { LandingSections } from './components/LandingSections';
 import { Footer } from './components/Footer';
 import { Intro3DOverlay } from './components/Intro3DOverlay';
+import { RegistrationClosedModal } from './components/RegistrationClosedModal';
 import { RegistrationPage } from './pages/RegistrationPage';
 import { SuccessPage } from './pages/SuccessPage';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -11,10 +12,12 @@ import { VolunteerLoginPage } from './pages/VolunteerLoginPage';
 import { VolunteerScannerDashboard } from './pages/VolunteerScannerDashboard';
 import { VolunteerHistoryPage } from './pages/VolunteerHistoryPage';
 import { getStoredVolunteerToken, isTokenExpired } from './utils/volunteerAuth';
+import { IS_REGISTRATION_CLOSED, isRegistrationClosed } from './config/eventConfig';
 
 export function App() {
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'register' | 'success' | 'admin' | 'volunteer-login' | 'volunteer-dashboard' | 'volunteer-history'
   const [registrationData, setRegistrationData] = useState(null);
+  const [showClosedModal, setShowClosedModal] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
   const [introKey, setIntroKey] = useState(0);
 
@@ -63,8 +66,14 @@ export function App() {
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (hash === '#register' || hash === '#register-eclash') {
-        setCurrentView('register');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (IS_REGISTRATION_CLOSED || isRegistrationClosed()) {
+          setShowClosedModal(true);
+          setCurrentView('home');
+          window.location.hash = '';
+        } else {
+          setCurrentView('register');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       } else if (hash === '#admin') {
         setCurrentView('admin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -84,6 +93,10 @@ export function App() {
 
   // CTA navigation handler from Navbar or Hero
   const handleOpenRegistration = () => {
+    if (IS_REGISTRATION_CLOSED || isRegistrationClosed()) {
+      setShowClosedModal(true);
+      return;
+    }
     window.location.hash = '#register';
     setCurrentView('register');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -234,6 +247,12 @@ export function App() {
           <Footer onNavigate={handleNavigate} onReplayIntro={handleReplayIntro} />
         </>
       )}
+
+      {/* Global Registration Closed Popup Modal */}
+      <RegistrationClosedModal
+        isOpen={showClosedModal}
+        onClose={() => setShowClosedModal(false)}
+      />
     </div>
   );
 }
