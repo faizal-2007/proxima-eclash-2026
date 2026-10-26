@@ -34,6 +34,7 @@ import { EVENT_METADATA } from '../config/eventConfig';
 import { VolunteersManager } from '../components/admin/VolunteersManager';
 import { CheckInsViewer } from '../components/admin/CheckInsViewer';
 import { FixturesTab } from '../components/admin/FixturesTab';
+import { MatchResultEntry } from '../components/admin/MatchResultEntry';
 
 export const AdminDashboard = ({ onBack }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -694,6 +695,17 @@ export const AdminDashboard = ({ onBack }) => {
               >
                 <Swords className="w-4 h-4 text-emerald-400" />
                 <span>Fixtures &amp; Draw</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('MATCH_RESULTS')}
+                className={`px-4 py-2.5 rounded-2xl font-bold font-orbitron text-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${activeTab === 'MATCH_RESULTS'
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-rose-600 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)]'
+                    : 'bg-white/5 text-orange-300 hover:bg-white/10 border border-orange-500/30'
+                  }`}
+              >
+                <Flame className="w-4 h-4 text-orange-400" />
+                <span>Free Fire Match Results</span>
               </button>
             </>
           )}
@@ -1379,6 +1391,13 @@ export const AdminDashboard = ({ onBack }) => {
         {activeTab === 'FIXTURES' && (
           <div className="animate-in fade-in duration-200">
             <FixturesTab token={token} registrations={registrations} />
+          </div>
+        )}
+
+        {/* TAB 5: MATCH RESULTS (FREE FIRE BR) */}
+        {activeTab === 'MATCH_RESULTS' && (
+          <div className="animate-in fade-in duration-200">
+            <MatchResultEntry token={token} registrations={registrations} />
           </div>
         )}
 

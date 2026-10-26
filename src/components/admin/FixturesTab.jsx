@@ -52,6 +52,7 @@ import {
 } from '../../utils/exportFixtures.js';
 
 import { KnockoutBracket } from '../PublicFixtures.jsx';
+import { MatchResultEntry } from './MatchResultEntry.jsx';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -1536,6 +1537,20 @@ export function FixturesTab({ token, registrations }) {
               <Trophy className="w-3 h-3" />
               Bracket View
             </button>
+            {selectedGame === 'Free Fire' && (
+              <button
+                type="button"
+                onClick={() => setViewMode('results')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold font-orbitron transition-all flex items-center gap-1 ${
+                  viewMode === 'results'
+                    ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md'
+                    : 'text-orange-400 hover:text-orange-300'
+                }`}
+              >
+                <Flame className="w-3 h-3 text-orange-400" />
+                BR Results
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -1576,9 +1591,11 @@ export function FixturesTab({ token, registrations }) {
         </div>
       )}
 
-      {/* ── Rounds / Lobbies or Bracket View ── */}
+      {/* ── Rounds / Lobbies or Bracket View or Match Results View ── */}
       {!isLoading && hasExisting && (
-        viewMode === 'bracket' && isKnockoutFormat(cfg.format) ? (
+        viewMode === 'results' && selectedGame === 'Free Fire' ? (
+          <MatchResultEntry token={token} registrations={registrations} />
+        ) : viewMode === 'bracket' && isKnockoutFormat(cfg.format) ? (
           <KnockoutBracket
             fixtures={matches}
             nameMap={nameMap}
