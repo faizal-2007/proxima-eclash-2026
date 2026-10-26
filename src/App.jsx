@@ -5,6 +5,7 @@ import { LandingSections } from './components/LandingSections';
 import { Footer } from './components/Footer';
 import { Intro3DOverlay } from './components/Intro3DOverlay';
 import { RegistrationClosedModal } from './components/RegistrationClosedModal';
+import { HallPassModal } from './components/HallPassModal';
 import { RegistrationPage } from './pages/RegistrationPage';
 import { SuccessPage } from './pages/SuccessPage';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -18,6 +19,7 @@ export function App() {
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'register' | 'success' | 'admin' | 'volunteer-login' | 'volunteer-dashboard' | 'volunteer-history'
   const [registrationData, setRegistrationData] = useState(null);
   const [showClosedModal, setShowClosedModal] = useState(false);
+  const [showHallPassModal, setShowHallPassModal] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
   const [introKey, setIntroKey] = useState(0);
 
@@ -74,6 +76,10 @@ export function App() {
           setCurrentView('register');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+      } else if (hash === '#hall-pass' || hash === '#hallpass' || hash === '#ticket' || hash === '#pass') {
+        setShowHallPassModal(true);
+        setCurrentView('home');
+        window.location.hash = '';
       } else if (hash === '#admin') {
         setCurrentView('admin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -103,7 +109,9 @@ export function App() {
   };
 
   const handleNavigate = (hash) => {
-    if (hash === '#register' || hash === '#register-eclash') {
+    if (hash === '#hall-pass' || hash === '#hallpass' || hash === '#ticket' || hash === '#pass') {
+      setShowHallPassModal(true);
+    } else if (hash === '#register' || hash === '#register-eclash') {
       handleOpenRegistration();
     } else if (hash === '#admin') {
       window.location.hash = '#admin';
@@ -237,7 +245,11 @@ export function App() {
           {/* Main Content Area */}
           <main className="flex-1">
             {/* Esports Championship Hero Arena Section with Parallax & 3D Tilt */}
-            <SplitHero onSelectTrack={handleOpenRegistration} isIntroActive={!introFinished} />
+            <SplitHero
+              onSelectTrack={handleOpenRegistration}
+              onOpenHallPass={() => setShowHallPassModal(true)}
+              isIntroActive={!introFinished}
+            />
 
             {/* Below-Hero Content Sections: About, Games, Schedule, Prizes, Rules/FAQ, Contact */}
             <LandingSections onSelectTrack={handleOpenRegistration} />
@@ -252,6 +264,14 @@ export function App() {
       <RegistrationClosedModal
         isOpen={showClosedModal}
         onClose={() => setShowClosedModal(false)}
+        onOpenHallPass={() => setShowHallPassModal(true)}
+      />
+
+      {/* Hall Pass Retrieval Modal by Campus ID */}
+      <HallPassModal
+        isOpen={showHallPassModal}
+        onClose={() => setShowHallPassModal(false)}
+        onOpenFullTicket={handleRegistrationSuccess}
       />
     </div>
   );

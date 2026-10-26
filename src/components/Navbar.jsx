@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Gamepad2, ShieldCheck, Sparkles, Trophy, QrCode, Ban } from 'lucide-react';
+import { Menu, X, Gamepad2, ShieldCheck, Sparkles, Trophy, QrCode, Ban, TicketCheck } from 'lucide-react';
 import { EVENT_METADATA, REGISTRATION_BUTTON_TEXT } from '../config/eventConfig';
 
 export const Navbar = ({ onNavigate }) => {
@@ -68,6 +68,9 @@ export const Navbar = ({ onNavigate }) => {
             Fixtures
           </button>
 
+          <button onClick={() => handleLinkClick('#hall-pass')} className="text-cyan-300 hover:text-white font-semibold transition-colors">
+            Hall Pass
+          </button>
           <button onClick={() => handleLinkClick('#faq')} className="hover:text-slate-100 transition-colors">
             Rules & FAQ
           </button>
@@ -78,6 +81,14 @@ export const Navbar = ({ onNavigate }) => {
 
         {/* Action CTAs & Admin / Volunteer Links */}
         <div className="hidden sm:flex items-center gap-3">
+          <button
+            onClick={() => handleLinkClick('#hall-pass')}
+            title="Check or Download your Tournament Hall Pass"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-cyan-200 hover:text-white bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,229,255,0.2)] transition-all cursor-pointer"
+          >
+            <TicketCheck className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Hall Pass</span>
+          </button>
           <button
             onClick={() => handleLinkClick('#register-eclash')}
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-orbitron font-bold tracking-wider uppercase bg-red-950/80 hover:bg-red-900/90 text-red-200 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:brightness-110 active:scale-95 transition-all duration-200 cursor-pointer"
@@ -105,11 +116,19 @@ export const Navbar = ({ onNavigate }) => {
         {/* Mobile: Quick CTA + Hamburger */}
         <div className="flex sm:hidden items-center gap-1.5 shrink-0">
           <button
+            onClick={() => handleLinkClick('#hall-pass')}
+            title="Hall Pass"
+            className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-[9px] min-[360px]:text-[10px] font-orbitron font-bold tracking-tight uppercase bg-cyan-950/80 text-cyan-200 border border-cyan-500/40 active:scale-95 transition-all duration-200"
+          >
+            <TicketCheck className="w-3 h-3 text-cyan-400 shrink-0" />
+            <span className="truncate">Pass</span>
+          </button>
+          <button
             onClick={() => handleLinkClick('#register-eclash')}
-            className="flex items-center gap-1 px-2.5 py-2 rounded-lg text-[9px] min-[360px]:text-[10px] font-orbitron font-bold tracking-tight uppercase bg-red-950/80 text-red-200 border border-red-500/50 active:scale-95 transition-all duration-200"
+            className="flex items-center gap-1 px-2 py-2 rounded-lg text-[9px] min-[360px]:text-[10px] font-orbitron font-bold tracking-tight uppercase bg-red-950/80 text-red-200 border border-red-500/50 active:scale-95 transition-all duration-200"
           >
             <Ban className="w-3 h-3 text-red-400 shrink-0" />
-            <span className="truncate">{REGISTRATION_BUTTON_TEXT}</span>
+            <span className="truncate">Closed</span>
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -124,6 +143,14 @@ export const Navbar = ({ onNavigate }) => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="sm:hidden bg-[#070b2a]/98 backdrop-blur-2xl border-b border-cyan-500/30 px-4 pt-3 pb-6 space-y-3">
+          <button
+            onClick={() => handleLinkClick('#hall-pass')}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-orbitron font-bold tracking-wider uppercase bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-400/50 text-cyan-200 shadow-[0_0_15px_rgba(0,229,255,0.25)] cursor-pointer"
+          >
+            <TicketCheck className="w-4 h-4 text-cyan-400" />
+            Check / Download Hall Pass 🎫
+          </button>
+
           <button
             onClick={() => handleLinkClick('#register-eclash')}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-orbitron font-bold tracking-wider uppercase bg-red-950/90 text-red-200 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] cursor-pointer"

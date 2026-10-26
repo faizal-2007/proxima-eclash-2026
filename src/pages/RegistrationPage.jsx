@@ -516,9 +516,9 @@ export const RegistrationPage = ({ onBack, onSuccess }) => {
           </div>
         </motion.div>
 
-        {/* Existing ticket recovery is still available for already registered players */}
+        {/* Hall pass recovery for already registered players */}
         <div className="mt-8 w-full max-w-xl relative z-10">
-          <TicketRecoveryForm />
+          <TicketRecoveryForm onSuccess={onSuccess} initialOpen={true} />
         </div>
       </div>
     );

@@ -19,21 +19,21 @@ export default async function handler(req, res) {
   const url = new URL(req.url || '/api/ticket', 'http://localhost');
   const campusId = String(req.query?.campusId || url.searchParams.get('campusId') || '').trim();
   const email = String(req.query?.email || url.searchParams.get('email') || '').trim().toLowerCase();
-  if (!campusId || !email) {
-    return res.status(400).json({ error: 'Campus ID and campus email are both required.' });
+  if (!campusId) {
+    return res.status(400).json({ error: 'Campus ID is required to look up your Hall Pass.' });
   }
 
   const rate = checkRateLimit({
     req,
     namespace: 'ticket-reopen',
-    identity: `${campusId}:${email}`,
-    ipLimit: 30,
-    identityLimit: 8,
+    identity: campusId,
+    ipLimit: 60,
+    identityLimit: 20,
     windowMs: 60 * 60 * 1000,
   });
   if (!rate.allowed) {
     res.setHeader('Retry-After', String(rate.retryAfterSeconds));
-    return res.status(429).json({ error: 'Too many ticket lookup attempts. Please wait and try again.' });
+    return res.status(429).json({ error: 'Too many lookup attempts. Please wait a moment and try again.' });
   }
 
   const supabase = getSupabaseClient();
@@ -46,13 +46,13 @@ export default async function handler(req, res) {
     const registration = await getRegistrationForTicket(
       supabase,
       campusId,
-      email
+      email || null
     );
     if (!registration) {
-      return res.status(404).json({ error: 'No registration matched both the Campus ID and campus email.' });
+      return res.status(404).json({ error: `No registration found for Campus ID "${campusId}". Please verify your Campus ID.` });
     }
     if (registration.paymentStatus === 'REJECTED') {
-      return res.status(403).json({ error: 'This ticket has been revoked. Please contact the organizer.' });
+      return res.status(403).json({ error: 'This ticket has been revoked. Please contact the organizers.' });
     }
 
     return res.status(200).json({

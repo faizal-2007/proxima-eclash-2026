@@ -114,19 +114,23 @@ export async function findRegistrationById(client = getSupabaseClient(), registr
 }
 
 /**
- * Find registration for ticket retrieval by Campus ID and email
+ * Find registration for ticket retrieval by Campus ID (and optional email)
  */
 export async function getRegistrationForTicket(client = getSupabaseClient(), campusId, email) {
-  if (!client || !campusId || !email) return null;
+  if (!client || !campusId) return null;
 
   const cleanCampusId = String(campusId).trim();
-  const cleanEmail = String(email).trim().toLowerCase();
-
-  const { data, error } = await client
+  let query = client
     .from('registrations')
     .select('*')
-    .eq('campus_id', cleanCampusId)
-    .ilike('campus_email', cleanEmail)
+    .eq('campus_id', cleanCampusId);
+
+  if (email && String(email).trim()) {
+    const cleanEmail = String(email).trim().toLowerCase();
+    query = query.ilike('campus_email', cleanEmail);
+  }
+
+  const { data, error } = await query
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();

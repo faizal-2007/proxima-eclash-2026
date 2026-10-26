@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Gamepad2, Clock, Sparkles, ChevronRight, Trophy, Shield, MapPin, Calendar, Ban } from 'lucide-react';
+import { Gamepad2, Clock, Sparkles, ChevronRight, Trophy, Shield, MapPin, Calendar, Ban, TicketCheck } from 'lucide-react';
 import { EVENT_METADATA, GAMES_LIST, REGISTRATION_BUTTON_TEXT, REGISTRATION_STATUS_BADGE } from '../config/eventConfig';
 import {
   LayerBackground,
@@ -11,7 +11,7 @@ import {
   LayerParticles,
 } from './HeroArtworkLayers';
 
-export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
+export const SplitHero = ({ onSelectTrack, onOpenHallPass, _isIntroActive = false }) => {
   // Live Countdown Timer logic
   const [timeLeft, setTimeLeft] = useState({ days: 32, hours: 14, minutes: 45, seconds: 20 });
   const [isMobile, setIsMobile] = useState(false);
@@ -283,22 +283,29 @@ export const SplitHero = ({ onSelectTrack, _isIntroActive = false }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mt-3 sm:mt-7 w-full max-w-md px-1"
+          className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mt-3 sm:mt-7 w-full max-w-xl px-1 justify-center"
         >
           <button
             onClick={() => onSelectTrack('eclash')}
-            className="w-full py-3 sm:py-4 px-6 sm:px-8 rounded-xl font-orbitron font-extrabold text-xs sm:text-base tracking-wide sm:tracking-wider uppercase flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-red-600/90 via-rose-700/90 to-red-900/90 border border-red-500/50 text-white shadow-[0_0_30px_rgba(239,68,68,0.5)] hover:brightness-110 active:scale-[0.98] transition-all group cursor-pointer"
+            className="w-full sm:flex-1 py-3 sm:py-3.5 px-5 sm:px-6 rounded-xl font-orbitron font-extrabold text-xs sm:text-sm tracking-wide uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-red-600/90 via-rose-700/90 to-red-900/90 border border-red-500/50 text-white shadow-[0_0_25px_rgba(239,68,68,0.5)] hover:brightness-110 active:scale-[0.98] transition-all group cursor-pointer"
           >
-            <Ban className="w-5 h-5 text-red-200 group-hover:rotate-12 transition-transform" />
+            <Ban className="w-4 h-4 text-red-200 group-hover:rotate-12 transition-transform" />
             <span>{REGISTRATION_BUTTON_TEXT}</span>
-            <ChevronRight className="w-4 h-4 stroke-[3] group-hover:translate-x-1.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={onOpenHallPass}
+            className="w-full sm:w-auto py-3 sm:py-3.5 px-5 sm:px-6 rounded-xl font-orbitron font-extrabold text-xs sm:text-sm tracking-wide uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/50 text-cyan-200 shadow-[0_0_20px_rgba(0,229,255,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <TicketCheck className="w-4 h-4 text-cyan-400" />
+            <span>Hall Pass 🎫</span>
           </button>
 
           <a
             href="#tracks"
-            className="w-full sm:w-auto py-3.5 px-6 rounded-xl font-rajdhani font-bold text-sm tracking-wide uppercase flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/20 text-slate-200 transition-all"
+            className="w-full sm:w-auto py-3 sm:py-3.5 px-4 sm:px-5 rounded-xl font-rajdhani font-bold text-xs sm:text-sm tracking-wide uppercase flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/20 text-slate-200 transition-all"
           >
-            <span>Explore Games ↓</span>
+            <span>Games ↓</span>
           </a>
         </motion.div>
       </div>

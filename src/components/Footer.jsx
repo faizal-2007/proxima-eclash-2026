@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gamepad2, MapPin, Mail, ShieldCheck, Sparkles, Shield } from 'lucide-react';
+import { Gamepad2, MapPin, Mail, ShieldCheck, Sparkles, Shield, TicketCheck } from 'lucide-react';
 import { EVENT_METADATA } from '../config/eventConfig';
 
 export const Footer = ({ onNavigate, onReplayIntro }) => {
@@ -122,6 +122,13 @@ export const Footer = ({ onNavigate, onReplayIntro }) => {
                 Technical Admin: {EVENT_METADATA.contact.technicalAdmin} · {EVENT_METADATA.contact.technicalAdminPhone}
               </div>
               <div className="pt-2 flex flex-wrap gap-2">
+                <button
+                  onClick={() => handleLink('#hall-pass')}
+                  className="px-2.5 py-1 rounded-md bg-cyan-900/40 hover:bg-cyan-900/60 text-[11px] text-cyan-200 border border-cyan-500/40 flex items-center gap-1 cursor-pointer"
+                >
+                  <TicketCheck className="w-3 h-3 text-cyan-400" />
+                  Hall Pass
+                </button>
                 <button
                   onClick={() => handleLink('#faq')}
                   className="px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 text-[11px] border border-white/10"

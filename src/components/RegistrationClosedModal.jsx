@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ban, X, Trophy, AlertTriangle } from 'lucide-react';
+import { Ban, X, Trophy, AlertTriangle, TicketCheck } from 'lucide-react';
 import { REGISTRATION_BUTTON_TEXT, REGISTRATION_STATUS_BADGE } from '../config/eventConfig';
 
-export const RegistrationClosedModal = ({ isOpen, onClose }) => {
+export const RegistrationClosedModal = ({ isOpen, onClose, onOpenHallPass }) => {
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
@@ -81,8 +81,26 @@ export const RegistrationClosedModal = ({ isOpen, onClose }) => {
               </p>
             </div>
 
+            {/* Hall Pass Recovery for existing players */}
+            <div className="mt-5 pt-4 border-t border-white/10">
+              <p className="text-xs text-slate-400 mb-2 font-rajdhani">
+                Already registered? Retrieve and download your official entry pass using your Campus ID:
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onOpenHallPass) onOpenHallPass();
+                }}
+                className="w-full py-2.5 px-4 rounded-xl font-orbitron font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/50 text-cyan-200 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(0,229,255,0.2)]"
+              >
+                <TicketCheck className="w-4 h-4 text-cyan-400" />
+                <span>Check &amp; Download Hall Pass</span>
+              </button>
+            </div>
+
             {/* Actions */}
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center items-center">
               <button
                 disabled
                 className="w-full sm:w-auto py-3 px-6 rounded-xl font-orbitron font-bold text-xs uppercase tracking-wider bg-red-950/60 border border-red-500/40 text-red-300 opacity-80 cursor-not-allowed flex items-center justify-center gap-2"
@@ -95,7 +113,7 @@ export const RegistrationClosedModal = ({ isOpen, onClose }) => {
                 onClick={onClose}
                 className="w-full sm:w-auto py-3 px-6 rounded-xl font-rajdhani font-bold text-xs uppercase tracking-wider bg-white/10 hover:bg-white/15 border border-white/20 text-white transition-all cursor-pointer"
               >
-                Close & View Brackets
+                Close &amp; View Brackets
               </button>
             </div>
           </motion.div>
