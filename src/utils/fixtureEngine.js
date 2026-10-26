@@ -29,27 +29,27 @@ export const GAME_FORMAT = {
     lobbySize: null,
   },
   'Free Fire': {
-    format: 'br_to_knockout',
+    format: 'knockout',
     label: 'Free Fire',
     sideSize: 1,
     teamMode: false,
-    qualifierCount: 8,
+    hasPlayIn: false,
     lobbySize: null,
   },
   'BGMI': {
-    format: 'team_knockout_playin',
-    label: 'BGMI (TDM)',
-    sideSize: 2,
-    teamMode: true,
-    hasPlayIn: true,
+    format: 'knockout',
+    label: 'BGMI',
+    sideSize: 1,
+    teamMode: false,
+    hasPlayIn: false,
     lobbySize: null,
   },
   'BGMI (TDM)': {
-    format: 'team_knockout_playin',
-    label: 'BGMI (TDM)',
-    sideSize: 2,
-    teamMode: true,
-    hasPlayIn: true,
+    format: 'knockout',
+    label: 'BGMI',
+    sideSize: 1,
+    teamMode: false,
+    hasPlayIn: false,
     lobbySize: null,
   },
   'Mini Militia': {
@@ -147,9 +147,17 @@ export function pairTeams(players, sideSize = 2) {
  */
 export function roundName(round, totalRounds, game) {
   if (game === 'Free Fire') {
-    if (round === 1) return 'Stage 1: Solo Battle Royale Qualifier';
-    if (round === 2) return 'Quarter-final';
-    if (round === 3) return 'Semi-final';
+    if (round === 1) return 'Round of 32';
+    if (round === 2) return 'Round of 16';
+    if (round === 3) return 'Quarter-finals';
+    if (round === 4) return 'Semi-finals';
+    if (round === 5) return 'Grand Final';
+  }
+
+  if (game === 'BGMI' || game === 'BGMI (TDM)') {
+    if (round === 1) return 'Round of 16';
+    if (round === 2) return 'Quarter-finals';
+    if (round === 3) return 'Semi-finals';
     if (round === 4) return 'Grand Final';
   }
 
@@ -351,46 +359,52 @@ export function generatePlayInKnockout(game, sides, explicitTargetField = null) 
 }
 
 /**
- * Free Fire hybrid generator:
- * - Round 1: 1 Solo Battle Royale Qualifier lobby with all registered players (e.g. 31 players).
- * - Stage 2: 8-player knockout bracket:
- *   - Round 2: Quarter-finals (4 matches)
- *   - Round 3: Semi-finals (2 matches)
- *   - Round 4: Grand Final (1 match)
- * Total: 1 BR match + 7 knockout matches = 8 matches.
+ * Free Fire 1v1 knockout generator:
+ * - 31 players bracket of 32:
+ * - Round 1: Round of 32 (15 matches, 30 players)
+ * - Round 2: Round of 16 (8 matches: Match 1 slot 0 has the 1 bye player)
+ * - Round 3: Quarter-finals (4 matches)
+ * - Round 4: Semi-finals (2 matches)
+ * - Round 5: Grand Final (1 match)
+ * Total: 15 + 8 + 4 + 2 + 1 = 30 matches.
  */
 export function generateFreeFireFixtures(players) {
   const shuffled = shuffle(players);
+  const byePlayer = shuffled[0] || '';
+  const r1Players = shuffled.slice(1);
+
   const matches = [];
 
-  // Round 1: 1 Solo BR Qualifier Lobby
-  matches.push({
-    game: 'Free Fire',
-    format: 'lobby',
-    round: 1,
-    match_no: 1,
-    players: shuffled,
-    winner: null,
-    locked: false,
-    status: 'scheduled',
-  });
-
-  // Round 2: Quarter-finals (4 matches, 8 slots)
-  for (let m = 1; m <= 4; m++) {
+  // Round 1 (Round of 32): 15 matches
+  for (let m = 1; m <= 15; m++) {
     matches.push({
       game: 'Free Fire',
       format: 'knockout',
-      round: 2,
+      round: 1,
       match_no: m,
-      players: ['', ''],
+      players: [r1Players[(m - 1) * 2] || '', r1Players[(m - 1) * 2 + 1] || ''],
       winner: null,
       locked: false,
       status: 'scheduled',
     });
   }
 
-  // Round 3: Semi-finals (2 matches, 4 slots)
-  for (let m = 1; m <= 2; m++) {
+  // Round 2 (Round of 16): 8 matches (Match 1 slot 0 is the bye player)
+  for (let m = 1; m <= 8; m++) {
+    matches.push({
+      game: 'Free Fire',
+      format: 'knockout',
+      round: 2,
+      match_no: m,
+      players: [m === 1 ? byePlayer : '', ''],
+      winner: null,
+      locked: false,
+      status: 'scheduled',
+    });
+  }
+
+  // Round 3 (Quarter-finals): 4 matches
+  for (let m = 1; m <= 4; m++) {
     matches.push({
       game: 'Free Fire',
       format: 'knockout',
@@ -403,11 +417,25 @@ export function generateFreeFireFixtures(players) {
     });
   }
 
-  // Round 4: Grand Final (1 match, 2 slots)
+  // Round 4 (Semi-finals): 2 matches
+  for (let m = 1; m <= 2; m++) {
+    matches.push({
+      game: 'Free Fire',
+      format: 'knockout',
+      round: 4,
+      match_no: m,
+      players: ['', ''],
+      winner: null,
+      locked: false,
+      status: 'scheduled',
+    });
+  }
+
+  // Round 5 (Grand Final): 1 match
   matches.push({
     game: 'Free Fire',
     format: 'knockout',
-    round: 4,
+    round: 5,
     match_no: 1,
     players: ['', ''],
     winner: null,
@@ -419,77 +447,10 @@ export function generateFreeFireFixtures(players) {
 }
 
 /**
- * BGMI TDM 2v2 knockout generator:
- * - Pairs 15 players into 7 teams (6 teams of 2 + 1 trio team with rotating sub).
- * - Field after play-in: 4 teams (Semi-finals).
- * - 3 Quarter-final matches + 1 Bye straight to semi-final.
- * - Round 1: 3 Quarter-final matches (6 teams)
- * - Round 2: 2 Semi-final matches (4 teams: 3 QF winners + 1 bye)
- * - Round 3: 1 Grand Final match
- * Total matches: 3 + 2 + 1 = 6 matches.
+ * BGMI 1v1 single-elimination knockout generator (15 players in bracket of 16).
  */
 export function generateBgmiFixtures(players) {
-  const teams = pairTeams(players, 2);
-  const shuffledTeams = shuffle(teams);
-
-  // In BGMI: 7 teams -> 6 teams in 3 QF matches, 1 team gets bye to semi-finals
-  const qfTeams = shuffledTeams.slice(0, 6);
-  const byeTeam = shuffledTeams[6] || '';
-
-  const matches = [];
-
-  // Round 1 (Quarter-finals): 3 matches
-  for (let m = 1; m <= 3; m++) {
-    matches.push({
-      game: 'BGMI',
-      format: 'knockout',
-      round: 1,
-      match_no: m,
-      players: [qfTeams[(m - 1) * 2] || '', qfTeams[(m - 1) * 2 + 1] || ''],
-      winner: null,
-      locked: false,
-      status: 'scheduled',
-    });
-  }
-
-  // Round 2 (Semi-finals): 2 matches
-  // Semi-Final 1 awaits QF1 and QF2 winners
-  // Semi-Final 2 awaits QF3 winner and byeTeam
-  matches.push({
-    game: 'BGMI',
-    format: 'knockout',
-    round: 2,
-    match_no: 1,
-    players: ['', ''],
-    winner: null,
-    locked: false,
-    status: 'scheduled',
-  });
-
-  matches.push({
-    game: 'BGMI',
-    format: 'knockout',
-    round: 2,
-    match_no: 2,
-    players: ['', byeTeam], // Slot 1 already has the bye team straight through
-    winner: null,
-    locked: false,
-    status: 'scheduled',
-  });
-
-  // Round 3 (Grand Final): 1 match
-  matches.push({
-    game: 'BGMI',
-    format: 'knockout',
-    round: 3,
-    match_no: 1,
-    players: ['', ''],
-    winner: null,
-    locked: false,
-    status: 'scheduled',
-  });
-
-  return matches;
+  return generateKnockout('BGMI', players);
 }
 
 /**
@@ -650,24 +611,6 @@ export function advanceWinner(matches, round, match_no, winner) {
   const prevWinner = cur.winner;
   cur.winner = winner || null;
 
-  // Case 1: BGMI Round 1 (3 quarter-final matches feeding into 2 semi-finals in Round 2)
-  if (cur.game === 'BGMI' && round === 1) {
-    let nextMatchNo = 1;
-    let slot = 0;
-    if (match_no === 1) { nextMatchNo = 1; slot = 0; }
-    else if (match_no === 2) { nextMatchNo = 1; slot = 1; }
-    else if (match_no === 3) { nextMatchNo = 2; slot = 0; }
-
-    const next = updated.find((m) => m.round === 2 && m.match_no === nextMatchNo);
-    if (next) {
-      if (!winner && prevWinner && next.players[slot] === prevWinner) {
-        next.players[slot] = '';
-      } else if (winner) {
-        next.players[slot] = winner;
-      }
-    }
-    return updated;
-  }
 
   // Case 2: eFootball Round 0 Play-in matches advancing into Round 1
   if (cur.game === 'eFootball' && round === 0) {
@@ -726,8 +669,25 @@ export function advanceWinner(matches, round, match_no, winner) {
     return updated;
   }
 
-  // Case 5: Free Fire Round 1 is the lobby qualifier
+  // Case 5: Free Fire Round 1 (Round of 32 -> Round of 16)
   if (cur.game === 'Free Fire' && round === 1) {
+    let nextMatchNo;
+    let slot;
+    if (match_no === 1) {
+      nextMatchNo = 1;
+      slot = 1; // Slot 0 is Rakshya .k (the bye player)
+    } else {
+      nextMatchNo = Math.floor(match_no / 2) + 1;
+      slot = match_no % 2 === 0 ? 0 : 1;
+    }
+    const next = updated.find((m) => m.round === 2 && m.match_no === nextMatchNo);
+    if (next) {
+      if (!winner && prevWinner && next.players[slot] === prevWinner) {
+        next.players[slot] = '';
+      } else if (winner) {
+        next.players[slot] = winner;
+      }
+    }
     return updated;
   }
 
@@ -781,8 +741,8 @@ export function swapPlayers(matches, playerId, targetRound, targetMatchNo, targe
  * Get total rounds for a given game and player/side count.
  */
 export function getTotalRounds(playerCount, game) {
-  if (game === 'Free Fire') return 4; // Round 1 (BR) + Round 2 (QF) + Round 3 (SF) + Round 4 (Final)
-  if (game === 'BGMI' || game === 'BGMI (TDM)') return 3; // Round 1 (QF) + Round 2 (SF) + Round 3 (Final)
+  if (game === 'Free Fire') return 5; // Round 1 (R32) + Round 2 (R16) + Round 3 (QF) + Round 4 (SF) + Round 5 (Final)
+  if (game === 'BGMI' || game === 'BGMI (TDM)') return 4; // Round 1 (R16) + Round 2 (QF) + Round 3 (SF) + Round 4 (Final)
   if (game === 'Mini Militia') {
     const teamsCount = Math.floor(playerCount / 2);
     return Math.log2(nextPow2(teamsCount));
